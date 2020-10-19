@@ -1,0 +1,273 @@
+<!DOCTYPE html><html lang="zh-CN" data-default-color-scheme="&#34;auto&#34;"><head><meta charset="UTF-8"><link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png"><link rel="icon" type="image/png" href="/img/favicon.png"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,shrink-to-fit=no"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="theme-color" content="#2f4154"><meta name="description" content=""><meta name="author" content="februarysea"><meta name="keywords" content=""><title>个人博客更换主题icarus过程记录 - februarysea&#39;s blog</title><link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css"><link rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css"><link rel="stylesheet" href="/lib/hint/hint.min.css"><link rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/github-gist.min.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css"><link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css"><link rel="stylesheet" href="/css/main.css"><script src="/js/utils.js"></script><script src="/js/color-schema.js"></script><meta name="generator" content="Hexo 5.2.0"></head><body><header style="height:70vh"><nav id="navbar" class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar"><div class="container"><a class="navbar-brand" href="/">&nbsp;<strong>februarysea</strong>&nbsp;</a> <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><div class="animated-icon"><span></span><span></span><span></span></div></button><div class="collapse navbar-collapse" id="navbarSupportedContent"><ul class="navbar-nav ml-auto text-center"><li class="nav-item"><a class="nav-link" href="/"><i class="iconfont icon-home-fill"></i> 首页</a></li><li class="nav-item"><a class="nav-link" href="/archives/"><i class="iconfont icon-archive-fill"></i> 归档</a></li><li class="nav-item"><a class="nav-link" href="/categories/"><i class="iconfont icon-category-fill"></i> 分类</a></li><li class="nav-item"><a class="nav-link" href="/tags/"><i class="iconfont icon-tags-fill"></i> 标签</a></li><li class="nav-item"><a class="nav-link" href="/about/"><i class="iconfont icon-user-fill"></i> 关于</a></li><li class="nav-item" id="search-btn"><a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i class="iconfont icon-search"></i>&nbsp;</a></li><li class="nav-item" id="color-toggle-btn"><a class="nav-link" href="javascript:">&nbsp;<i class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a></li></ul></div></div></nav><div class="banner intro-2" id="background" parallax="true" style="background:url(/img/default.png) no-repeat center center;background-size:cover"><div class="full-bg-img"><div class="mask flex-center" style="background-color:rgba(0,0,0,.3)"><div class="container page-header text-center fade-in-up"><span class="h2" id="subtitle"></span><div class="mt-3"><span class="post-meta"><i class="iconfont icon-date-fill" aria-hidden="true"></i> <time datetime="2020-02-15 23:57" pubdate>2020年2月15日 晚上</time></span></div><div class="mt-1"><span class="post-meta mr-2"><i class="iconfont icon-chart"></i> 2k 字 </span><span class="post-meta mr-2"><i class="iconfont icon-clock-fill"></i> 32 分钟</span></div></div></div></div></div></header><main><div class="container-fluid"><div class="row"><div class="d-none d-lg-block col-lg-2"></div><div class="col-lg-8 nopadding-md"><div class="container nopadding-md" id="board-ctn"><div class="py-5" id="board"><article class="post-content mx-auto" id="post"><h1 style="display:none">个人博客更换主题icarus过程记录</h1><div class="markdown-body" id="post-body"><h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>我的博客之前使用的<a target="_blank" rel="noopener" href="https://github.com/litten/hexo-theme-yilia">yilia</a>主题，但这个主题已经很久没有维护了，偶然在Github上闲逛发现了优雅的<a target="_blank" rel="noopener" href="https://github.com/ppoffice/hexo-theme-icarus">icarus</a>主题，主题特别酷，也一直在维护，于是我便计划更换主题。下面是整个过程的记录。整个配置过程还参考了<a target="_blank" rel="noopener" href="https://removeif.github.io/friend/">@辣椒の酱</a>的博客配置、<a target="_blank" rel="noopener" href="https://nave.work/">@Evan</a>的博客。</p><h3 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h3><p>icarus主题是支持多语言的，默认是英语，所以在配置主题的<code>_config.yml</code>之前需要把自己博客目录下的<code>_config.yml</code>更改:</p><div class="hljs"><pre><code class="hljs yml"><span class="hljs-attr">language:</span> <span class="hljs-string">zh-CN</span></code></pre></div><p>接下来就是主题的<code>_config.yml</code>：</p><p><code>donate</code>功能如果不用需要直接从<code>_config.yml</code>删除，如果只是注释掉会报错。</p><div class="hljs"><pre><code class="hljs yaml"><span class="hljs-comment"># Version of the Icarus theme that is currently used</span>
+<span class="hljs-attr">version:</span> <span class="hljs-number">2.6</span><span class="hljs-number">.0</span>
+<span class="hljs-comment"># Path or URL to the website&#x27;s icon</span>
+<span class="hljs-attr">favicon:</span> <span class="hljs-string">/images/logo.png</span>
+<span class="hljs-comment"># Additional HTML meta tags in an array.</span>
+<span class="hljs-attr">meta:</span> 
+<span class="hljs-comment"># canonical_url of your site</span>
+<span class="hljs-attr">canonical_url:</span> 
+<span class="hljs-comment"># Path or URL to RSS atom.xml</span>
+<span class="hljs-attr">rss:</span> 
+<span class="hljs-comment"># Path or URL to the website&#x27;s logo to be shown on the left of the navigation bar or footer</span>
+<span class="hljs-attr">logo:</span> <span class="hljs-string">/images/logo.png</span>
+<span class="hljs-comment"># Open Graph metadata</span>
+<span class="hljs-comment"># https://hexo.io/docs/helpers.html#open-graph</span>
+<span class="hljs-attr">open_graph:</span>
+    <span class="hljs-comment"># Facebook App ID</span>
+    <span class="hljs-attr">fb_app_id:</span> 
+    <span class="hljs-comment"># Facebook Admin ID</span>
+    <span class="hljs-attr">fb_admins:</span> 
+    <span class="hljs-comment"># Twitter ID</span>
+    <span class="hljs-attr">twitter_id:</span> 
+    <span class="hljs-comment"># Twitter site</span>
+    <span class="hljs-attr">twitter_site:</span> 
+    <span class="hljs-comment"># Google+ profile link</span>
+    <span class="hljs-attr">google_plus:</span> 
+<span class="hljs-comment"># Navigation bar link settings</span>
+<span class="hljs-attr">navbar:</span>
+    <span class="hljs-comment"># Navigation bar menu links</span>
+    <span class="hljs-attr">menu:</span>
+        <span class="hljs-string">首页:</span> <span class="hljs-string">/</span>
+        <span class="hljs-string">归档:</span> <span class="hljs-string">/archives</span>
+        <span class="hljs-string">分类:</span> <span class="hljs-string">/categories</span>
+        <span class="hljs-string">标签:</span> <span class="hljs-string">/tags</span>
+    <span class="hljs-comment"># Navigation bar links to be shown on the right</span>
+    <span class="hljs-comment"># links:</span>
+        <span class="hljs-comment"># Download on GitHub:</span>
+            <span class="hljs-comment"># icon: fab fa-github</span>
+            <span class="hljs-comment"># url: &#x27;https://github.com/ppoffice/hexo-theme-icarus&#x27;</span>
+<span class="hljs-comment"># Footer section link settings</span>
+<span class="hljs-attr">footer:</span>
+    <span class="hljs-comment"># Links to be shown on the right of the footer section</span>
+    <span class="hljs-attr">links:</span>
+        <span class="hljs-attr">Creative Commons:</span>
+            <span class="hljs-attr">icon:</span> <span class="hljs-string">fab</span> <span class="hljs-string">fa-creative-commons</span>
+            <span class="hljs-attr">url:</span> <span class="hljs-string">&#x27;https://creativecommons.org/&#x27;</span>
+        <span class="hljs-attr">Attribution 4.0 International:</span>
+            <span class="hljs-attr">icon:</span> <span class="hljs-string">fab</span> <span class="hljs-string">fa-creative-commons-by</span>
+            <span class="hljs-attr">url:</span> <span class="hljs-string">&#x27;https://creativecommons.org/licenses/by/4.0/&#x27;</span>
+        <span class="hljs-attr">Download on GitHub:</span>
+            <span class="hljs-attr">icon:</span> <span class="hljs-string">fab</span> <span class="hljs-string">fa-github</span>
+            <span class="hljs-attr">url:</span> <span class="hljs-string">&#x27;https://github.com/ppoffice/hexo-theme-icarus&#x27;</span>
+<span class="hljs-comment"># Article display settings</span>
+<span class="hljs-attr">article:</span>
+    <span class="hljs-comment"># Code highlight settings</span>
+    <span class="hljs-attr">highlight:</span> 
+        <span class="hljs-comment"># Code highlight themes</span>
+        <span class="hljs-comment"># https://github.com/highlightjs/highlight.js/tree/master/src/styles</span>
+        <span class="hljs-attr">theme:</span> <span class="hljs-string">github</span>
+        <span class="hljs-comment"># Show code copying button</span>
+        <span class="hljs-attr">clipboard:</span> <span class="hljs-literal">true</span>
+        <span class="hljs-comment"># Default folding status of the code blocks. Can be &quot;&quot;, &quot;folded&quot;, &quot;unfolded&quot;</span>
+        <span class="hljs-attr">fold:</span> <span class="hljs-string">unfolded</span>
+    <span class="hljs-comment"># Whether to show article thumbnail images</span>
+    <span class="hljs-attr">thumbnail:</span> <span class="hljs-literal">false</span>
+    <span class="hljs-comment"># Whether to show estimate article reading time</span>
+    <span class="hljs-attr">readtime:</span> <span class="hljs-literal">true</span>
+<span class="hljs-comment"># Search plugin settings</span>
+<span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/categories/Plugins/Search</span>
+<span class="hljs-attr">search:</span>
+    <span class="hljs-comment"># Name of the search plugin</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">insight</span>
+<span class="hljs-comment"># Comment plugin settings</span>
+<span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/categories/Plugins/Comment</span>
+<span class="hljs-attr">comment:</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">valine</span>
+    <span class="hljs-attr">app_id:</span> <span class="hljs-string">xxxxx</span>           <span class="hljs-comment"># (required) LeanCloud application id</span>
+    <span class="hljs-attr">app_key:</span> <span class="hljs-string">xxxx</span>           <span class="hljs-comment"># (required) LeanCloud application key</span>
+    <span class="hljs-attr">notify:</span> <span class="hljs-literal">false</span>           <span class="hljs-comment"># (optional) receive email notification</span>
+    <span class="hljs-attr">verify:</span> <span class="hljs-literal">true</span>            <span class="hljs-comment"># (optional) show verification code</span>
+    <span class="hljs-attr">placeholder:</span> <span class="hljs-string">欢迎交流♂</span>   <span class="hljs-comment"># (optional) comment box placeholder text</span>
+
+<span class="hljs-comment"># Share plugin settings</span>
+<span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/categories/Plugins/Share</span>
+<span class="hljs-attr">share:</span>
+    <span class="hljs-comment"># Share plugin name</span>
+    <span class="hljs-attr">type:</span> 
+<span class="hljs-comment"># Sidebar settings.</span>
+<span class="hljs-comment"># Please be noted that a sidebar is only visible when it has at least one widget</span>
+<span class="hljs-attr">sidebar:</span>
+    <span class="hljs-comment"># left sidebar settings</span>
+    <span class="hljs-attr">left:</span>
+        <span class="hljs-comment"># Whether the left sidebar is sticky when page scrolls</span>
+        <span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/Configuration/Theme/make-a-sidebar-sticky-when-page-scrolls/</span>
+        <span class="hljs-attr">sticky:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># right sidebar settings</span>
+    <span class="hljs-attr">right:</span>
+        <span class="hljs-comment"># Whether the right sidebar is sticky when page scrolls</span>
+        <span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/Configuration/Theme/make-a-sidebar-sticky-when-page-scrolls/</span>
+        <span class="hljs-attr">sticky:</span> <span class="hljs-literal">true</span>
+<span class="hljs-comment"># Sidebar widget settings</span>
+<span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/categories/Widgets/</span>
+<span class="hljs-attr">widgets:</span>
+    <span class="hljs-bullet">-</span>
+        <span class="hljs-comment"># Widget name</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">profile</span>
+        <span class="hljs-comment"># Where should the widget be placed, left or right</span>
+        <span class="hljs-attr">position:</span> <span class="hljs-string">left</span>
+        <span class="hljs-comment"># Author name to be shown in the profile widget</span>
+        <span class="hljs-attr">author:</span> <span class="hljs-string">&quot;februarysea&quot;</span>
+        <span class="hljs-comment"># Title of the author to be shown in the profile widget</span>
+        <span class="hljs-attr">author_title:</span> <span class="hljs-string">&quot;目标是神奇宝贝大师！&quot;</span>
+        <span class="hljs-comment"># Author&#x27;s current location to be shown in the profile widget</span>
+        <span class="hljs-attr">location:</span> <span class="hljs-string">&quot;Shanghai&quot;</span>
+        <span class="hljs-comment"># Path or URL to the avatar to be shown in the profile widget</span>
+        <span class="hljs-attr">avatar:</span>  <span class="hljs-string">&quot;images/back.jpg&quot;</span>
+        <span class="hljs-comment"># Email address for the Gravatar to be shown in the profile widget</span>
+        <span class="hljs-attr">gravatar:</span> 
+        <span class="hljs-comment"># Whether to show avatar image rounded or square</span>
+        <span class="hljs-attr">avatar_rounded:</span> <span class="hljs-literal">false</span>
+        <span class="hljs-comment"># Path or URL for the follow button</span>
+        <span class="hljs-attr">follow_link:</span> <span class="hljs-string">&#x27;mailto:februarysea@outlook.com&#x27;</span>
+        <span class="hljs-comment"># Links to be shown on the bottom of the profile widget</span>
+        <span class="hljs-attr">social_links:</span>
+            <span class="hljs-attr">Github:</span>
+                <span class="hljs-attr">icon:</span> <span class="hljs-string">fab</span> <span class="hljs-string">fa-github</span>
+                <span class="hljs-attr">url:</span> <span class="hljs-string">&#x27;https://github.com/februarysea&#x27;</span>
+            <span class="hljs-comment"># Facebook:</span>
+                <span class="hljs-comment"># icon: fab fa-facebook</span>
+                <span class="hljs-comment"># url: &#x27;https://facebook.com&#x27;</span>
+            <span class="hljs-attr">Twitter:</span>
+                <span class="hljs-attr">icon:</span> <span class="hljs-string">fab</span> <span class="hljs-string">fa-twitter</span>
+                <span class="hljs-attr">url:</span> <span class="hljs-string">&#x27;https://twitter.com/Hunk2333&#x27;</span>
+            <span class="hljs-attr">Weibo:</span>
+                <span class="hljs-attr">icon:</span> <span class="hljs-string">&#x27;fab fa-weibo&#x27;</span>
+                <span class="hljs-attr">url:</span> <span class="hljs-string">&#x27;https://weibo.com/u/7097601356&#x27;</span>
+            <span class="hljs-attr">Instagram:</span>
+                <span class="hljs-attr">icon:</span> <span class="hljs-string">&#x27;fab fa-instagram&#x27;</span>
+                <span class="hljs-attr">url:</span> <span class="hljs-string">&#x27;https://www.instagram.com/hunk233/&#x27;</span>
+            <span class="hljs-comment"># Dribbble:</span>
+                <span class="hljs-comment"># icon: fab fa-dribbble</span>
+                <span class="hljs-comment"># url: &#x27;https://dribbble.com&#x27;</span>
+            <span class="hljs-comment"># RSS:</span>
+                <span class="hljs-comment"># icon: fas fa-rss</span>
+                <span class="hljs-comment"># url: /</span>
+    <span class="hljs-bullet">-</span>
+        <span class="hljs-comment"># Widget name</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">toc</span>
+        <span class="hljs-comment"># Where should the widget be placed, left or right</span>
+        <span class="hljs-attr">position:</span> <span class="hljs-string">right</span>
+    <span class="hljs-bullet">-</span>
+        <span class="hljs-comment"># Widget name</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">links</span>
+        <span class="hljs-comment"># Where should the widget be placed, left or right</span>
+        <span class="hljs-attr">position:</span> <span class="hljs-string">left</span>
+        <span class="hljs-comment"># Links to be shown in the links widget</span>
+        <span class="hljs-attr">links:</span>
+            <span class="hljs-attr">PPOffice:</span> <span class="hljs-string">&#x27;https://github.com/ppoffice&#x27;</span>
+            <span class="hljs-string">辣椒の酱</span> <span class="hljs-string">:</span> <span class="hljs-string">&#x27;https://removeif.github.io/&#x27;</span>
+            
+    <span class="hljs-bullet">-</span>
+        <span class="hljs-comment"># Widget name</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">category</span>
+        <span class="hljs-comment"># Where should the widget be placed, left or right</span>
+        <span class="hljs-attr">position:</span> <span class="hljs-string">right</span>
+    <span class="hljs-bullet">-</span>
+        <span class="hljs-comment"># Widget name</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">tagcloud</span>
+        <span class="hljs-comment"># Where should the widget be placed, left or right</span>
+        <span class="hljs-attr">position:</span> <span class="hljs-string">right</span>
+    <span class="hljs-comment"># -</span>
+        <span class="hljs-comment"># Widget name</span>
+        <span class="hljs-comment"># type: recent_posts</span>
+        <span class="hljs-comment"># Where should the widget be placed, left or right</span>
+        <span class="hljs-comment"># position: right</span>
+    <span class="hljs-bullet">-</span>
+        <span class="hljs-comment"># Widget name</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">archive</span>
+        <span class="hljs-comment"># Where should the widget be placed, left or right</span>
+        <span class="hljs-attr">position:</span> <span class="hljs-string">right</span>
+    <span class="hljs-bullet">-</span>
+        <span class="hljs-comment"># Widget name</span>
+        <span class="hljs-attr">type:</span> <span class="hljs-string">tag</span>
+        <span class="hljs-comment"># Where should the widget be placed, left or right</span>
+        <span class="hljs-attr">position:</span> <span class="hljs-string">right</span>
+<span class="hljs-comment"># Other plugin settings</span>
+<span class="hljs-attr">plugins:</span>
+    <span class="hljs-comment"># Enable page animations</span>
+    <span class="hljs-attr">animejs:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># Enable the lightGallery and Justified Gallery plugins</span>
+    <span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/Plugins/General/gallery-plugin/</span>
+    <span class="hljs-attr">gallery:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># Enable the Outdated Browser plugin</span>
+    <span class="hljs-comment"># http://outdatedbrowser.com/</span>
+    <span class="hljs-attr">outdated-browser:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># Enable the MathJax plugin</span>
+    <span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/Plugins/General/mathjax-plugin/</span>
+    <span class="hljs-attr">mathjax:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># Show the back to top button on mobile devices</span>
+    <span class="hljs-attr">back-to-top:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># Google Analytics plugin settings</span>
+    <span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/Plugins/General/site-analytics-plugin/#Google-Analytics</span>
+    <span class="hljs-attr">google-analytics:</span>
+        <span class="hljs-comment"># Google Analytics tracking id</span>
+        <span class="hljs-attr">tracking_id:</span> 
+    <span class="hljs-comment"># Baidu Analytics plugin settings</span>
+    <span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/Plugins/General/site-analytics-plugin/#Baidu-Analytics</span>
+    <span class="hljs-attr">baidu-analytics:</span>
+        <span class="hljs-comment"># Baidu Analytics tracking id</span>
+        <span class="hljs-attr">tracking_id:</span> 
+    <span class="hljs-comment"># Hotjar user feedback plugin</span>
+    <span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/Plugins/General/site-analytics-plugin/#Hotjar</span>
+    <span class="hljs-attr">hotjar:</span>
+        <span class="hljs-comment"># Hotjar site id</span>
+        <span class="hljs-attr">site_id:</span> 
+    <span class="hljs-comment"># Show a loading progress bar at top of the page</span>
+    <span class="hljs-attr">progressbar:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-comment"># BuSuanZi site/page view counter</span>
+    <span class="hljs-comment"># https://busuanzi.ibruce.info</span>
+    <span class="hljs-attr">busuanzi:</span> <span class="hljs-literal">true</span>
+<span class="hljs-comment"># CDN provider settings</span>
+<span class="hljs-comment"># https://ppoffice.github.io/hexo-theme-icarus/Configuration/Theme/speed-up-your-site-with-custom-cdn/</span>
+<span class="hljs-attr">providers:</span>
+    <span class="hljs-comment"># Name or URL of the JavaScript and/or stylesheet CDN provider</span>
+    <span class="hljs-attr">cdn:</span> <span class="hljs-string">jsdelivr</span>
+    <span class="hljs-comment"># Name or URL of the webfont CDN provider</span>
+    <span class="hljs-attr">fontcdn:</span> <span class="hljs-string">google</span>
+    <span class="hljs-comment"># Name or URL of the webfont Icon CDN provider</span>
+    <span class="hljs-attr">iconcdn:</span> <span class="hljs-string">fontawesome</span></code></pre></div><h3 id="评论功能"><a href="#评论功能" class="headerlink" title="评论功能"></a>评论功能</h3><p>icarus内置了多款评论插件，本来最初使用的是<code>gitalk</code>，但它实际上是通过GitHub的<code>issuse</code>来存储评论数据，而且每写一篇新文章还必须自己手动初始化（虽然有自动化的文章但用的语言我不是很熟悉就没细看）。其他的评论系统有好有坏，最后选择了<code>Valine</code>。以下内容摘自<a target="_blank" rel="noopener" href="https://valine.js.org/">https://valine.js.org/</a></p><blockquote><p>如果你想在某个网页或者文章页中使用Valine，请参照以下步骤配置</p><h2 id="获取APP-ID-和-APP-Key"><a href="#获取APP-ID-和-APP-Key" class="headerlink" title="获取APP ID 和 APP Key"></a>获取APP ID 和 APP Key</h2><p>请先<a target="_blank" rel="noopener" href="https://leancloud.cn/dashboard/login.html#/signin">登录</a>或<a target="_blank" rel="noopener" href="https://leancloud.cn/dashboard/login.html#/signup">注册</a> <code>LeanCloud</code>, 进入<a target="_blank" rel="noopener" href="https://leancloud.cn/dashboard/applist.html#/apps">控制台</a>后点击左下角<a target="_blank" rel="noopener" href="https://leancloud.cn/dashboard/applist.html#/newapp">创建应用</a>：</p><p><img src="https://i.loli.net/2019/06/21/5d0c995c86fac81746.jpg" srcset="/img/loading.gif"></p><p>应用创建好以后，进入刚刚创建的应用，选择左下角的<code>设置</code>&gt;<code>应用Key</code>，然后就能看到你的<code>APP ID</code>和<code>APP Key</code>了：</p><p><img src="https://i.loli.net/2019/06/21/5d0c997a60baa24436.jpg" srcset="/img/loading.gif"></p><h2 id="评论数据管理"><a href="#评论数据管理" class="headerlink" title="评论数据管理"></a>评论数据管理</h2><p>由于Valine 是无后端评论系统，所以也就没有开发评论数据管理功能。请自行登录<code>Leancloud应用</code>管理。</p><p>具体步骤：<code>登录</code>&gt;<code>选择你创建的应用</code>&gt;<code>存储</code>&gt;选择Class <code>Comment</code>，然后就可以尽情的发挥你的权利啦(～￣▽￣)～</p><blockquote><p>当然，你也可以配合 <a target="_blank" rel="noopener" href="https://github.com/panjunwen">@panjunwen</a> 开发的 <a target="_blank" rel="noopener" href="https://github.com/panjunwen/Valine-Admin">Valine-Admin</a> 进行<code>评论数据管理</code></p></blockquote><h2 id="安全域名"><a href="#安全域名" class="headerlink" title="安全域名"></a>安全域名</h2><p>为了你的数据安全，请设置自己的<code>安全域名</code>：</p><p><img src="https://i.loli.net/2019/06/21/5d0c995bddd4f99219.jpg" srcset="/img/loading.gif" alt="设置安全域名"></p><p>更多信息请查看<a href="/configuration.html">配置项</a>。</p></blockquote><p>配置完成后在icarus主题下的<code>_config.yml</code>填写相应配置就ok。</p><div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">comment:</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">valine</span>
+    <span class="hljs-attr">app_id:</span> <span class="hljs-string">xxxxx</span>           <span class="hljs-comment"># (required) LeanCloud application id</span>
+    <span class="hljs-attr">app_key:</span> <span class="hljs-string">xxxx</span>           <span class="hljs-comment"># (required) LeanCloud application key</span>
+    <span class="hljs-attr">notify:</span> <span class="hljs-literal">false</span>           <span class="hljs-comment"># (optional) receive email notification</span>
+    <span class="hljs-attr">verify:</span> <span class="hljs-literal">true</span>            <span class="hljs-comment"># (optional) show verification code</span>
+    <span class="hljs-attr">placeholder:</span> <span class="hljs-string">欢迎交流♂</span>   <span class="hljs-comment"># (optional) comment box placeholder text</span>
+</code></pre></div><h3 id="相册功能"><a href="#相册功能" class="headerlink" title="相册功能"></a>相册功能</h3><p>本来一直期待自己的博客应该有一个相册，但是实际上设置好相册功能之后发现图片加载特别慢，所以放弃了。但是还是记录下如何设置。</p><p>Icarus内置了相册功能，只需要把<code>_config.yml</code>作如下设置：</p><div class="hljs"><pre><code class="hljs yaml"><span class="hljs-attr">gallery:</span> <span class="hljs-literal">true</span></code></pre></div><p>然后就可以编辑相册页面了。其实就是<code>md</code>格式的静态页面，需要自己手动添加照片。类似下面这样。</p><div class="hljs"><pre><code class="hljs markdown">---
+date: 2019-07-29 16:28:26
+
+---
+
+<span class="hljs-quote">&gt; <span class="hljs-strong">**2020**</span></span>
+
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;justified-gallery&quot;</span>&gt;</span></span>
+
+![<span class="hljs-string">长久</span>](<span class="hljs-link">../images/long.jpg</span>)
+![<span class="hljs-string">海鸥</span>](<span class="hljs-link">../images/seagull.jpg</span>)
+![<span class="hljs-string">树们</span>](<span class="hljs-link">../images/trees.jpg</span>)
+![<span class="hljs-string">浮生</span>](<span class="hljs-link">../images/life.jpg</span>)
+![<span class="hljs-string">黄与蓝</span>](<span class="hljs-link">../images/yellowAndBlue.jpg</span>)
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span></span>
+
+<span class="hljs-quote">&gt; <span class="hljs-strong">**2019**</span></span>
+
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;justified-gallery&quot;</span>&gt;</span></span>
+
+
+![<span class="hljs-string">东京与富士山</span>](<span class="hljs-link">../images/fuji.jpg</span>)
+![<span class="hljs-string">东京塔</span>](<span class="hljs-link">../images/tokyoTower.jpg</span>)
+![<span class="hljs-string">海岸</span>](<span class="hljs-link">../images/sea.jpg</span>)
+![<span class="hljs-string">永远</span>](<span class="hljs-link">../images/forever.jpg</span>)
+![<span class="hljs-string">秋天</span>](<span class="hljs-link">../images/autumn.jpg</span>)
+![<span class="hljs-string">行人</span>](<span class="hljs-link">../images/walker.jpg</span>)
+![<span class="hljs-string">红色</span>](<span class="hljs-link">../images/red.jpg</span>)
+![<span class="hljs-string">轨迹</span>](<span class="hljs-link">../images/track.jpg</span>)
+![<span class="hljs-string">光</span>](<span class="hljs-link">../images/light.jpg</span>)
+![<span class="hljs-string">老人们</span>](<span class="hljs-link">../images/theOlders.jpg</span>)
+<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+
+<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span></span></code></pre></div><h3 id="及时聊天功能"><a href="#及时聊天功能" class="headerlink" title="及时聊天功能"></a>及时聊天功能</h3><p>参考自<a href="%5Bhttps://nave.work/Hexo%E4%B8%BB%E9%A2%98%E6%8A%98%E8%85%BE%E6%97%A5%E8%AE%B0-%E4%BA%8C-%E6%B7%BB%E5%8A%A0%E8%B1%86%E7%93%A3%E5%92%8C%E8%81%8A%E5%A4%A9%E6%8F%92%E4%BB%B6.html%5D(https://nave.work/Hexo%E4%B8%BB%E9%A2%98%E6%8A%98%E8%85%BE%E6%97%A5%E8%AE%B0-%E4%BA%8C-%E6%B7%BB%E5%8A%A0%E8%B1%86%E7%93%A3%E5%92%8C%E8%81%8A%E5%A4%A9%E6%8F%92%E4%BB%B6.html)">@Evan</a></p><ol><li><p>首先需要注册 <a target="_blank" rel="noopener" href="https://www.tidio.com/">Tidio</a> 账号，根据引导填写应用信息。</p></li><li><p>在个人主页中选择 <code>Channels -&gt; Live Chat -&gt; Integration</code> ,复制 JS 代码[<img src="https://cdn.jsdelivr.net/gh/NavePnow/blog_photo@private/screenshot%202019-11-17%20at%2020.37.55.png" srcset="/img/loading.gif" alt="img">](<a target="_blank" rel="noopener" href="https://cdn.jsdelivr.net/gh/NavePnow/blog_photo@private/screenshot">https://cdn.jsdelivr.net/gh/NavePnow/blog_photo@private/screenshot</a> 2019-11-17 at 20.37.55.png)</p></li><li><p>修改 /layout/layout.ejs, 在文件最后插入对应的代码.</p><div class="hljs"><pre><code class="hljs html">    <span class="hljs-tag">&lt;<span class="hljs-name">%</span> &#125; %&gt;</span>
++    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;//code.tidio.co/token.js&quot;</span> <span class="hljs-attr">async</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre></div><p>其中将<code>token</code>替换成你对应的token即可，接下来可以在 Tidio 控制台的 <code>Channel -&gt; Live chat -&gt; Appearance</code> 中根据提示定制聊天对话框的主题外观和语言包，以适应自己的需求。</p></li></ol></div><hr><div><div class="post-metas mb-3"><div class="post-meta mr-3"><i class="iconfont icon-category"></i> <a class="hover-with-bg" href="/categories/%E9%A1%B9%E7%9B%AE%E8%AE%B0%E5%BD%95/">项目记录</a></div><div class="post-meta"><i class="iconfont icon-tags"></i> <a class="hover-with-bg" href="/tags/Hexo/">Hexo</a></div></div><p class="note note-warning">本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！</p><div class="post-prevnext row"><article class="post-prev col-6"><a href="/2020/04/16/%E5%87%8F%E8%84%82%E8%BF%98%E6%98%AF%E5%A2%9E%E8%82%8C/"><i class="iconfont icon-arrowleft"></i> <span class="hidden-mobile">减脂还是增肌</span> <span class="visible-mobile">上一篇</span></a></article><article class="post-next col-6"><a href="/2019/11/15/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%88%E4%BA%8C%EF%BC%89%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92/"><span class="hidden-mobile">机器学习（二）逻辑回归</span> <span class="visible-mobile">下一篇</span> <i class="iconfont icon-arrowright"></i></a></article></div></div></article></div></div></div><div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn"><div id="toc"><p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p><div id="tocbot"></div></div></div></div></div></main><a id="scroll-top-button" href="#" role="button"><i class="iconfont icon-arrowup" aria-hidden="true"></i></a><div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable modal-lg" role="document"><div class="modal-content"><div class="modal-header text-center"><h4 class="modal-title w-100 font-weight-bold">搜索</h4><button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="modal-body mx-3"><div class="md-form mb-5"><input type="text" id="local-search-input" class="form-control validate"> <label data-error="x" data-success="v" for="local-search-input">关键词</label></div><div class="list-group" id="local-search-result"></div></div></div></div></div><footer class="text-center mt-5 py-3"><div class="footer-content"><a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a></div><div class="statistics"><span id="leancloud-site-pv-container" style="display:none">总访问量 <span id="leancloud-site-pv"></span> 次 </span><span id="leancloud-site-uv-container" style="display:none">总访客数 <span id="leancloud-site-uv"></span> 人</span></div></footer><script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script><script src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script><script src="/js/debouncer.js"></script><script src="/js/main.js"></script><script src="/js/lazyload.js"></script><script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js"></script><script src="/js/clipboard-use.js"></script><script defer>!function(){function e(e,t){return new Promise((function(n,o){e("get","/classes/Counter?where="+encodeURIComponent(JSON.stringify({target:t}))).then(e=>e.json()).then(({results:r,code:c,error:a})=>{if(401===c)throw a;if(r&&r.length>0){var s=r[0];n(s)}else e("post","/classes/Counter",{target:t,time:0}).then(e=>e.json()).then((e,t)=>{if(t)throw t;n(e)}).catch(e=>{console.error("Failed to create",e),o(e)})}).catch(e=>{console.error("LeanCloud Counter Error:",e),o(e)})}))}function t(e){return{method:"PUT",path:"/1.1/classes/Counter/"+e,body:{time:{__op:"Increment",amount:1}}}}function n(n){var o=[],r=[],c=document.querySelector("#leancloud-site-pv-container");if(c){var a=e(n,"site-pv").then(e=>{r.push(t(e.objectId));var n=document.querySelector("#leancloud-site-pv");n&&(n.innerText=e.time+1,c&&(c.style.display="inline"))});o.push(a)}var s=document.querySelector("#leancloud-site-uv-container");if(s){var i=e(n,"site-uv").then(e=>{var n,o,c=(n="LeanCloud_UV_Flag",!((o=localStorage.getItem(n))&&(new Date).getTime()-parseInt(o)<=864e5||(localStorage.setItem(n,(new Date).getTime().toString()),0)));c&&r.push(t(e.objectId));var a=document.querySelector("#leancloud-site-uv");a&&(a.innerText=e.time+(c?1:0),s&&(s.style.display="inline"))});o.push(i)}var l=document.querySelector("#leancloud-post-views-container");if(l){var u=decodeURI("/2020/02/15/%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E6%9B%B4%E6%8D%A2%E4%B8%BB%E9%A2%98icarus%E8%BF%87%E7%A8%8B%E8%AE%B0%E5%BD%95/"),d=e(n,u).then(e=>{if(r.push(t(e.objectId)),l){var n=document.querySelector("#leancloud-post-views");n&&(n.innerText=(e.time||0)+1,l.style.display="inline")}});o.push(d)}}var o="hoF7AVB0C8DlAlWnTCwesGN3-9Nh9j0Va";function r(e){n((t,n,r)=>fetch(`${e}/1.1${n}`,{method:t,headers:{"X-LC-Id":o,"X-LC-Key":"otV5csmIr57vcO0opxXieCYs","Content-Type":"application/json"},body:JSON.stringify(r)}))}var c="-MdYXbMMI"!==o.slice(-9)?"https://hof7avb0.lc-cn-e1-shared.com":`https://${o.slice(0,8).toLowerCase()}.api.lncldglobal.com`;c?r(c):fetch("https://app-router.leancloud.cn/2/route?appId="+o).then(e=>e.json()).then(({api_server:e})=>{r("https://"+e)})}()</script><script src="https://cdn.staticfile.org/tocbot/4.11.1/tocbot.min.js"></script><script>$(document).ready((function(){var t=$("#board-ctn").offset().top;tocbot.init({tocSelector:"#tocbot",contentSelector:"#post-body",headingSelector:"h1,h2,h3,h4,h5,h6",linkClass:"tocbot-link",activeLinkClass:"tocbot-active-link",listClass:"tocbot-list",isCollapsedClass:"tocbot-is-collapsed",collapsibleClass:"tocbot-is-collapsible",collapseDepth:0,scrollSmooth:!0,headingsOffset:-t}),$(".toc-list-item").length>0&&$("#toc").css("visibility","visible")}))</script><script src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js"></script><script>var typed=new Typed("#subtitle",{strings:["  ","个人博客更换主题icarus过程记录&nbsp;"],cursorChar:"_",typeSpeed:70,loop:!1});typed.stop(),$(document).ready((function(){$(".typed-cursor").addClass("h2"),typed.start()}))</script><script src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js"></script><script>anchors.options={placement:"right",visible:"hover"};var el="h1,h2,h3,h4,h5,h6".split(","),res=[];for(item of el)res.push(".markdown-body > "+item);anchors.add(res.join(", "))</script><script src="/js/local-search.js"></script><script>var path="/local-search.xml",inputArea=document.querySelector("#local-search-input");inputArea.onclick=function(){searchFunc(path,"local-search-input","local-search-result"),this.onclick=null}</script><script src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js"></script><link rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css"><script>$("#post img:not(.no-zoom img, img[no-zoom]), img[zoom]").each((function(){var t=document.createElement("a");$(t).attr("data-fancybox","images"),$(t).attr("href",$(this).attr("src")),$(this).wrap(t)}))</script><script src="//code.tidio.co/abocwfwhvgkj6pfpun9lba9mt6zdbwly.js" async></script></body></html>
