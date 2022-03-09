@@ -16,23 +16,23 @@
   <meta name="author" content="februarysea">
   <meta name="keywords" content="">
   
-    <meta name="description" content="胶片的结构胶片是由单层的或多层的感光乳剂以及感光乳剂所附着的片基组成的。彩色胶片有三层主要的感光图层：一层感红，一层感蓝，一层感绿。  感光乳剂是悬浮在明胶中的光敏感物质卤化银颗粒。 片基是提供给乳剂一个固体附着物，现代感光胶片片基一般都采用乙酸纤维酯薄膜。 感蓝层：黄染料，感绿层：品红染料，感红层：青染料。  光线通过相机射到胶片的乳剂层上，当光线到达卤化银晶体时，这些晶体发生结构性变化，并与邻">
+    <meta name="description" content="Version:1.10.2 Attribute of a Tensor1234tensor &#x3D; torch.rand(3, 4)tensor.shape	# shapetensor.dtype	# datatypetensor.device # device on which they are stored  Operations on TensorsEach of these operatio">
 <meta property="og:type" content="article">
-<meta property="og:title" content="胶片">
-<meta property="og:url" content="https://februarysea.github.io/2020/10/20/%E8%83%B6%E7%89%87/index.html">
+<meta property="og:title" content="PyTorch学习之路（一）Tensor">
+<meta property="og:url" content="https://februarysea.github.io/2022/03/08/PyTorch%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF%EF%BC%88%E4%B8%80%EF%BC%89Tensor/index.html">
 <meta property="og:site_name" content="februarysea&#39;s blog">
-<meta property="og:description" content="胶片的结构胶片是由单层的或多层的感光乳剂以及感光乳剂所附着的片基组成的。彩色胶片有三层主要的感光图层：一层感红，一层感蓝，一层感绿。  感光乳剂是悬浮在明胶中的光敏感物质卤化银颗粒。 片基是提供给乳剂一个固体附着物，现代感光胶片片基一般都采用乙酸纤维酯薄膜。 感蓝层：黄染料，感绿层：品红染料，感红层：青染料。  光线通过相机射到胶片的乳剂层上，当光线到达卤化银晶体时，这些晶体发生结构性变化，并与邻">
+<meta property="og:description" content="Version:1.10.2 Attribute of a Tensor1234tensor &#x3D; torch.rand(3, 4)tensor.shape	# shapetensor.dtype	# datatypetensor.device # device on which they are stored  Operations on TensorsEach of these operatio">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://februarysea.github.io/img/film.jpg">
-<meta property="article:published_time" content="2020-10-20T08:44:59.000Z">
-<meta property="article:modified_time" content="2021-04-12T14:36:55.000Z">
+<meta property="article:published_time" content="2022-03-08T09:27:19.000Z">
+<meta property="article:modified_time" content="2022-03-09T11:24:45.487Z">
 <meta property="article:author" content="februarysea">
-<meta property="article:tag" content="Photography">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="Machine Learning">
+<meta property="article:tag" content="Deep Learning">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://februarysea.github.io/img/film.jpg">
   
   
-  <title>胶片 - februarysea&#39;s blog</title>
+  <title>PyTorch学习之路（一）Tensor - februarysea&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
 
@@ -178,7 +178,7 @@
       <div class="full-bg-img">
         <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
           <div class="page-header text-center fade-in-up">
-            <span class="h2" id="subtitle" title="胶片">
+            <span class="h2" id="subtitle" title="PyTorch学习之路（一）Tensor">
               
             </span>
 
@@ -188,8 +188,8 @@
   
     <span class="post-meta">
       <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-      <time datetime="2020-10-20 16:44" pubdate>
-        2020年10月20日 下午
+      <time datetime="2022-03-08 17:27" pubdate>
+        2022年3月8日 下午
       </time>
     </span>
   
@@ -199,7 +199,7 @@
   
     <span class="post-meta mr-2">
       <i class="iconfont icon-chart"></i>
-      1.6k 字
+      1.3k 字
     </span>
   
 
@@ -208,7 +208,7 @@
       <i class="iconfont icon-clock-fill"></i>
       
       
-      14 分钟
+      12 分钟
     </span>
   
 
@@ -237,55 +237,53 @@
         <div class="py-5" id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">胶片</h1>
+            <h1 style="display: none">PyTorch学习之路（一）Tensor</h1>
             
               <p class="note note-info">
                 
-                  本文最后更新于：2021年4月12日 晚上
+                  本文最后更新于：2022年3月9日 晚上
                 
               </p>
             
             <div class="markdown-body">
-              <h3 id="胶片的结构"><a href="#胶片的结构" class="headerlink" title="胶片的结构"></a>胶片的结构</h3><p>胶片是由<strong>单层的或多层的感光乳剂</strong>以及<strong>感光乳剂所附着的片基</strong>组成的。彩色胶片有三层主要的感光图层：一层感红，一层感蓝，一层感绿。</p>
-<ul>
-<li>感光乳剂是悬浮在明胶中的光敏感物质卤化银颗粒。</li>
-<li>片基是提供给乳剂一个固体附着物，现代感光胶片片基一般都采用乙酸纤维酯薄膜。</li>
-<li>感蓝层：黄染料，感绿层：品红染料，感红层：青染料。</li>
-</ul>
-<p>光线通过相机射到胶片的乳剂层上，当光线到达卤化银晶体时，这些晶体发生结构性变化，并与邻近也受到光线照射的卤化银晶体相互聚结起来。乳剂层接受到的光量越多，就有越多的晶体聚结在一起；光量越少，晶体的变化和聚结也越少。</p>
-<h3 id="胶片的分类"><a href="#胶片的分类" class="headerlink" title="胶片的分类"></a>胶片的分类</h3><h4 id="“负片”（Negative-Film）"><a href="#“负片”（Negative-Film）" class="headerlink" title="“负片”（Negative Film）"></a>“负片”（Negative Film）</h4><p>“负片”是经曝光和显影加工后得到的影像，其明暗与被摄体相反，其色彩为被摄体的补色。“负片”需要经过印放在照片上才能还原为正像。简单地说，拍摄的胶片冲洗出来以后，所看到的影像是反色的影像，需要经过扩印或放大成照片才能变成与所拍摄景物相同色彩的影像。</p>
-<p>以黑白的片子为例，“负片”的胶片上人的头发是白的，而实际上是白色的衣服在胶片上则显示为黑色。如果是彩色的胶片，则胶片上的颜色与实际景物的颜色是互补的，例如：实际是红色的衣服在胶片上显示为绿色。无论是黑白还是彩色的“负片”，都是摄影最常用到的胶片。日常生活中用普通相机拍照冲洗出来的底片就是“负片”。</p>
-<h4 id="“正片”（Positive-Film）"><a href="#“正片”（Positive-Film）" class="headerlink" title="“正片”（Positive Film）"></a>“正片”（Positive Film）</h4><p>电影摄影机所拍的“负片”经过冲洗和剪接后，先复制为若干拷贝带，再用 Positive Film 翻正，就可以在电影院放映了。“正片”是用于印制照片、幻灯片和电影拷贝的感光胶片的总称，能把底片上的负像印制为正像，使影像的明暗及色彩恢复为与被摄体相同。</p>
-<p>黑白“正片”的感色性仅限于紫蓝色光，彩色“正片”的感色能力比彩色“反片”弱。因此，“正片”很少用于摄影。彩色“正片”用于印制彩色放映拷贝，如电影和幻灯片等。其特点是反差大、灰雾度低、清晰度高、感光度低，而且幻灯片与实际的影响是左右镜像的。</p>
-<h4 id="“反转片”（Reversal-Film）"><a href="#“反转片”（Reversal-Film）" class="headerlink" title="“反转片”（Reversal Film）"></a>“反转片”（Reversal Film）</h4><p>“反转片”有彩色和黑白之分，现在所说的“反转片”其实是 Color Reversal Film，常用于静态摄影。之所以称其为“反转片”是因为其在显影的第一阶段成负像，然后才成彩色染料形成的正像。“反转片”是在拍摄后经过反转冲洗可直接获得正像的一种感光胶片。黑白“反转片”可直接获得影像阴暗程度与被摄体一致的透明片；彩色“反转片”可直接获得色彩与被摄体相同的透明片，其色彩真实鲜艳，但宽容度较小。</p>
-<p>“反转片”由于有高质量的正像效果，被大量用于印刷制版或幻灯片制作，专业摄影师在拍摄广告照片时大多都使用彩色“反转片”。 无论是“负片”、“正片”还是“反转片”，都有黑白胶片和彩色胶片之分。彩色“反转片”用于景物拍摄。经过反转冲洗过程可以直接获得与景物明暗、色彩一致的正像，可直接用于放映和印刷制版。其特点是反差比“负片”大，比“正片”小；宽容度比“负片”小，比“正片”大；最低密度小，片基为无色透明。</p>
-<p>比较分析</p>
-<ul>
-<li><strong>“反转片”</strong>，胶片上的颜色与实际所摄景物是颜色是一致的，可通过幻灯机放映出所拍摄的效果。</li>
-<li><strong>“正片”</strong>是用于其它底片“转印 - 冲洗”后得到的正像；</li>
-<li><strong>“反转片”</strong>是通过“拍摄 - 冲洗”自身直接得到正像。</li>
-<li>可以说“正片”就是一种特殊的“负片”。说得更通俗一点，“正片”类似于相纸，只是相纸的基体材料是不透明的纸基，而“正片”的基体是透明的聚脂纤维、醋酸纤维。</li>
-<li>在实际拍摄过程中，使用“反转片”要比使用“负片”的要求少。因为使用“反转片”时所用的曝光数据一定要正确，否则无法弥补；但使用“负片”时，只要其曝光的数据不超过胶片的宽容度，就可以在扩印或放大时进行色彩校正。所以常常称“反转片”为专业胶卷，当然也有专业的“负片”。由于“反转片”属于专业胶片，所因而肯定比“负片”贵。</li>
-</ul>
-<p>说明：由于“反转片”（Reversal film）亦采正像显影方式，“正片”遂成与负片相对的感光材料总称。</p>
+              <p>Version:1.10.2</p>
+<h2 id="Attribute-of-a-Tensor"><a href="#Attribute-of-a-Tensor" class="headerlink" title="Attribute of a Tensor"></a>Attribute of a Tensor</h2><figure class="highlight python"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs python">tensor = torch.rand(<span class="hljs-number">3</span>, <span class="hljs-number">4</span>)<br>tensor.shape	<span class="hljs-comment"># shape</span><br>tensor.dtype	<span class="hljs-comment"># datatype</span><br>tensor.device <span class="hljs-comment"># device on which they are stored</span><br></code></pre></div></td></tr></table></figure>
+
+<h2 id="Operations-on-Tensors"><a href="#Operations-on-Tensors" class="headerlink" title="Operations on Tensors"></a>Operations on Tensors</h2><p>Each of these operations can be run on the GPU(typically faster than on a CPU).</p>
+<p>By default, tensors are created on the CPU.</p>
+<p>Keep in mind that copying large tensors across devices can be expensive in terms of time and memory!</p>
+<figure class="highlight python"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs python"><span class="hljs-comment"># move tensor to the GPU if available</span><br><span class="hljs-keyword">if</span> torch.cuda.is_available():<br>    tensor = tensor.to(<span class="hljs-string">&quot;cuda&quot;</span>)<br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs python"><span class="hljs-comment"># standard numpy-like indexing and slicing</span><br>tensor = torch.ones(<span class="hljs-number">4</span>, <span class="hljs-number">4</span>) <span class="hljs-comment"># initialize to 1</span><br>tensor[<span class="hljs-number">0</span>]       <span class="hljs-comment"># first row</span><br>tensor[:,<span class="hljs-number">0</span>]     <span class="hljs-comment"># first column</span><br>tesnor[..., -<span class="hljs-number">1</span>] <span class="hljs-comment"># last column</span><br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs python"><span class="hljs-comment"># joining tensors</span><br>t1 = torch.cat([tensor, tensor, tensor], dim=<span class="hljs-number">1</span>)<br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs python"><span class="hljs-comment"># arithmetic operations</span><br><br><span class="hljs-comment"># matrix multiplication</span><br>y1 = tensor @ tensor.T<br>y2 = tensor.matmul(tensor.T)<br>y3 = torch.rand_like(tensor)<br>torch.matmul(tensor, tensor.T, out=y3)<br><br><span class="hljs-comment"># element-wise product</span><br>z1 = tensor * tensor<br>z2 = tensor.mul(tensor)<br><br>z3 = torch.rand_like(tensor)<br>torch.mul(tensor, tensor, out=z3)<br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs python"><span class="hljs-comment"># single-element tensors</span><br><span class="hljs-comment"># a Python numerical value using item()</span><br>agg = tensor.<span class="hljs-built_in">sum</span>()<br>agg_item = agg.item()<br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs python"><span class="hljs-comment"># in-place operations</span><br><span class="hljs-comment"># Operations store the result into the operand.</span><br><span class="hljs-comment"># for exaample: x.copy_(y), x.t_()</span><br>tensor.add_(<span class="hljs-number">5</span>)<br></code></pre></div></td></tr></table></figure>
+
+<h2 id="Bridge-with-NumPy"><a href="#Bridge-with-NumPy" class="headerlink" title="Bridge with NumPy"></a>Bridge with NumPy</h2><p>Tensors on the cpu and NumPy arrays can share their underlying memory locations, and changing one will change the other.</p>
+<figure class="highlight python"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs python"><span class="hljs-comment"># Tensor to Numpy array</span><br>t = torch.ones(<span class="hljs-number">5</span>)<br>n = t.numpy()<br></code></pre></div></td></tr></table></figure>
+
+<figure class="highlight ini"><table><tr><td class="gutter hljs"><div class="hljs code-wrapper"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></div></td><td class="code"><div class="hljs code-wrapper"><pre><code class="hljs ini"><span class="hljs-comment"># NumPy array to Tensor</span><br><span class="hljs-attr">n</span> = np.<span class="hljs-literal">on</span>es(<span class="hljs-number">5</span>)<br><span class="hljs-attr">t</span> = torch.from_numpy(n)<br></code></pre></div></td></tr></table></figure>
+
 
             </div>
             <hr>
             <div>
               <div class="post-metas mb-3">
                 
-                  <div class="post-meta mr-3">
-                    <i class="iconfont icon-category"></i>
-                    
-                      <a class="hover-with-bg" href="/categories/%E4%B8%AA%E4%BA%BA%E5%85%B4%E8%B6%A3/">个人兴趣</a>
-                    
-                  </div>
-                
                 
                   <div class="post-meta">
                     <i class="iconfont icon-tags"></i>
                     
-                      <a class="hover-with-bg" href="/tags/Photography/">Photography</a>
+                      <a class="hover-with-bg" href="/tags/Python/">Python</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Machine-Learning/">Machine Learning</a>
+                    
+                      <a class="hover-with-bg" href="/tags/Deep-Learning/">Deep Learning</a>
                     
                   </div>
                 
@@ -302,9 +300,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2021/03/27/Python%E9%9D%A2%E8%AF%95%E9%A2%98%E7%9B%AE%E6%80%BB%E7%BB%93/">
+                      <a href="/2022/03/08/PyTorch%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%B7%AF%EF%BC%88%E4%BA%8C%EF%BC%89%20Datasets%20and%20DataLoaders/">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Python面试题目总结</span>
+                        <span class="hidden-mobile">PyTorch学习之路（二） Datasets and DataLoaders</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -312,8 +310,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2020/04/16/%E5%87%8F%E8%84%82%E8%BF%98%E6%98%AF%E5%A2%9E%E8%82%8C/">
-                        <span class="hidden-mobile">减脂还是增肌</span>
+                      <a href="/2021/03/27/Python%E9%9D%A2%E8%AF%95%E9%A2%98%E7%9B%AE%E6%80%BB%E7%BB%93/">
+                        <span class="hidden-mobile">Python面试题目总结</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
