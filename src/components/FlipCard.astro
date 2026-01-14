@@ -6,12 +6,13 @@ interface Props {
   padding?: string;
   color?: string;
   borderColor?: string;
+  class?: string;
 }
 
-const { colSpan, rowSpan, href, padding = "p-6", color = "bg-darkslate-500", borderColor = "border-darkslate-100" } = Astro.props;
+const { colSpan, rowSpan, href, padding = "p-6", color = "bg-darkslate-500", borderColor = "border-darkslate-100", class: className } = Astro.props;
 ---
 
-<div class={`flip-card-container group perspective-1000 w-full h-full ${colSpan || "md:col-span-1"} ${rowSpan || "md:row-span-1"}`}>
+<div class={`flip-card-container group perspective-1000 w-full h-full ${colSpan || "md:col-span-1"} ${rowSpan || "md:row-span-1"} ${className}`}>
   <div class="flip-card-inner relative w-full h-full transition-transform duration-700 transform-style-3d h-full">
     <!-- Front Side -->
     <div class={`flip-card-front absolute inset-0 backface-hidden ${color} shadow-lg rounded-lg ${padding} border ${borderColor} flex flex-col justify-between overflow-hidden`}>
