@@ -11,13 +11,13 @@ import svelte from "@astrojs/svelte";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://februarysea.github.io/",
+  site: "https://www.februarysea.me",
   integrations: [
     sitemap(),
     robotsTxt({
       sitemap: [
-        "https://februarysea.github.io/sitemap-index.xml",
-        "https://februarysea.github.io/sitemap-0.xml",
+        "https://www.februarysea.me/sitemap-index.xml",
+        "https://www.februarysea.me/sitemap-0.xml",
       ],
     }),
     solidJs(),

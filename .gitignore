@@ -24,14 +24,14 @@ pnpm-debug.log*
 
 # Editor directories and files
 .idea/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/launch.json
+
+.vscode/
 *.suo
 *.ntvs
 *.njsproj
 *.sln
 *.sw?
+
 
 # Netlify
 .netlify/
