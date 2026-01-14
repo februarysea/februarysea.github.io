@@ -1,0 +1,45 @@
+---
+import FlipCard from "./FlipCard.astro";
+import { LINKS } from "../lib/constants";
+import { Icon } from "astro-icon/components";
+---
+
+<FlipCard colSpan="md:col-span-1" rowSpan="md:row-span-4" color="bg-[#050505]" borderColor="border-purple-500">
+  <div slot="front" class="h-full flex flex-col justify-between">
+    <header class="flex items-center">
+      <h1 class="text-white text-xl font-bold font-sans">
+        Let's Connect!
+      </h1>
+    </header>
+    <div class="flex flex-col justify-center items-center h-full gap-4">
+       <p class="text-sm text-gray-300 text-center font-sans">
+         Open to research collaborations and technical discussions.
+       </p>
+       <div class="flex gap-4">
+         <a href={LINKS.github} target="_blank" aria-label="Github">
+            <Icon name="ri:github-fill" class="h-10 w-10 text-gray-300 hover:text-white transition-colors" />
+         </a>
+         <a href={`mailto:${LINKS.email}`} aria-label="Email">
+            <Icon name="ri:mail-fill" class="h-10 w-10 text-gray-300 hover:text-white transition-colors" />
+         </a>
+       </div>
+    </div>
+    <p class="text-xs text-gray-500 mt-2 text-right font-sans">Details on back...</p>
+  </div>
+
+  <div slot="back" class="h-full flex flex-col justify-center">
+    <div class="flex flex-col w-full px-4">
+      <h2 class="text-gray-500 mb-2 font-bold text-lg font-sans">Contact Info</h2>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col">
+            <span class="text-xs text-gray-500 font-sans">Email</span>
+            <a href={`mailto:${LINKS.email}`} class="text-sm text-white hover:text-primary-500 break-all font-sans">{LINKS.email}</a>
+        </div>
+        <div class="flex flex-col">
+            <span class="text-xs text-gray-500 font-sans">GitHub</span>
+            <a href={LINKS.github} target="_blank" class="text-sm text-white hover:text-primary-500 break-all font-sans">{LINKS.github}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</FlipCard>

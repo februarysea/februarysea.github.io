@@ -1,0 +1,131 @@
+---
+import FlipCard from "./FlipCard.astro";
+import Button from "./Button.astro";
+import { LINKS } from "../lib/constants";
+import { Icon } from "astro-icon/components";
+import Tooltip from "./Tooltip/index";
+import { Image } from "astro:assets";
+---
+
+<FlipCard colSpan="md:col-span-3" rowSpan="md:row-span-4" color="bg-[#050505]" borderColor="border-cyan-500">
+  <div slot="front" class="flex w-full h-full relative overflow-hidden">
+    <!-- Complex Neural/Agent Network SVG -->
+    <svg
+      class="w-full h-full absolute bottom-0 opacity-40 md:opacity-60 pointer-events-none text-cyan-500
+             right-[-80px] scale-[1.05]
+             sm:right-[-110px] sm:scale-[1.1]
+             md:right-[-150px] md:scale-125
+             lg:right-[-200px] lg:scale-[1.35]
+             origin-bottom-right"
+      viewBox="0 0 400 400"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      </defs>
+      
+      <!-- Network Links -->
+      <g stroke="currentColor" stroke-width="1" opacity="0.5">
+        <!-- Rotating Data Ring -->
+        <circle cx="300" cy="300" r="120" stroke-dasharray="2 10" opacity="0.2">
+            <animateTransform attributeName="transform" type="rotate" from="0 300 300" to="360 300 300" dur="60s" repeatCount="indefinite"/>
+        </circle>
+        
+        <!-- Central connections -->
+        <path d="M300 300 L220 250" />
+        <path d="M300 300 L350 200" />
+        <path d="M300 300 L180 320" />
+        <path d="M300 300 L260 380" />
+        <path d="M300 300 L380 320" />
+        
+        <!-- Inter-node connections -->
+        <path d="M220 250 L150 200" />
+        <path d="M220 250 L180 320" />
+        <path d="M220 250 L350 200" />
+        
+        <path d="M350 200 L320 150" />
+        <path d="M350 200 L380 320" />
+        
+        <path d="M180 320 L260 380" />
+        <path d="M260 380 L380 320" />
+        
+        <!-- Dashed speculative links (research potential) -->
+        <path d="M150 200 L320 150" opacity="0.3" stroke-dasharray="4 4" />
+      </g>
+
+      <!-- Nodes (Agents/Neurons) -->
+      <g fill="currentColor" filter="url(#glow)">
+        <!-- Core Node -->
+        <circle cx="300" cy="300" r="6" class="text-cyan-400">
+          <animate attributeName="r" values="6;8;6" dur="3s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="1;0.8;1" dur="3s" repeatCount="indefinite" />
+        </circle>
+        
+        <!-- Primary Nodes with independent pulses -->
+        <circle cx="220" cy="250" r="4">
+            <animate attributeName="opacity" values="0.6;1;0.6" dur="4s" repeatCount="indefinite" begin="0s" />
+        </circle>
+        <circle cx="350" cy="200" r="4">
+            <animate attributeName="opacity" values="0.6;1;0.6" dur="5s" repeatCount="indefinite" begin="1s" />
+        </circle>
+        <circle cx="180" cy="320" r="4">
+             <animate attributeName="opacity" values="0.6;1;0.6" dur="3.5s" repeatCount="indefinite" begin="2s" />
+        </circle>
+        <circle cx="260" cy="380" r="4" />
+        <circle cx="380" cy="320" r="4">
+             <animate attributeName="opacity" values="0.6;1;0.6" dur="4.5s" repeatCount="indefinite" begin="0.5s" />
+        </circle>
+        
+        <!-- Satellite Nodes -->
+        <circle cx="150" cy="200" r="3" opacity="0.7" />
+        <circle cx="320" cy="150" r="3" opacity="0.7" />
+        
+        <!-- Distant Particles (Data points) -->
+        <circle cx="100" cy="280" r="2" opacity="0.4" />
+        <circle cx="360" cy="100" r="2" opacity="0.4" />
+        <circle cx="200" cy="380" r="2" opacity="0.4" />
+      </g>
+      
+      <!-- Moving Signals (Data Flow) - Increased Density -->
+      <circle r="2" fill="white" filter="url(#glow)">
+        <animateMotion dur="3s" repeatCount="indefinite" path="M300 300 L220 250 L150 200" />
+      </circle>
+      <circle r="2" fill="white" filter="url(#glow)">
+        <animateMotion dur="4s" repeatCount="indefinite" begin="1s" path="M180 320 L300 300 L350 200" />
+      </circle>
+      <circle r="1.5" fill="cyan" filter="url(#glow)">
+        <animateMotion dur="5s" repeatCount="indefinite" begin="0.5s" path="M350 200 L320 150" />
+      </circle>
+      <circle r="1.5" fill="cyan" filter="url(#glow)">
+        <animateMotion dur="6s" repeatCount="indefinite" begin="2s" path="M150 200 L320 150" />
+      </circle>
+      <circle r="1.5" fill="white" filter="url(#glow)">
+         <animateMotion dur="4.5s" repeatCount="indefinite" begin="1.5s" path="M300 300 L260 380 L380 320" />
+      </circle>
+    </svg>
+    <div class="flex flex-col justify-between md:max-h-[300px] gap-4 relative z-10 md:max-w-[60%] lg:max-w-[55%]">
+      <div class="flex flex-col h-full">
+        <h6 class="text-sm font-light m-0 text-gray-500 font-sans">Welcome</h6>
+        <div class="m-0 font-light text-xl flex flex-col gap-4 font-sans">
+          <p class="m-0 font-bold text-3xl font-sans">Chunhou Ji</p>
+          <div class="flex flex-col text-lg font-sans">
+             <span>PhD Student</span>
+             <span>@ Society Hub, UGOD Thrust</span>
+             <span>HKUST (Guangzhou)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div slot="back" class="w-full h-full flex flex-col justify-center items-center gap-4">
+    <h2 class="text-2xl font-bold font-sans">Research Interests</h2>
+    <p class="text-center text-sm text-gray-300 max-w-lg font-sans">
+       Agent-based modeling (ABM); artificial intelligence applications in urban studies; mechanistic interpretability of large language models; cognitive mapping in human mobility and urban cognition.
+    </p>
+  </div>
+</FlipCard>

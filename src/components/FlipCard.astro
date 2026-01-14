@@ -1,0 +1,122 @@
+---
+interface Props {
+  colSpan?: string;
+  rowSpan?: string;
+  href?: string;
+  padding?: string;
+  color?: string;
+  borderColor?: string;
+}
+
+const { colSpan, rowSpan, href, padding = "p-6", color = "bg-darkslate-500", borderColor = "border-darkslate-100" } = Astro.props;
+---
+
+<div class={`flip-card-container group perspective-1000 w-full h-full ${colSpan || "md:col-span-1"} ${rowSpan || "md:row-span-1"}`}>
+  <div class="flip-card-inner relative w-full h-full transition-transform duration-700 transform-style-3d h-full">
+    <!-- Front Side -->
+    <div class={`flip-card-front absolute inset-0 backface-hidden ${color} shadow-lg rounded-lg ${padding} border ${borderColor} flex flex-col justify-between overflow-hidden`}>
+      <slot name="front" />
+    </div>
+
+    <!-- Back Side -->
+    <div class={`flip-card-back absolute inset-0 backface-hidden rotate-y-180 ${color} shadow-lg rounded-lg ${padding} border ${borderColor} flex flex-col justify-between overflow-hidden`}>
+      <slot name="back" />
+    </div>
+  </div>
+</div>
+
+<script>
+  const containers = document.querySelectorAll('.flip-card-container');
+  
+  containers.forEach((container) => {
+    const inner = container.querySelector('.flip-card-inner');
+    if (!inner) return;
+
+    let isAutoFlipped = false;
+    let isHovering = false;
+    let autoFlipTimeout: number | undefined;
+
+    // Function to schedule the next auto flip
+    const scheduleAutoFlip = () => {
+      // Slower random interval: 10s to 25s
+      const nextInterval = Math.random() * 15000 + 10000;
+      
+      autoFlipTimeout = setTimeout(() => {
+        if (!isHovering) {
+            // Perform auto flip (show back)
+            isAutoFlipped = true;
+            updateTransform();
+            
+            // Stay on back for 3s-5s, then flip back
+            setTimeout(() => {
+                if (!isHovering) {
+                    isAutoFlipped = false;
+                    updateTransform();
+                } else {
+                    // If hovering when we were supposed to flip back, 
+                    // just reset the state so when we leave hover, we go back to front
+                    isAutoFlipped = false; 
+                }
+                // Schedule next cycle regardless
+                scheduleAutoFlip();
+            }, Math.random() * 2000 + 3000);
+        } else {
+            // If hovering, skip this cycle but schedule next one
+            scheduleAutoFlip();
+        }
+      }, nextInterval) as unknown as number;
+    };
+
+    // Initial random start delay
+    setTimeout(scheduleAutoFlip, Math.random() * 5000 + 1000);
+
+    const updateTransform = () => {
+        if (isHovering) {
+            // On hover: Always show the OPPOSITE of what would be shown automatically
+            // If auto-flipped (back), hover shows front.
+            // If normal (front), hover shows back.
+            if (isAutoFlipped) {
+                inner.classList.remove('flipped');
+            } else {
+                inner.classList.add('flipped');
+            }
+        } else {
+            // Not hovering: follow auto-flip state
+            if (isAutoFlipped) {
+                inner.classList.add('flipped');
+            } else {
+                inner.classList.remove('flipped');
+            }
+        }
+    };
+
+    container.addEventListener('mouseenter', () => {
+        isHovering = true;
+        updateTransform();
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isHovering = false;
+        updateTransform();
+    });
+  });
+</script>
+
+<style>
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+  .flip-card-inner.flipped {
+    transform: rotateY(180deg);
+  }
+</style>

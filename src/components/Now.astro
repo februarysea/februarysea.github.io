@@ -1,0 +1,27 @@
+---
+import FlipCard from "./FlipCard.astro";
+import Pulse from "./Pulse.astro";
+---
+
+<FlipCard colSpan="md:col-span-1" rowSpan="md:row-span-2" color="bg-[#050505]" borderColor="border-rose-500">
+  <div slot="front" class="w-full h-full flex flex-col justify-between">
+    <div class="flex justify-between w-full items-start mb-2">
+      <div class="flex flex-col">
+        <h2 class="font-sans">Now</h2>
+        <a href="https://sive.rs/nowff" target="_blank">
+          <span class="text-xs text-gray-500 cursor-pointer font-sans">what's that ?</span>
+        </a>
+      </div>
+      <Pulse />
+    </div>
+    <p class="text-xs font-sans">Pursuing PhD degree</p>
+  </div>
+
+  <div slot="back" class="w-full h-full flex flex-col justify-between">
+    <div class="flex flex-col">
+      <h2 class="text-primary-500 font-bold font-sans">Status</h2>
+      <p class="text-xs text-gray-300 mt-2 font-sans">Preparing projects and papers</p>
+    </div>
+    <p class="text-xs text-right font-sans">Busy but excited</p>
+  </div>
+</FlipCard>

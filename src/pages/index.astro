@@ -1,0 +1,99 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/Card/index.astro";
+import FlipCard from "../components/FlipCard.astro";
+import IntroCard from "../components/IntroCard.astro";
+import ContactsCard from "../components/ContactsCard.astro";
+import TimeZone from "../components/TimeZoneCard.astro";
+import AboutMe from "../components/AboutMe.astro";
+import Now from "../components/Now.astro";
+import Globe from "../components/Globe";
+import { getCollection } from "astro:content";
+import { formatDate } from "../lib/helpers";
+
+const posts = (await getCollection("blog"))?.sort(
+  (blogEntryA, blogEntryB) =>
+    (blogEntryB.data.pubDate || new Date()).getTime() -
+    (blogEntryA.data.pubDate || new Date()).getTime()
+);
+---
+
+<script>
+  import { stagger, animate, type AnimationSequence } from "motion";
+  import { loaderAnimation } from "../lib/constants";
+  const cards = document.querySelectorAll(".card");
+
+  const sequence = [
+    loaderAnimation,
+    [
+      cards,
+      { y: ["40%", "0%"], opacity: [0, 1] },
+      {
+        type: "spring",
+        at: "-0.1",
+        delay: stagger(0.3),
+      },
+    ],
+  ];
+
+  animate(sequence as AnimationSequence);
+</script>
+
+<Layout
+  description="I'm a developer based in Italy, passionate about user experience and specializing in engaging animations and micro-interactions. My primary tools of choice include: JavaScript, React, Solid.js, Astro, Svelte, and Node.js."
+  title="Gianmarco Cavallo - Freelance front-end Developer"
+>
+  <main
+    class="text-white m-auto p-2 grid gap-2 max-w-6xl overflow-hidden relative w-full sm:p-4 sm:gap-2 md:grid-cols-2 md:gap-3 md:p-6 lg:h-screen lg:grid-rows-8 lg:grid-cols-4 lg:gap-4 lg:max-h-[800px]"
+  >
+    <IntroCard />
+    <AboutMe />
+    <ContactsCard />
+    <TimeZone />
+    <Now />
+    <FlipCard
+      colSpan="md:col-span-1"
+      href="travel"
+      rowSpan="md:row-span-1"
+      padding="p-0"
+      color="bg-[#050505]"
+      borderColor="border-orange-500"
+    >
+      <div slot="front" class="h-full w-full relative z-10 p-6">
+        <div class="h-full w-full absolute inset-0 -z-10">
+          <Globe client:load />
+        </div>
+        <p class="text-white font-bold font-sans">Countries I visited</p>
+      </div>
+      <div slot="back" class="h-full w-full flex flex-col justify-center items-center p-6">
+        <h2 class="text-xl font-bold font-sans">20+</h2>
+        <p class="text-sm text-gray-400 font-sans">Countries Visited</p>
+      </div>
+    </FlipCard>
+    <FlipCard
+      colSpan="md:col-span-1"
+      href="#"
+      rowSpan="md:row-span-2"
+      color="bg-[#050505]"
+      borderColor="border-slate-500"
+    >
+      <div slot="front" class="flex flex-col justify-center items-center h-full">
+        <h2 class="text-2xl font-bold font-serif italic">"Be water"</h2>
+      </div>
+      <div slot="back" class="w-full h-full flex flex-col justify-center items-center">
+         <p class="text-center text-sm text-gray-400 font-serif italic">"Empty your mind, be formless, shapeless — like water."</p>
+         <p class="text-center text-xs text-gray-500 mt-2">— Bruce Lee</p>
+      </div>
+    </FlipCard>
+    <FlipCard colSpan="md:col-span-1" rowSpan="md:row-span-1" color="bg-[#050505]" borderColor="border-gray-600">
+      <div slot="front" class="h-full flex flex-col justify-center items-center gap-2">
+        <p class="text-xs text-gray-400 font-sans">Theme based on</p>
+        <p class="text-sm font-bold text-center font-sans">Bento Portfolio<br/><span class="text-xs font-normal text-gray-500 font-sans">by <a href="https://github.com/Ladvace/astro-bento-portfolio" target="_blank" class="hover:text-primary-500 underline">Gianmarco Cavallo</a></span></p>
+      </div>
+      <div slot="back" class="h-full flex flex-col justify-center items-center">
+        <p class="text-xs text-gray-400 mb-2 font-sans">Modified by</p>
+        <p class="text-white font-bold mb-4 font-sans">Chunhou Ji</p>
+      </div>
+    </FlipCard>
+  </main>
+</Layout>
