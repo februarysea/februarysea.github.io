@@ -10,6 +10,7 @@ interface Props {
 }
 
 const { title, description, page, pubDate } = Astro.props;
+const GA_ID = "G-W6N98PVLSC";
 const image =
   page === "travel"
     ? `${Astro.url.origin}/globe_preview.webp"`
@@ -100,6 +101,25 @@ const schema =
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Zodiak:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <link href={Astro.url.href} rel="canonical" />
+    {Astro.env?.PROD && (
+      <>
+        <script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+        />
+        <script
+          is:inline
+          set:html={`
+            if (!(navigator.doNotTrack === '1' || window.doNotTrack === '1')) {
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', { anonymize_ip: false });
+            }
+          `}
+        />
+      </>
+    )}
     <script
       is:inline
       set:html={JSON.stringify(schema)}
