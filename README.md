@@ -73,3 +73,30 @@ or
 ## Authors ❤️
 
 - Gianmarco - https://github.com/Ladvace
+
+## Worktime Logging (Optional)
+
+Worktime data lives in `src/data/worktime.json` and is rendered in the Worktime card.
+
+Common commands:
+
+```bash
+# Log today (hours)
+pnpm log:worktime 9
+
+# Log yesterday
+pnpm log:worktime 9 --yesterday
+
+# Log a specific date
+pnpm log:worktime 9 --date 2026-02-05
+
+# Show missing dates between the first logged day and today
+pnpm log:worktime 9 --backfill
+
+# Auto-commit and push
+pnpm log:worktime 9 --commit --push
+```
+
+Notes:
+- `--backfill` only reports missing dates; it does not fill them.
+- GitHub Actions will deploy automatically after `git push` to `master`.

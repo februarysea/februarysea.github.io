@@ -9,7 +9,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "eslint": "eslint 'src/**/*.{js,astro}'",
-    "check": "astro check"
+    "check": "astro check",
+    "log:worktime": "node scripts/log-worktime.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
