@@ -1,48 +1,237 @@
 ---
-import { getCurrentTimeInShanghai, formatTimeForShanghai } from "../lib/helpers";
 import FlipCard from "./FlipCard.astro";
+
+const workLog = {
+  // Add or update entries by date (YYYY-MM-DD). Missing days are treated as 0h.
+  "2026-02-01": 9,
+  "2026-02-02": 9,
+  "2026-02-03": 9,
+  "2026-02-04": 9,
+};
+
+const round1 = (value) => Math.round(value * 10) / 10;
+const formatHours = (value) => {
+  const rounded = round1(value);
+  return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1);
+};
+
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const today = new Date();
+today.setHours(12, 0, 0, 0);
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const weekStart = new Date(today);
+weekStart.setDate(today.getDate() - today.getDay());
+
+const startDate = new Date(weekStart);
+startDate.setDate(weekStart.getDate() - 51 * 7);
+
+const dayEntries = [];
+for (let i = 0; i < 52 * 7; i += 1) {
+  const date = new Date(startDate);
+  date.setDate(startDate.getDate() + i);
+  const key = formatDate(date);
+  const isFuture = date > today;
+  dayEntries.push({
+    date,
+    key,
+    value: isFuture ? null : (workLog[key] ?? 0),
+    isFuture,
+  });
+}
+
+const pastEntries = dayEntries.filter((entry) => !entry.isFuture);
+
+const yesterday = new Date(today);
+yesterday.setDate(today.getDate() - 1);
+const yesterdayKey = formatDate(yesterday);
+const yesterdayHours = workLog[yesterdayKey] ?? 0;
+const logKeys = Object.keys(workLog).sort();
+const parseKeyDate = (key) => {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day, 12, 0, 0, 0);
+};
+const dataStartDate = logKeys.length ? parseKeyDate(logKeys[0]) : startDate;
+
+const statsEntries = pastEntries.filter((entry) => entry.date >= dataStartDate);
+const statsValues = statsEntries.map((entry) => entry.value ?? 0);
+
+const totalHours = round1(statsValues.reduce((sum, value) => sum + value, 0));
+const averageHours = statsValues.length ? round1(totalHours / statsValues.length) : 0;
+const last7Values = statsValues.slice(-7);
+const last7Average = last7Values.length ? round1(last7Values.reduce((sum, value) => sum + value, 0) / last7Values.length) : 0;
+const bestHours = statsValues.length ? Math.max(...statsValues) : 0;
+const bestIndex = statsValues.indexOf(bestHours);
+const bestDate = statsEntries[bestIndex]?.date ?? today;
+const bestDateLabel = bestHours > 0 ? `${formatDate(bestDate)} (${formatHours(bestHours)}h)` : "—";
+
+const findIndexByDate = (target) => statsEntries.findIndex((entry) => formatDate(entry.date) === target);
+const yesterdayIndex = findIndexByDate(yesterdayKey);
+const streakStartIndex = yesterdayIndex >= 0 ? yesterdayIndex : statsValues.length - 1;
+let currentStreak = 0;
+for (let i = streakStartIndex; i >= 0; i -= 1) {
+  if (statsValues[i] > 0) currentStreak += 1;
+  else break;
+}
+let longestStreak = 0;
+let runningStreak = 0;
+for (let i = 0; i < statsValues.length; i += 1) {
+  if (statsValues[i] > 0) {
+    runningStreak += 1;
+    if (runningStreak > longestStreak) longestStreak = runningStreak;
+  } else {
+    runningStreak = 0;
+  }
+}
+
+const weekMonthLabels = [];
+let lastMonth = -1;
+for (let week = 0; week < 52; week += 1) {
+  const date = new Date(startDate);
+  date.setDate(startDate.getDate() + week * 7);
+  const month = date.getMonth();
+  weekMonthLabels.push(month !== lastMonth ? months[month] : "");
+  lastMonth = month;
+}
+const intensityClass = (value) => {
+  if (value <= 0) return "bg-[#0b1211]";
+  if (value <= 2) return "bg-[#0f3b34]";
+  if (value <= 4) return "bg-[#146055]";
+  if (value <= 6) return "bg-[#1f8f79]";
+  return "bg-[#2ad1b7]";
+};
 ---
 
-<script>
-  import { onCleanup, onMount } from "solid-js";
-  import { formatTimeForShanghai } from "../lib/helpers";
-
-  let interval: ReturnType<typeof setInterval>;
-
-  function updateClock() {
-    const timeDisplay = document.getElementById("timeDisplay");
-    const now = new Date();
-
-    if (timeDisplay) {
-      timeDisplay.textContent = formatTimeForShanghai(now);
-      timeDisplay.setAttribute("datetime", now.toISOString());
-    }
-  }
-
-  onMount(() => {
-    interval = setInterval(updateClock, 1000);
-  });
-
-  onCleanup(() => {
-    clearInterval(interval);
-  });
-</script>
-
-<FlipCard colSpan="lg:col-span-2" rowSpan="md:row-span-2" color="bg-[#050505]" borderColor="border-amber-500" class="h-[180px] lg:h-full">
+<FlipCard colSpan="md:col-span-2 lg:col-span-3" rowSpan="md:row-span-2" color="bg-[#050505]" borderColor="border-[#2ad1b7]" padding="p-4" class="h-[180px] lg:h-full">
   <div slot="front" class="w-full h-full flex flex-col justify-between">
-      <h2 class="text-xl font-bold font-sans">Time Zone</h2>
-      <div class="w-full h-[calc(100%-28px)] flex justify-center items-center">
-        <time
-          class="text-3xl xl:text-4xl xl:whitespace-nowrap font-sans font-bold tracking-widest"     datetime=""     id="timeDisplay"
-        >
-          {formatTimeForShanghai(getCurrentTimeInShanghai())}
-        </time>
+    <div class="flex items-start justify-between">
+      <div class="flex flex-col">
+        <h2 class="text-xl font-bold font-sans">Worktime</h2>
       </div>
+      <div class="text-right">
+        <p class="text-xs text-gray-500 font-sans">Yesterday</p>
+        <p class="text-sm font-bold text-[#2ad1b7] font-sans">{formatHours(yesterdayHours)}h</p>
+      </div>
+    </div>
+
+    <div class="mt-2 flex items-start gap-3 worktime-grid">
+      <div class="flex gap-2">
+        <div class="worktime-labels text-[8px] sm:text-[9px] md:text-[10px] text-gray-500 font-sans">
+          <span class="row-start-2">Mon</span>
+          <span class="row-start-4">Wed</span>
+          <span class="row-start-6">Fri</span>
+        </div>
+        <div class="flex flex-col">
+          <div class="worktime-months leading-none">
+            {weekMonthLabels.map((label) => (
+              <div class="worktime-month text-[8px] sm:text-[9px] md:text-[10px] text-gray-500 font-sans whitespace-nowrap">
+                {label}
+              </div>
+            ))}
+          </div>
+          <div class="worktime-cells">
+            {dayEntries.map((entry) => (
+              <div
+                class={`worktime-cell rounded-[2px] ring-1 ring-[#0e1f1b] ${entry.isFuture ? "bg-transparent opacity-40" : intensityClass(entry.value ?? 0)}`}
+                title={`${formatDate(entry.date)} - ${entry.isFuture ? "no data" : `${formatHours(entry.value ?? 0)}h`}`}
+                aria-label={`${formatDate(entry.date)} ${entry.isFuture ? "no data" : `${formatHours(entry.value ?? 0)} hours`}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div class="worktime-legend text-[9px] text-gray-500 font-sans mt-[2px]">
+        <span>More</span>
+        <span class="worktime-cell rounded-[2px] bg-[#2ad1b7] ring-1 ring-[#0e1f1b]"></span>
+        <span class="worktime-cell rounded-[2px] bg-[#1f8f79] ring-1 ring-[#0e1f1b]"></span>
+        <span class="worktime-cell rounded-[2px] bg-[#146055] ring-1 ring-[#0e1f1b]"></span>
+        <span class="worktime-cell rounded-[2px] bg-[#0f3b34] ring-1 ring-[#0e1f1b]"></span>
+        <span class="worktime-cell rounded-[2px] bg-[#0b1211] ring-1 ring-[#0e1f1b]"></span>
+        <span>Less</span>
+      </div>
+    </div>
   </div>
-  
-  <div slot="back" class="w-full h-full flex flex-col justify-center items-center">
-      <p class="text-gray-400 text-xs mb-1 font-sans">Location</p>
-      <p class="text-lg font-bold font-sans">China, Guangzhou</p>
-      <p class="text-xs text-gray-500 mt-2 font-sans">UTC+8 CST</p>
+
+  <div slot="back" class="w-full h-full flex flex-col justify-between">
+    <div class="flex flex-col">
+      <h2 class="text-xl font-bold font-sans">Worktime Stats</h2>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2 text-sm font-sans">
+      <div class="flex flex-col">
+        <span class="text-xs text-gray-500">Total</span>
+        <span class="font-bold">{formatHours(totalHours)}h</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs text-gray-500">Avg / day</span>
+        <span class="font-bold">{formatHours(averageHours)}h</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs text-gray-500">Last 7 avg</span>
+        <span class="font-bold">{formatHours(last7Average)}h</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs text-gray-500">Current streak</span>
+        <span class="font-bold">{currentStreak}d</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs text-gray-500">Longest streak</span>
+        <span class="font-bold">{longestStreak}d</span>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xs text-gray-500">Best day</span>
+        <span class="font-bold">{bestDateLabel}</span>
+      </div>
+    </div>
   </div>
 </FlipCard>
+
+<style>
+  .worktime-grid {
+    --cell: clamp(8px, 0.8vw, 10px);
+    --gap-y: clamp(2px, 0.25vw, 3px);
+    --gap-x: clamp(3px, 0.35vw, 4px);
+  }
+  .worktime-labels {
+    display: grid;
+    grid-template-rows: repeat(7, var(--cell));
+    row-gap: var(--gap-y);
+    padding-right: 2px;
+  }
+  .worktime-months {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: var(--cell);
+    column-gap: var(--gap-x);
+  }
+  .worktime-month {
+    width: var(--cell);
+    height: 12px;
+  }
+  .worktime-cells {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(7, var(--cell));
+    grid-auto-columns: var(--cell);
+    column-gap: var(--gap-x);
+    row-gap: var(--gap-y);
+  }
+  .worktime-cell {
+    width: var(--cell);
+    height: var(--cell);
+  }
+  .worktime-legend {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-y);
+    height: calc(var(--cell) * 7 + var(--gap-y) * 6);
+    justify-content: space-between;
+  }
+</style>
