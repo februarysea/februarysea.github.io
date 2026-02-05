@@ -11,6 +11,14 @@ import Globe from "../components/Globe";
 import { getCollection } from "astro:content";
 import { formatDate } from "../lib/helpers";
 
+const friends = [
+  {
+    name: "Shiqi Wang",
+    url: "https://shiqi-wang.com/",
+    role: "GeoAI Researcher",
+  },
+];
+
 const posts = (await getCollection("blog"))?.sort(
   (blogEntryA, blogEntryB) =>
     (blogEntryB.data.pubDate || new Date()).getTime() -
@@ -53,21 +61,31 @@ const posts = (await getCollection("blog"))?.sort(
     <Now />
     <FlipCard
       colSpan="md:col-span-1"
-      href="travel"
       rowSpan="md:row-span-1"
-      padding="p-0"
       color="bg-[#050505]"
       borderColor="border-orange-500"
     >
-      <div slot="front" class="h-full w-full relative z-10 p-6">
-        <div class="h-full w-full absolute inset-0 -z-10">
-          <Globe client:load />
+      <div
+        slot="front"
+        class="h-full w-full p-6"
+        id="friend-card"
+        data-friends={JSON.stringify(friends)}
+      >
+        <div class="h-full w-full flex flex-col items-center justify-center text-center gap-2 font-sans">
+          <span class="text-lg font-bold">Friend Links</span>
         </div>
-        <p class="text-white font-bold font-sans">Countries I visited</p>
       </div>
-      <div slot="back" class="h-full w-full flex flex-col justify-center items-center p-6">
-        <h2 class="text-xl font-bold font-sans">20+</h2>
-        <p class="text-sm text-gray-400 font-sans">Countries Visited</p>
+      <div slot="back" class="h-full w-full p-6">
+        <a
+          href="https://shiqi-wang.com/"
+          target="_blank"
+          rel="noreferrer"
+          class="h-full w-full flex flex-col items-center justify-center text-center gap-2 font-sans hover:text-orange-400 transition-colors"
+          id="friend-back-link"
+        >
+          <span class="text-sm font-bold" id="friend-back-name">Shiqi Wang</span>
+          <span class="text-xs text-gray-400" id="friend-back-role">GeoAI Researcher</span>
+        </a>
       </div>
     </FlipCard>
     <FlipCard
@@ -97,3 +115,55 @@ const posts = (await getCollection("blog"))?.sort(
     </FlipCard>
   </main>
 </Layout>
+
+<script>
+  const card = document.getElementById("friend-card");
+  if (card) {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const data = card.getAttribute("data-friends");
+    const friends = data ? JSON.parse(data) : [];
+    if (!prefersReduced && friends.length > 1) {
+      const container = card.closest(".flip-card-container");
+      const inner = container ? container.querySelector(".flip-card-inner") : null;
+      const backLinkEl = document.getElementById("friend-back-link");
+      const backNameEl = document.getElementById("friend-back-name");
+      const backRoleEl = document.getElementById("friend-back-role");
+      let index = 0;
+      const applyFriend = (item) => {
+        if (!backLinkEl || !backNameEl || !backRoleEl) return;
+        backLinkEl.href = item.url;
+        backNameEl.textContent = item.name;
+        backRoleEl.textContent = item.role;
+      };
+      const rotate = () => {
+        if (!backLinkEl) return;
+        backLinkEl.classList.add("friend-fade");
+        window.setTimeout(() => {
+          index = (index + 1) % friends.length;
+          applyFriend(friends[index]);
+          backLinkEl.classList.remove("friend-fade");
+        }, 220);
+      };
+      if (inner) {
+        let wasFlipped = inner.classList.contains("flipped");
+        const observer = new MutationObserver(() => {
+          const isFlipped = inner.classList.contains("flipped");
+          if (isFlipped && !wasFlipped) rotate();
+          wasFlipped = isFlipped;
+        });
+        observer.observe(inner, { attributes: true, attributeFilter: ["class"] });
+      }
+    }
+  }
+</script>
+
+<style>
+  .friend-fade {
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+  #friend-back-link {
+    transition: opacity 200ms ease, transform 200ms ease;
+  }
+</style>
