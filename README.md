@@ -117,10 +117,17 @@ MBP manual upload example:
 
 ```bash
 cd /Users/februarysea/Documents/februarysea.github.io
+pnpm log:worktime:auto --device mbp --yesterday
 git pull --rebase origin master
 git add src/data/worktime.devices.mbp.json
 git commit -m "chore(worktime): update mbp logs"
 git push origin HEAD
+```
+
+ActivityWatch connection test:
+
+```bash
+pnpm log:worktime:test --yesterday
 ```
 
 macOS daily automation (`launchd`) example:
