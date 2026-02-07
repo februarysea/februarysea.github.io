@@ -96,8 +96,8 @@ pnpm log:worktime:auto --device macmini --yesterday
 # Same as above, then commit + pull --rebase + push
 pnpm log:worktime:auto --device macmini --yesterday --commit --push --rebase
 
-# MacBook Pro example
-pnpm log:worktime:auto --device mbp --yesterday --commit --push --rebase
+# MacBook Pro local auto-log (no auto upload)
+pnpm log:worktime:auto --device mbp --yesterday
 
 # Show missing dates between the first logged day and today
 pnpm log:worktime 9 --backfill --out src/data/worktime.devices.macmini.json
@@ -111,6 +111,17 @@ Notes:
 - Use `--rebase` before `--push` when multiple machines commit to `master`.
 - `--backfill` only reports missing dates; it does not fill them.
 - `deploy.yml` still handles site deployment after pushes to `master`.
+- Recommended workflow: macmini auto-upload, MBP local auto-log + manual upload.
+
+MBP manual upload example:
+
+```bash
+cd /Users/februarysea/Documents/februarysea.github.io
+git pull --rebase origin master
+git add src/data/worktime.devices.mbp.json
+git commit -m "chore(worktime): update mbp logs"
+git push origin HEAD
+```
 
 macOS daily automation (`launchd`) example:
 
@@ -156,4 +167,7 @@ launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/io.februarysea.worktime-
 launchctl enable gui/$(id -u)/io.februarysea.worktime-auto
 ```
 
-For MacBook Pro, keep everything the same and only change `--device mbp`.
+For MacBook Pro, keep everything the same, change `--device mbp`, and remove:
+- `--commit`
+- `--push`
+- `--rebase`
