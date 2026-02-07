@@ -5,6 +5,8 @@ on:
   # 每次推送到 main 分支时触发
   push:
     branches: [ master ]
+    paths-ignore:
+      - "src/data/worktime.devices.*.json"
   # 允许在 GitHub Actions 页面手动触发
   workflow_dispatch:
 

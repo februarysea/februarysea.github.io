@@ -10,7 +10,9 @@
     "astro": "astro",
     "eslint": "eslint 'src/**/*.{js,astro}'",
     "check": "astro check",
-    "log:worktime": "node scripts/log-worktime.mjs"
+    "log:worktime": "node scripts/log-worktime.mjs",
+    "log:worktime:auto": "node scripts/log-worktime-auto.mjs",
+    "log:worktime:merge": "node scripts/merge-worktime-devices.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
