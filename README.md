@@ -99,6 +99,12 @@ pnpm log:worktime:auto --device macmini --yesterday --commit --push --rebase
 # MacBook Pro local auto-log (no auto upload)
 pnpm log:worktime:auto --device mbp --yesterday
 
+# MacBook Pro one-line: auto-fetch + auto-commit + auto-push (today)
+pnpm log:worktime:mbp
+
+# MacBook Pro one-line: auto-fetch + auto-commit + auto-push (yesterday)
+pnpm log:worktime:mbp:yesterday
+
 # Show missing dates between the first logged day and today
 pnpm log:worktime 9 --backfill --out src/data/worktime.devices.macmini.json
 
@@ -111,7 +117,7 @@ Notes:
 - Use `--rebase` before `--push` when multiple machines commit to `master`.
 - `--backfill` only reports missing dates; it does not fill them.
 - `deploy.yml` still handles site deployment after pushes to `master`.
-- Recommended workflow: macmini auto-upload, MBP local auto-log + manual upload.
+- Recommended workflow: macmini midnight auto-upload, MBP end-of-day one-line upload (`pnpm log:worktime:mbp`).
 
 MBP manual upload example:
 

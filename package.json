@@ -12,6 +12,8 @@
     "check": "astro check",
     "log:worktime": "node scripts/log-worktime.mjs",
     "log:worktime:auto": "node scripts/log-worktime-auto.mjs",
+    "log:worktime:mbp": "node scripts/log-worktime-auto.mjs --device mbp --commit --push --rebase",
+    "log:worktime:mbp:yesterday": "node scripts/log-worktime-auto.mjs --device mbp --yesterday --commit --push --rebase",
     "log:worktime:merge": "node scripts/merge-worktime-devices.mjs",
     "log:worktime:test": "node scripts/test-activitywatch.mjs"
   },
