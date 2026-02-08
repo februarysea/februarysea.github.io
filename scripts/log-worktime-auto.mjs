@@ -15,8 +15,8 @@ const getFlagValue = (flag) => {
 };
 
 const usage = () => {
-  console.log("Usage: pnpm log:worktime:auto [--device name] [--date YYYY-MM-DD] [--yesterday] [--dry-run] [--backfill] [--commit] [--push] [--rebase] [--server URL]");
-  console.log("Example: pnpm log:worktime:auto --device macmini --yesterday --commit --push --rebase");
+  console.log("Usage: pnpm log:worktime:auto [--date YYYY-MM-DD] [--yesterday] [--dry-run] [--backfill] [--commit] [--push] [--rebase] [--server URL]");
+  console.log("Example: pnpm log:worktime:auto --yesterday --commit --push --rebase");
 };
 
 if (hasFlag("-h") || hasFlag("--help")) {
@@ -62,20 +62,6 @@ const dayEnd = new Date(dayStart);
 dayEnd.setDate(dayEnd.getDate() + 1);
 
 const server = (getFlagValue("--server") || process.env.ACTIVITYWATCH_URL || "http://localhost:5600").replace(/\/+$/, "");
-const normalizeDevice = (value) => (
-  String(value)
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-);
-const rawDevice = getFlagValue("--device") || process.env.WORKTIME_DEVICE || os.hostname();
-const device = normalizeDevice(rawDevice);
-if (!device) {
-  console.error("Invalid device name. Use --device (letters, numbers, dot, dash, underscore).");
-  process.exit(1);
-}
-const outputRelativePath = `src/data/worktime.devices.${device}.json`;
 
 const getJson = async (url) => {
   const response = await fetch(url);
@@ -154,15 +140,14 @@ const roundedHours = Math.round(rawHours * 10) / 10;
 
 console.log(`ActivityWatch source: ${sourceLabel}`);
 console.log(`Detected ${rawHours.toFixed(2)}h on ${targetDate}; logging ${roundedHours}h.`);
-console.log(`Device: ${device} -> ${outputRelativePath}`);
 
 if (hasFlag("--dry-run")) {
-  console.log("Dry run enabled: no data file was modified.");
+  console.log("Dry run enabled: worktime.json was not modified.");
   process.exit(0);
 }
 
 const logScriptPath = path.resolve(__dirname, "./log-worktime.mjs");
-const childArgs = [logScriptPath, String(roundedHours), "--date", targetDate, "--out", outputRelativePath];
+const childArgs = [logScriptPath, String(roundedHours), "--date", targetDate];
 for (const forwardFlag of ["--backfill", "--commit", "--push", "--rebase"]) {
   if (hasFlag(forwardFlag)) childArgs.push(forwardFlag);
 }

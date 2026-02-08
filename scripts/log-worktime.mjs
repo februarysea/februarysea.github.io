@@ -16,7 +16,7 @@ const getFlagValue = (flag) => {
 };
 const positionalArgs = [];
 {
-  const flagsWithValues = new Set(["--hours", "--date", "--out"]);
+  const flagsWithValues = new Set(["--hours", "--date"]);
   for (let i = 0; i < args.length; i += 1) {
     const token = args[i];
     if (token.startsWith("-")) {
@@ -28,7 +28,7 @@ const positionalArgs = [];
 }
 
 const usage = () => {
-  console.log("Usage: pnpm log:worktime <hours> [--date YYYY-MM-DD] [--yesterday] [--backfill] [--commit] [--push] [--rebase] [--out path]");
+  console.log("Usage: pnpm log:worktime <hours> [--date YYYY-MM-DD] [--yesterday] [--backfill] [--commit] [--push] [--rebase]");
   console.log("Example: pnpm log:worktime 9 --yesterday --commit --push --rebase");
 };
 
@@ -58,7 +58,6 @@ const parseKeyDate = (key) => {
 };
 
 const dateArg = getFlagValue("--date");
-const outArg = getFlagValue("--out");
 if (dateArg && hasFlag("--yesterday")) {
   console.error("Use either --date or --yesterday, not both.");
   process.exit(1);
@@ -68,14 +67,8 @@ if (dateArg && !/^\d{4}-\d{2}-\d{2}$/.test(dateArg)) {
   process.exit(1);
 }
 
-const dataPath = outArg
-  ? (path.isAbsolute(outArg) ? outArg : path.resolve(projectRoot, outArg))
-  : defaultDataPath;
+const dataPath = defaultDataPath;
 const dataPathRelative = path.relative(projectRoot, dataPath);
-if (dataPathRelative.startsWith("..")) {
-  console.error("Output path must be inside this repository.");
-  process.exit(1);
-}
 
 const today = new Date();
 today.setHours(12, 0, 0, 0);
