@@ -117,6 +117,7 @@ Notes:
 - Use `--rebase` before `--push` when multiple machines commit to `master`.
 - `--backfill` only reports missing dates; it does not fill them.
 - `deploy.yml` still handles site deployment after pushes to `master`.
+- `deploy.yml` also runs daily (UTC) so the Worktime wall date window advances even without code changes.
 - Recommended workflow: macmini midnight auto-upload, MBP end-of-day one-line upload (`pnpm log:worktime:mbp`).
 
 MBP manual upload example:

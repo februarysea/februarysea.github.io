@@ -7,6 +7,13 @@ on:
     branches: [ master ]
     paths-ignore:
       - "src/data/worktime.devices.*.json"
+  # merge workflow 完成后触发，确保 actions bot 的合并提交也能部署
+  workflow_run:
+    workflows: ["Merge Worktime Device Logs"]
+    types: [completed]
+  # 每天定时部署一次，保证静态日期（today/yesterday）向前推进
+  schedule:
+    - cron: "10 6 * * *"
   # 允许在 GitHub Actions 页面手动触发
   workflow_dispatch:
 
@@ -23,6 +30,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

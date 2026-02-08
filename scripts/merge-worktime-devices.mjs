@@ -20,27 +20,44 @@ if (!deviceFiles.length) {
   process.exit(0);
 }
 
-const merged = {};
-
-for (const fileName of deviceFiles) {
-  const filePath = path.resolve(dataDir, fileName);
+const readJsonFile = (filePath) => {
+  if (!fs.existsSync(filePath)) return {};
   const raw = fs.readFileSync(filePath, "utf-8").trim();
-  if (!raw) continue;
-
-  let json;
+  if (!raw) return {};
   try {
-    json = JSON.parse(raw);
+    return JSON.parse(raw);
   } catch (error) {
     console.error(`Invalid JSON in ${path.relative(projectRoot, filePath)}`);
     process.exit(1);
   }
+};
+
+const baseLog = readJsonFile(outputPath);
+const merged = {};
+const deviceTotals = {};
+
+for (const [dateKey, hours] of Object.entries(baseLog)) {
+  if (!isDateKey(dateKey)) continue;
+  const numericHours = Number(hours);
+  if (!Number.isFinite(numericHours) || numericHours < 0) continue;
+  merged[dateKey] = normalizeHours(numericHours);
+}
+
+for (const fileName of deviceFiles) {
+  const filePath = path.resolve(dataDir, fileName);
+  const json = readJsonFile(filePath);
 
   for (const [dateKey, hours] of Object.entries(json)) {
     if (!isDateKey(dateKey)) continue;
     const numericHours = Number(hours);
     if (!Number.isFinite(numericHours) || numericHours < 0) continue;
-    merged[dateKey] = normalizeHours((merged[dateKey] || 0) + numericHours);
+    deviceTotals[dateKey] = normalizeHours((deviceTotals[dateKey] || 0) + numericHours);
   }
+}
+
+// For days present in device logs, aggregated device totals are source of truth.
+for (const [dateKey, value] of Object.entries(deviceTotals)) {
+  merged[dateKey] = normalizeHours(value);
 }
 
 const sorted = Object.fromEntries(
