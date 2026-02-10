@@ -15,8 +15,8 @@ const getFlagValue = (flag) => {
 };
 
 const usage = () => {
-  console.log("Usage: pnpm log:worktime:auto [--date YYYY-MM-DD] [--yesterday] [--dry-run] [--backfill] [--commit] [--push] [--rebase] [--server URL]");
-  console.log("Example: pnpm log:worktime:auto --yesterday --commit --push --rebase");
+  console.log("Usage: pnpm log:worktime:auto [--date YYYY-MM-DD] [--yesterday] [--dry-run] [--add] [--backfill] [--commit] [--push] [--rebase] [--server URL]");
+  console.log("Example: pnpm log:worktime:auto --add --commit --push --rebase");
 };
 
 if (hasFlag("-h") || hasFlag("--help")) {
@@ -148,7 +148,7 @@ if (hasFlag("--dry-run")) {
 
 const logScriptPath = path.resolve(__dirname, "./log-worktime.mjs");
 const childArgs = [logScriptPath, String(roundedHours), "--date", targetDate];
-for (const forwardFlag of ["--backfill", "--commit", "--push", "--rebase"]) {
+for (const forwardFlag of ["--add", "--backfill", "--commit", "--push", "--rebase"]) {
   if (hasFlag(forwardFlag)) childArgs.push(forwardFlag);
 }
 

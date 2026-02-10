@@ -28,8 +28,8 @@ const positionalArgs = [];
 }
 
 const usage = () => {
-  console.log("Usage: pnpm log:worktime <hours> [--date YYYY-MM-DD] [--yesterday] [--backfill] [--commit] [--push] [--rebase]");
-  console.log("Example: pnpm log:worktime 9 --yesterday --commit --push --rebase");
+  console.log("Usage: pnpm log:worktime <hours> [--date YYYY-MM-DD] [--yesterday] [--add] [--backfill] [--commit] [--push] [--rebase]");
+  console.log("Example: pnpm log:worktime 2.5 --date 2026-02-09 --add --commit --push --rebase");
 };
 
 if (hasFlag("-h") || hasFlag("--help")) {
@@ -80,6 +80,7 @@ const getOffsetDate = (offsetDays) => {
 
 const targetDate = dateArg ?? (hasFlag("--yesterday") ? getOffsetDate(-1) : formatDate(today));
 const roundedHours = Math.round(rawHours * 10) / 10;
+const shouldAdd = hasFlag("--add");
 
 let data = {};
 if (fs.existsSync(dataPath)) {
@@ -87,14 +88,25 @@ if (fs.existsSync(dataPath)) {
   data = raw.trim().length ? JSON.parse(raw) : {};
 }
 
-data[targetDate] = roundedHours;
+const existingHoursRaw = Number(data[targetDate]);
+const existingHours = Number.isFinite(existingHoursRaw) ? existingHoursRaw : 0;
+const finalHours = shouldAdd
+  ? Math.round((existingHours + roundedHours) * 10) / 10
+  : roundedHours;
+
+data[targetDate] = finalHours;
 const sorted = Object.fromEntries(
   Object.entries(data).sort(([a], [b]) => a.localeCompare(b))
 );
 
 fs.writeFileSync(dataPath, JSON.stringify(sorted, null, 2) + "\n");
 
-console.log(`Logged ${roundedHours}h for ${targetDate}.`);
+if (shouldAdd) {
+  console.log(`Logged +${roundedHours}h for ${targetDate}.`);
+  console.log(`Day total: ${existingHours}h -> ${finalHours}h.`);
+} else {
+  console.log(`Logged ${finalHours}h for ${targetDate}.`);
+}
 console.log(`Updated: ${dataPathRelative}`);
 
 if (hasFlag("--backfill")) {
@@ -125,7 +137,10 @@ if (hasFlag("--commit")) {
       cwd: projectRoot,
       stdio: "inherit",
     });
-    execSync(`git commit -m "Log worktime ${targetDate}: ${roundedHours}h"`, {
+    const commitHours = shouldAdd
+      ? `+${roundedHours}h => ${finalHours}h`
+      : `${finalHours}h`;
+    execSync(`git commit -m "Log worktime ${targetDate}: ${commitHours}"`, {
       cwd: projectRoot,
       stdio: "inherit",
     });
@@ -142,7 +157,7 @@ if (hasFlag("--push")) {
         cwd: projectRoot,
         encoding: "utf-8",
       }).trim();
-      execSync(`git pull --rebase origin ${branch}`, {
+      execSync(`git pull --rebase --autostash origin ${branch}`, {
         cwd: projectRoot,
         stdio: "inherit",
       });

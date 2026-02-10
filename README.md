@@ -91,10 +91,19 @@ pnpm log:worktime 9 --yesterday
 pnpm log:worktime 9 --date 2026-02-07
 
 # Auto-read ActivityWatch and write worktime.json
-pnpm log:worktime:auto --yesterday
+pnpm log:worktime:auto
+
+# Auto-read ActivityWatch and add to an existing day total
+pnpm log:worktime:auto --add
 
 # Same as above, then commit + pull --rebase + push
-pnpm log:worktime:auto --yesterday --commit --push --rebase
+pnpm log:worktime:auto --add --commit --push --rebase
+
+# MBP one-liner: read today from ActivityWatch, add to existing total, upload
+pnpm log:worktime:mbp
+
+# macmini one-liner: same behavior as MBP (today + add + upload)
+pnpm log:worktime:macmini
 
 # Show missing dates between the first logged day and today
 pnpm log:worktime 9 --backfill
@@ -105,9 +114,11 @@ pnpm log:worktime:test --yesterday
 
 Notes:
 - `--backfill` only reports missing dates; it does not fill them.
+- `--add` accumulates hours onto the existing value for that day.
 - `--rebase` is recommended before `--push`.
 - `deploy.yml` also runs daily (UTC) so the Worktime wall date window advances even without code changes.
-- Recommended workflow: macmini midnight auto-upload only.
+- If your schedule is `00:00` and you want the previous day (for example run at `2026-02-11 00:00` but write `2026-02-10`), use `--yesterday`.
+- Recommended workflow: both MBP and macmini run the same add-mode command (`pnpm log:worktime:mbp` / `pnpm log:worktime:macmini`).
 
 macOS daily automation (`launchd`) example (macmini):
 
@@ -123,7 +134,7 @@ cat > ~/Library/LaunchAgents/io.februarysea.worktime-auto.plist <<'PLIST'
   <array>
     <string>/opt/homebrew/bin/node</string>
     <string>/Users/februarysea/Documents/februarysea.github.io/scripts/log-worktime-auto.mjs</string>
-    <string>--yesterday</string>
+    <string>--add</string>
     <string>--commit</string>
     <string>--push</string>
     <string>--rebase</string>
@@ -133,9 +144,9 @@ cat > ~/Library/LaunchAgents/io.februarysea.worktime-auto.plist <<'PLIST'
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key>
-    <integer>0</integer>
+    <integer>23</integer>
     <key>Minute</key>
-    <integer>0</integer>
+    <integer>59</integer>
   </dict>
   <key>StandardOutPath</key>
   <string>/tmp/io.februarysea.worktime-auto.log</string>

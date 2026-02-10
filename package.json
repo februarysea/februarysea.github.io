@@ -12,6 +12,8 @@
     "check": "astro check",
     "log:worktime": "node scripts/log-worktime.mjs",
     "log:worktime:auto": "node scripts/log-worktime-auto.mjs",
+    "log:worktime:mbp": "node scripts/log-worktime-auto.mjs --add --commit --push --rebase",
+    "log:worktime:macmini": "node scripts/log-worktime-auto.mjs --add --commit --push --rebase",
     "log:worktime:test": "node scripts/test-activitywatch.mjs"
   },
   "dependencies": {
