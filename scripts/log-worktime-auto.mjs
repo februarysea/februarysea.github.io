@@ -15,8 +15,9 @@ const getFlagValue = (flag) => {
 };
 
 const usage = () => {
-  console.log("Usage: pnpm log:worktime:auto [--date YYYY-MM-DD] [--yesterday] [--dry-run] [--add] [--backfill] [--commit] [--push] [--rebase] [--server URL]");
-  console.log("Example: pnpm log:worktime:auto --add --commit --push --rebase");
+  console.log("Usage: node scripts/log-worktime-auto.mjs [--date YYYY-MM-DD] [--yesterday] [--dry-run] [--add] [--backfill] [--commit] [--push] [--rebase] [--server URL]");
+  console.log("Example: pnpm log:worktime:macmini");
+  console.log("Example: pnpm log:worktime:mbp");
 };
 
 if (hasFlag("-h") || hasFlag("--help")) {

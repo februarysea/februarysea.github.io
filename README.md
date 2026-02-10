@@ -90,20 +90,14 @@ pnpm log:worktime 9 --yesterday
 # Log a specific date
 pnpm log:worktime 9 --date 2026-02-07
 
-# Auto-read ActivityWatch and write worktime.json
-pnpm log:worktime:auto
+# Read today from ActivityWatch, add to existing total, then upload (macmini profile)
+pnpm log:worktime:macmini
 
-# Auto-read ActivityWatch and add to an existing day total
-pnpm log:worktime:auto --add
-
-# Same as above, then commit + pull --rebase + push
-pnpm log:worktime:auto --add --commit --push --rebase
-
-# MBP one-liner: read today from ActivityWatch, add to existing total, upload
+# Read today from ActivityWatch, add to existing total, then upload (MBP profile)
 pnpm log:worktime:mbp
 
-# macmini one-liner: same behavior as MBP (today + add + upload)
-pnpm log:worktime:macmini
+# Custom flags (example: dry run, no write)
+node scripts/log-worktime-auto.mjs --add --dry-run
 
 # Show missing dates between the first logged day and today
 pnpm log:worktime 9 --backfill
