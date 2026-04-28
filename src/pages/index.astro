@@ -1,15 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Card from "../components/Card/index.astro";
 import FlipCard from "../components/FlipCard.astro";
 import IntroCard from "../components/IntroCard.astro";
 import ContactsCard from "../components/ContactsCard.astro";
 import TimeZone from "../components/TimeZoneCard.astro";
 import AboutMe from "../components/AboutMe.astro";
 import Now from "../components/Now.astro";
-import Globe from "../components/Globe";
-import { getCollection } from "astro:content";
-import { formatDate } from "../lib/helpers";
 
 const friends = [
   {
@@ -18,12 +14,6 @@ const friends = [
     role: "GeoAI Researcher",
   },
 ];
-
-const posts = (await getCollection("blog"))?.sort(
-  (blogEntryA, blogEntryB) =>
-    (blogEntryB.data.pubDate || new Date()).getTime() -
-    (blogEntryA.data.pubDate || new Date()).getTime()
-);
 ---
 
 <script>
@@ -117,19 +107,25 @@ const posts = (await getCollection("blog"))?.sort(
 </Layout>
 
 <script>
+  type Friend = {
+    name: string;
+    url: string;
+    role: string;
+  };
+
   const card = document.getElementById("friend-card");
   if (card) {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const data = card.getAttribute("data-friends");
-    const friends = data ? JSON.parse(data) : [];
+    const friends = (data ? JSON.parse(data) : []) as Friend[];
     if (!prefersReduced && friends.length > 1) {
       const container = card.closest(".flip-card-container");
       const inner = container ? container.querySelector(".flip-card-inner") : null;
-      const backLinkEl = document.getElementById("friend-back-link");
+      const backLinkEl = document.getElementById("friend-back-link") as HTMLAnchorElement | null;
       const backNameEl = document.getElementById("friend-back-name");
       const backRoleEl = document.getElementById("friend-back-role");
       let index = 0;
-      const applyFriend = (item) => {
+      const applyFriend = (item: Friend) => {
         if (!backLinkEl || !backNameEl || !backRoleEl) return;
         backLinkEl.href = item.url;
         backNameEl.textContent = item.name;

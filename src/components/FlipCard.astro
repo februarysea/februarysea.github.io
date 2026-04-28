@@ -9,7 +9,7 @@ interface Props {
   class?: string;
 }
 
-const { colSpan, rowSpan, href, padding = "p-6", color = "bg-darkslate-500", borderColor = "border-darkslate-100", class: className } = Astro.props;
+const { colSpan, rowSpan, padding = "p-6", color = "bg-darkslate-500", borderColor = "border-darkslate-100", class: className } = Astro.props;
 ---
 
 <div class={`flip-card-container group perspective-1000 w-full h-full ${colSpan || "md:col-span-1"} ${rowSpan || "md:row-span-1"} ${className}`}>
@@ -35,14 +35,13 @@ const { colSpan, rowSpan, href, padding = "p-6", color = "bg-darkslate-500", bor
 
     let isAutoFlipped = false;
     let isHovering = false;
-    let autoFlipTimeout: number | undefined;
 
     // Function to schedule the next auto flip
     const scheduleAutoFlip = () => {
       // Slower random interval: 10s to 25s
       const nextInterval = Math.random() * 15000 + 10000;
       
-      autoFlipTimeout = setTimeout(() => {
+      setTimeout(() => {
         if (!isHovering) {
             // Perform auto flip (show back)
             isAutoFlipped = true;
@@ -65,7 +64,7 @@ const { colSpan, rowSpan, href, padding = "p-6", color = "bg-darkslate-500", bor
             // If hovering, skip this cycle but schedule next one
             scheduleAutoFlip();
         }
-      }, nextInterval) as unknown as number;
+      }, nextInterval);
     };
 
     // Initial random start delay

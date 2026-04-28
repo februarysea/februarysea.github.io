@@ -76,7 +76,12 @@ or
 
 ## Worktime Logging (Optional)
 
-Worktime data lives in `src/data/worktime.json` and is rendered in the Worktime card.
+Legacy worktime totals live in `src/data/worktime.json`. New device-level data lives in:
+
+- `src/data/worktime-sources/macmini.json`
+- `src/data/worktime-sources/mbp.json`
+
+The Worktime card treats the legacy file as the macmini fallback, then adds MBP data when available. If `macmini.json` has a date, it overrides the legacy macmini value for that date.
 
 Common commands:
 
@@ -90,14 +95,17 @@ pnpm log:worktime 9 --yesterday
 # Log a specific date
 pnpm log:worktime 9 --date 2026-02-07
 
-# Read today from ActivityWatch, add to existing total, then upload (macmini profile)
+# Manual device log
+pnpm log:worktime 2.5 --date 2026-04-28 --device mbp
+
+# Read today from ActivityWatch, overwrite macmini's device value, then upload
 pnpm log:worktime:macmini
 
-# Read today from ActivityWatch, add to existing total, then upload (MBP profile)
+# On MBP, check 09:00-23:59, sync once per day, and backfill the last 7 completed days
 pnpm log:worktime:mbp
 
 # Custom flags (example: dry run, no write)
-node scripts/log-worktime-auto.mjs --add --dry-run
+node scripts/log-worktime-auto.mjs --device mbp --yesterday --lookback-days 7 --force --dry-run
 
 # Show missing dates between the first logged day and today
 pnpm log:worktime 9 --backfill
@@ -108,11 +116,13 @@ pnpm log:worktime:test --yesterday
 
 Notes:
 - `--backfill` only reports missing dates; it does not fill them.
-- `--add` accumulates hours onto the existing value for that day.
+- `--device NAME` writes `src/data/worktime-sources/NAME.json`.
+- Device logs overwrite the device's value for a date by default. This keeps repeated syncs idempotent.
+- `--add` is still available for manual legacy use, but it is not recommended for multi-device automation.
 - `--rebase` is recommended before `--push`.
-- `deploy.yml` also runs daily (UTC) so the Worktime wall date window advances even without code changes.
+- `deploy.yml` also runs daily at 00:10 Asia/Shanghai so the Worktime wall date window advances even without code changes.
 - If your schedule is `00:00` and you want the previous day (for example run at `2026-02-11 00:00` but write `2026-02-10`), use `--yesterday`.
-- Recommended workflow: both MBP and macmini run the same add-mode command (`pnpm log:worktime:mbp` / `pnpm log:worktime:macmini`).
+- Recommended workflow: macmini runs once per night; MBP runs hourly after 09:00 but only syncs once successfully per day. MBP syncs completed days through yesterday, so it does not publish partial data for the current day.
 
 macOS daily automation (`launchd`) example (macmini):
 
@@ -128,7 +138,8 @@ cat > ~/Library/LaunchAgents/io.februarysea.worktime-auto.plist <<'PLIST'
   <array>
     <string>/opt/homebrew/bin/node</string>
     <string>/Users/februarysea/Documents/februarysea.github.io/scripts/log-worktime-auto.mjs</string>
-    <string>--add</string>
+    <string>--device</string>
+    <string>macmini</string>
     <string>--commit</string>
     <string>--push</string>
     <string>--rebase</string>
@@ -140,7 +151,7 @@ cat > ~/Library/LaunchAgents/io.februarysea.worktime-auto.plist <<'PLIST'
     <key>Hour</key>
     <integer>23</integer>
     <key>Minute</key>
-    <integer>59</integer>
+    <integer>55</integer>
   </dict>
   <key>StandardOutPath</key>
   <string>/tmp/io.februarysea.worktime-auto.log</string>
@@ -153,4 +164,19 @@ PLIST
 launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/io.februarysea.worktime-auto.plist >/dev/null 2>&1 || true
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/io.februarysea.worktime-auto.plist
 launchctl enable gui/$(id -u)/io.februarysea.worktime-auto
+```
+
+MBP automation can use the same script with these extra flags:
+
+```bash
+node scripts/log-worktime-auto.mjs \
+  --device mbp \
+  --yesterday \
+  --lookback-days 7 \
+  --once-per-day \
+  --start-hour 9 \
+  --end-hour 23 \
+  --commit \
+  --push \
+  --rebase
 ```

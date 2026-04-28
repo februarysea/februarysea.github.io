@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { execSync } from "node:child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, "..");
 const defaultDataPath = path.resolve(projectRoot, "src/data/worktime.json");
+const sourceDataDir = path.resolve(projectRoot, "src/data/worktime-sources");
 
 const args = process.argv.slice(2);
 const hasFlag = (flag) => args.includes(flag);
@@ -16,7 +17,7 @@ const getFlagValue = (flag) => {
 };
 const positionalArgs = [];
 {
-  const flagsWithValues = new Set(["--hours", "--date"]);
+  const flagsWithValues = new Set(["--hours", "--date", "--device"]);
   for (let i = 0; i < args.length; i += 1) {
     const token = args[i];
     if (token.startsWith("-")) {
@@ -28,8 +29,8 @@ const positionalArgs = [];
 }
 
 const usage = () => {
-  console.log("Usage: pnpm log:worktime <hours> [--date YYYY-MM-DD] [--yesterday] [--add] [--backfill] [--commit] [--push] [--rebase]");
-  console.log("Example: pnpm log:worktime 2.5 --date 2026-02-09 --add --commit --push --rebase");
+  console.log("Usage: pnpm log:worktime <hours> [--date YYYY-MM-DD] [--yesterday] [--device NAME] [--add] [--backfill] [--dry-run] [--commit] [--push] [--rebase]");
+  console.log("Example: pnpm log:worktime 2.5 --date 2026-02-09 --device mbp --commit --push --rebase");
 };
 
 if (hasFlag("-h") || hasFlag("--help")) {
@@ -57,6 +58,16 @@ const parseKeyDate = (key) => {
   return new Date(year, month - 1, day, 12, 0, 0, 0);
 };
 
+const normalizeDevice = (value) => {
+  if (!value) return null;
+  const device = value.trim().toLowerCase();
+  if (!/^[a-z0-9-]+$/.test(device)) {
+    console.error("Invalid device name. Use lowercase letters, numbers, and hyphens only.");
+    process.exit(1);
+  }
+  return device;
+};
+
 const dateArg = getFlagValue("--date");
 if (dateArg && hasFlag("--yesterday")) {
   console.error("Use either --date or --yesterday, not both.");
@@ -67,7 +78,10 @@ if (dateArg && !/^\d{4}-\d{2}-\d{2}$/.test(dateArg)) {
   process.exit(1);
 }
 
-const dataPath = defaultDataPath;
+const device = normalizeDevice(getFlagValue("--device"));
+const dataPath = device
+  ? path.resolve(sourceDataDir, `${device}.json`)
+  : defaultDataPath;
 const dataPathRelative = path.relative(projectRoot, dataPath);
 
 const today = new Date();
@@ -81,6 +95,7 @@ const getOffsetDate = (offsetDays) => {
 const targetDate = dateArg ?? (hasFlag("--yesterday") ? getOffsetDate(-1) : formatDate(today));
 const roundedHours = Math.round(rawHours * 10) / 10;
 const shouldAdd = hasFlag("--add");
+const isDryRun = hasFlag("--dry-run");
 
 let data = {};
 if (fs.existsSync(dataPath)) {
@@ -88,26 +103,34 @@ if (fs.existsSync(dataPath)) {
   data = raw.trim().length ? JSON.parse(raw) : {};
 }
 
+const hasExistingValue = Object.prototype.hasOwnProperty.call(data, targetDate);
 const existingHoursRaw = Number(data[targetDate]);
 const existingHours = Number.isFinite(existingHoursRaw) ? existingHoursRaw : 0;
 const finalHours = shouldAdd
   ? Math.round((existingHours + roundedHours) * 10) / 10
   : roundedHours;
+const hasChange = !hasExistingValue || existingHours !== finalHours;
 
-data[targetDate] = finalHours;
 const sorted = Object.fromEntries(
-  Object.entries(data).sort(([a], [b]) => a.localeCompare(b))
+  Object.entries({ ...data, [targetDate]: finalHours }).sort(([a], [b]) => a.localeCompare(b))
 );
 
-fs.writeFileSync(dataPath, JSON.stringify(sorted, null, 2) + "\n");
-
 if (shouldAdd) {
-  console.log(`Logged +${roundedHours}h for ${targetDate}.`);
+  console.log(`Logged +${roundedHours}h for ${targetDate}${device ? ` (${device})` : ""}.`);
   console.log(`Day total: ${existingHours}h -> ${finalHours}h.`);
 } else {
-  console.log(`Logged ${finalHours}h for ${targetDate}.`);
+  console.log(`Logged ${finalHours}h for ${targetDate}${device ? ` (${device})` : ""}.`);
 }
-console.log(`Updated: ${dataPathRelative}`);
+
+if (!hasChange) {
+  console.log(`No data change for ${dataPathRelative}.`);
+} else if (isDryRun) {
+  console.log(`Dry run enabled: ${dataPathRelative} was not modified.`);
+} else {
+  fs.mkdirSync(path.dirname(dataPath), { recursive: true });
+  fs.writeFileSync(dataPath, JSON.stringify(sorted, null, 2) + "\n");
+  console.log(`Updated: ${dataPathRelative}`);
+}
 
 if (hasFlag("--backfill")) {
   const keys = Object.keys(sorted).sort();
@@ -131,16 +154,21 @@ if (hasFlag("--backfill")) {
   }
 }
 
+if (isDryRun || !hasChange) {
+  process.exit(0);
+}
+
 if (hasFlag("--commit")) {
   try {
-    execSync(`git add ${dataPathRelative}`, {
+    execFileSync("git", ["add", dataPathRelative], {
       cwd: projectRoot,
       stdio: "inherit",
     });
     const commitHours = shouldAdd
       ? `+${roundedHours}h => ${finalHours}h`
       : `${finalHours}h`;
-    execSync(`git commit -m "Log worktime ${targetDate}: ${commitHours}"`, {
+    const label = device ? `${device} worktime` : "worktime";
+    execFileSync("git", ["commit", "-m", `Log ${label} ${targetDate}: ${commitHours}`], {
       cwd: projectRoot,
       stdio: "inherit",
     });
@@ -153,16 +181,16 @@ if (hasFlag("--commit")) {
 if (hasFlag("--push")) {
   try {
     if (hasFlag("--rebase")) {
-      const branch = execSync("git rev-parse --abbrev-ref HEAD", {
+      const branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
         cwd: projectRoot,
         encoding: "utf-8",
       }).trim();
-      execSync(`git pull --rebase --autostash origin ${branch}`, {
+      execFileSync("git", ["pull", "--rebase", "--autostash", "origin", branch], {
         cwd: projectRoot,
         stdio: "inherit",
       });
     }
-    execSync("git push origin HEAD", { cwd: projectRoot, stdio: "inherit" });
+    execFileSync("git", ["push", "origin", "HEAD"], { cwd: projectRoot, stdio: "inherit" });
   } catch (error) {
     console.error("Push failed. Fix the error and try again.");
     process.exit(1);

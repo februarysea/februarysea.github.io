@@ -5,9 +5,9 @@ on:
   # 每次推送到 main 分支时触发
   push:
     branches: [ master ]
-  # 每天定时部署一次，保证静态日期（today/yesterday）向前推进
+  # 每天北京时间 00:10 定时部署一次，保证静态日期（today/yesterday）向前推进
   schedule:
-    - cron: "10 6 * * *"
+    - cron: "10 16 * * *"
   # 允许在 GitHub Actions 页面手动触发
   workflow_dispatch:
 
@@ -25,6 +25,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
     steps:
       - name: Checkout
         uses: actions/checkout@v4

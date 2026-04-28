@@ -1,9 +1,29 @@
 ---
 import FlipCard from "./FlipCard.astro";
-import workLog from "../data/worktime.json";
+import legacyWorkLog from "../data/worktime.json";
+import macminiWorkLog from "../data/worktime-sources/macmini.json";
+import mbpWorkLog from "../data/worktime-sources/mbp.json";
 
-const round1 = (value) => Math.round(value * 10) / 10;
-const formatHours = (value) => {
+type WorkLog = Record<string, number>;
+type DayEntry = {
+  date: Date;
+  key: string;
+  value: number | null;
+  isFuture: boolean;
+};
+
+const round1 = (value: number) => Math.round(value * 10) / 10;
+const legacyLog = legacyWorkLog as WorkLog;
+const macminiLog = macminiWorkLog as WorkLog;
+const mbpLog = mbpWorkLog as WorkLog;
+const allLogKeys = new Set([...Object.keys(legacyLog), ...Object.keys(macminiLog), ...Object.keys(mbpLog)]);
+const typedWorkLog: WorkLog = Object.fromEntries(
+  [...allLogKeys].map((key) => [
+    key,
+    round1((macminiLog[key] ?? legacyLog[key] ?? 0) + (mbpLog[key] ?? 0)),
+  ])
+);
+const formatHours = (value: number) => {
   const rounded = round1(value);
   return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1);
 };
@@ -12,7 +32,7 @@ const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 
 const today = new Date();
 today.setHours(12, 0, 0, 0);
-const formatDate = (date) => {
+const formatDate = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -25,7 +45,7 @@ weekStart.setDate(today.getDate() - today.getDay());
 const startDate = new Date(weekStart);
 startDate.setDate(weekStart.getDate() - 51 * 7);
 
-const dayEntries = [];
+const dayEntries: DayEntry[] = [];
 for (let i = 0; i < 52 * 7; i += 1) {
   const date = new Date(startDate);
   date.setDate(startDate.getDate() + i);
@@ -34,7 +54,7 @@ for (let i = 0; i < 52 * 7; i += 1) {
   dayEntries.push({
     date,
     key,
-    value: isFuture ? null : (workLog[key] ?? 0),
+    value: isFuture ? null : (typedWorkLog[key] ?? 0),
     isFuture,
   });
 }
@@ -44,9 +64,9 @@ const pastEntries = dayEntries.filter((entry) => !entry.isFuture);
 const yesterday = new Date(today);
 yesterday.setDate(today.getDate() - 1);
 const yesterdayKey = formatDate(yesterday);
-const yesterdayHours = workLog[yesterdayKey] ?? 0;
-const logKeys = Object.keys(workLog).sort();
-const parseKeyDate = (key) => {
+const yesterdayHours = typedWorkLog[yesterdayKey] ?? 0;
+const logKeys = Object.keys(typedWorkLog).sort();
+const parseKeyDate = (key: string) => {
   const [year, month, day] = key.split("-").map(Number);
   return new Date(year, month - 1, day, 12, 0, 0, 0);
 };
@@ -64,7 +84,7 @@ const bestIndex = statsValues.indexOf(bestHours);
 const bestDate = statsEntries[bestIndex]?.date ?? today;
 const bestDateLabel = bestHours > 0 ? `${formatDate(bestDate)} (${formatHours(bestHours)}h)` : "—";
 
-const findIndexByDate = (target) => statsEntries.findIndex((entry) => formatDate(entry.date) === target);
+const findIndexByDate = (target: string) => statsEntries.findIndex((entry) => formatDate(entry.date) === target);
 const yesterdayIndex = findIndexByDate(yesterdayKey);
 const streakStartIndex = yesterdayIndex >= 0 ? yesterdayIndex : statsValues.length - 1;
 let currentStreak = 0;
@@ -92,7 +112,7 @@ for (let week = 0; week < 52; week += 1) {
   weekMonthLabels.push(month !== lastMonth ? months[month] : "");
   lastMonth = month;
 }
-const intensityClass = (value) => {
+const intensityClass = (value: number) => {
   if (value <= 0) return "bg-[#0b1211]";
   if (value <= 2) return "bg-[#0f3b34]";
   if (value <= 4) return "bg-[#146055]";
@@ -111,7 +131,7 @@ const intensityClass = (value) => {
         <p class="text-xs text-gray-500 font-sans">Yesterday</p>
         <p
           id="worktime-yesterday-hours"
-          data-worklog={JSON.stringify(workLog)}
+          data-worklog={JSON.stringify(typedWorkLog)}
           class="text-sm font-bold text-[#2ad1b7] font-sans"
         >
           {formatHours(yesterdayHours)}h
