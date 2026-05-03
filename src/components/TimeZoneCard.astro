@@ -38,7 +38,8 @@ const formatDate = (date: Date) => {
 };
 
 const weekStart = new Date(today);
-weekStart.setDate(today.getDate() - today.getDay());
+const daysSinceMonday = (today.getDay() + 6) % 7;
+weekStart.setDate(today.getDate() - daysSinceMonday);
 
 const startDate = new Date(weekStart);
 startDate.setDate(weekStart.getDate() - 51 * 7);
