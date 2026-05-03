@@ -71,35 +71,23 @@ const parseKeyDate = (key: string) => {
 const dataStartDate = logKeys.length ? parseKeyDate(logKeys[0]) : startDate;
 
 const statsEntries = pastEntries.filter((entry) => entry.date >= dataStartDate);
-const statsValues = statsEntries.map((entry) => entry.value ?? 0);
-
-const totalHours = round1(statsValues.reduce((sum, value) => sum + value, 0));
-const averageHours = statsValues.length ? round1(totalHours / statsValues.length) : 0;
-const last7Values = statsValues.slice(-7);
-const last7Average = last7Values.length ? round1(last7Values.reduce((sum, value) => sum + value, 0) / last7Values.length) : 0;
-const bestHours = statsValues.length ? Math.max(...statsValues) : 0;
-const bestIndex = statsValues.indexOf(bestHours);
-const bestDate = statsEntries[bestIndex]?.date ?? today;
+const lastWeekEnd = new Date(weekStart);
+lastWeekEnd.setDate(weekStart.getDate() - 1);
+const lastWeekStart = new Date(lastWeekEnd);
+lastWeekStart.setDate(lastWeekEnd.getDate() - 6);
+const completedStatsEntries = statsEntries.filter((entry) => entry.date <= yesterday);
+const completedStatsValues = completedStatsEntries.map((entry) => entry.value ?? 0);
+const weekGoalHours = 60;
+const thisWeekEntries = statsEntries.filter((entry) => entry.date >= weekStart && entry.date <= today);
+const thisWeekTotal = round1(thisWeekEntries.reduce((sum, entry) => sum + (entry.value ?? 0), 0));
+const lastWeekEntries = statsEntries.filter((entry) => entry.date >= lastWeekStart && entry.date <= lastWeekEnd);
+const lastWeekValues = lastWeekEntries.map((entry) => entry.value ?? 0);
+const lastWeekTotal = round1(lastWeekValues.reduce((sum, value) => sum + value, 0));
+const lastWeekActiveDays = lastWeekValues.filter((value) => value > 0).length;
+const bestHours = completedStatsValues.length ? Math.max(...completedStatsValues) : 0;
+const bestIndex = completedStatsValues.indexOf(bestHours);
+const bestDate = completedStatsEntries[bestIndex]?.date ?? yesterday;
 const bestDateLabel = bestHours > 0 ? `${formatDate(bestDate)} (${formatHours(bestHours)}h)` : "—";
-
-const findIndexByDate = (target: string) => statsEntries.findIndex((entry) => formatDate(entry.date) === target);
-const yesterdayIndex = findIndexByDate(yesterdayKey);
-const streakStartIndex = yesterdayIndex >= 0 ? yesterdayIndex : statsValues.length - 1;
-let currentStreak = 0;
-for (let i = streakStartIndex; i >= 0; i -= 1) {
-  if (statsValues[i] > 0) currentStreak += 1;
-  else break;
-}
-let longestStreak = 0;
-let runningStreak = 0;
-for (let i = 0; i < statsValues.length; i += 1) {
-  if (statsValues[i] > 0) {
-    runningStreak += 1;
-    if (runningStreak > longestStreak) longestStreak = runningStreak;
-  } else {
-    runningStreak = 0;
-  }
-}
 
 const weekMonthLabels = [];
 let lastMonth = -1;
@@ -180,30 +168,22 @@ const intensityClass = (value: number) => {
       <h2 class="text-xl font-bold font-sans">Worktime Stats</h2>
     </div>
 
-    <div class="grid grid-cols-3 gap-2 text-sm font-sans">
+    <div class="grid grid-cols-2 gap-3 text-sm font-sans">
       <div class="flex flex-col">
-        <span class="text-xs text-gray-500">Total</span>
-        <span class="font-bold">{formatHours(totalHours)}h</span>
+        <span class="text-xs text-gray-500">Last week total</span>
+        <span class="font-bold text-base">{formatHours(lastWeekTotal)}h</span>
       </div>
       <div class="flex flex-col">
-        <span class="text-xs text-gray-500">Avg / day</span>
-        <span class="font-bold">{formatHours(averageHours)}h</span>
+        <span class="text-xs text-gray-500">Week goal</span>
+        <span class="font-bold text-base">{formatHours(thisWeekTotal)}/{formatHours(weekGoalHours)}h</span>
       </div>
       <div class="flex flex-col">
-        <span class="text-xs text-gray-500">Last 7 avg</span>
-        <span class="font-bold">{formatHours(last7Average)}h</span>
-      </div>
-      <div class="flex flex-col">
-        <span class="text-xs text-gray-500">Current streak</span>
-        <span class="font-bold">{currentStreak}d</span>
-      </div>
-      <div class="flex flex-col">
-        <span class="text-xs text-gray-500">Longest streak</span>
-        <span class="font-bold">{longestStreak}d</span>
+        <span class="text-xs text-gray-500">Last week active days</span>
+        <span class="font-bold text-base">{lastWeekActiveDays}/7d</span>
       </div>
       <div class="flex flex-col">
         <span class="text-xs text-gray-500">Best day</span>
-        <span class="font-bold">{bestDateLabel}</span>
+        <span class="font-bold text-sm leading-tight">{bestDateLabel}</span>
       </div>
     </div>
   </div>
