@@ -11,7 +11,7 @@
     "eslint": "eslint 'src/**/*.{js,astro}'",
     "check": "astro check",
     "log:worktime": "node scripts/log-worktime.mjs",
-    "log:worktime:mbp": "node scripts/log-worktime-auto.mjs --device mbp --yesterday --lookback-days 7 --once-per-day --start-hour 9 --end-hour 23 --commit --push --rebase",
+    "log:worktime:auto": "node scripts/log-worktime-auto.mjs --device macmini",
     "log:worktime:macmini": "node scripts/log-worktime-auto.mjs --device macmini --commit --push --rebase",
     "log:worktime:test": "node scripts/test-activitywatch.mjs"
   },

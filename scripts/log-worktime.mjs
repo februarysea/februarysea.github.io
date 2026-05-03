@@ -29,8 +29,8 @@ const positionalArgs = [];
 }
 
 const usage = () => {
-  console.log("Usage: pnpm log:worktime <hours> [--date YYYY-MM-DD] [--yesterday] [--device NAME] [--add] [--backfill] [--dry-run] [--commit] [--push] [--rebase]");
-  console.log("Example: pnpm log:worktime 2.5 --date 2026-02-09 --device mbp --commit --push --rebase");
+  console.log("Usage: pnpm log:worktime <hours> [--date YYYY-MM-DD] [--yesterday] [--device macmini] [--add] [--backfill] [--dry-run] [--commit] [--push] [--rebase]");
+  console.log("Example: pnpm log:worktime 2.5 --date 2026-02-09 --device macmini --commit --push --rebase");
 };
 
 if (hasFlag("-h") || hasFlag("--help")) {
@@ -59,10 +59,9 @@ const parseKeyDate = (key) => {
 };
 
 const normalizeDevice = (value) => {
-  if (!value) return null;
-  const device = value.trim().toLowerCase();
-  if (!/^[a-z0-9-]+$/.test(device)) {
-    console.error("Invalid device name. Use lowercase letters, numbers, and hyphens only.");
+  const device = (value ?? "macmini").trim().toLowerCase();
+  if (device !== "macmini") {
+    console.error("Only the macmini worktime source is supported.");
     process.exit(1);
   }
   return device;

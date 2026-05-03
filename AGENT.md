@@ -44,8 +44,7 @@ Worktime helpers:
 pnpm log:worktime 9
 pnpm log:worktime 9 --yesterday
 pnpm log:worktime 9 --date 2026-02-07
-pnpm log:worktime 2.5 --date 2026-04-28 --device mbp
-pnpm log:worktime:mbp
+pnpm log:worktime 2.5 --date 2026-04-28 --device macmini
 pnpm log:worktime:macmini
 pnpm log:worktime:test --yesterday
 ```
@@ -56,8 +55,8 @@ pnpm log:worktime:test --yesterday
 - `src/components/` contains Astro, Solid, and Svelte UI components.
 - `src/layouts/` contains shared page layouts.
 - `src/data/blog/` contains Markdown blog entries.
-- `src/data/worktime.json` stores legacy worktime totals.
-- `src/data/worktime-sources/` stores per-device worktime sources. The Worktime card treats `src/data/worktime.json` as the macmini fallback, uses `macmini.json` when present for a date, and adds `mbp.json` when available.
+- `src/data/worktime.json` stores legacy worktime totals as historical fallback data.
+- `src/data/worktime-sources/macmini.json` stores the macmini source. The Worktime card treats `src/data/worktime.json` as the macmini fallback and uses `macmini.json` when present for a date.
 - `src/lib/` contains shared helpers, constants, world data, and remark plugins.
 - `public/` contains static images, fonts, favicon, and preview assets.
 - `scripts/` contains worktime logging and ActivityWatch helper scripts.
@@ -85,6 +84,6 @@ Latest local validation results:
 - Prefer existing Astro/UnoCSS conventions over introducing a new styling layer.
 - Use typed DOM access in Astro client scripts when touching script blocks.
 - Be careful with `src/data/worktime.json` and `src/data/worktime-sources/*.json`; the automation scripts can commit and push updates.
+- Worktime scripts default to the `macmini` source and reject other device names.
 - `pnpm log:worktime:macmini` overwrites today's `macmini` source value from local ActivityWatch.
-- `pnpm log:worktime:mbp` looks back 7 completed days through yesterday, runs only between 09:00 and 23:59 unless `--force` is passed, and records a local once-per-day success marker in `~/.cache/februarysea-worktime-mbp-sync.json`.
 - Do not run destructive Git commands unless explicitly requested.

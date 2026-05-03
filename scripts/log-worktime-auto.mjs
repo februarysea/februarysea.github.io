@@ -17,9 +17,8 @@ const getFlagValue = (flag) => {
 };
 
 const usage = () => {
-  console.log("Usage: node scripts/log-worktime-auto.mjs [--device NAME] [--date YYYY-MM-DD] [--yesterday] [--lookback-days N] [--once-per-day] [--state-file PATH] [--start-hour H] [--end-hour H] [--force] [--dry-run] [--commit] [--push] [--rebase] [--server URL]");
+  console.log("Usage: node scripts/log-worktime-auto.mjs [--device macmini] [--date YYYY-MM-DD] [--yesterday] [--lookback-days N] [--once-per-day] [--state-file PATH] [--start-hour H] [--end-hour H] [--force] [--dry-run] [--commit] [--push] [--rebase] [--server URL]");
   console.log("Example: pnpm log:worktime:macmini");
-  console.log("Example: pnpm log:worktime:mbp");
 };
 
 if (hasFlag("-h") || hasFlag("--help")) {
@@ -40,10 +39,9 @@ const parseDate = (key) => {
 };
 
 const normalizeDevice = (value) => {
-  if (!value) return null;
-  const device = value.trim().toLowerCase();
-  if (!/^[a-z0-9-]+$/.test(device)) {
-    console.error("Invalid device name. Use lowercase letters, numbers, and hyphens only.");
+  const device = (value ?? "macmini").trim().toLowerCase();
+  if (device !== "macmini") {
+    console.error("Only the macmini worktime source is supported.");
     process.exit(1);
   }
   return device;
