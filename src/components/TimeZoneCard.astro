@@ -78,7 +78,7 @@ const lastWeekStart = new Date(lastWeekEnd);
 lastWeekStart.setDate(lastWeekEnd.getDate() - 6);
 const completedStatsEntries = statsEntries.filter((entry) => entry.date <= yesterday);
 const completedStatsValues = completedStatsEntries.map((entry) => entry.value ?? 0);
-const weekGoalHours = 60;
+const weekGoalHours = 80;
 const thisWeekEntries = statsEntries.filter((entry) => entry.date >= weekStart && entry.date <= today);
 const thisWeekTotal = round1(thisWeekEntries.reduce((sum, entry) => sum + (entry.value ?? 0), 0));
 const lastWeekEntries = statsEntries.filter((entry) => entry.date >= lastWeekStart && entry.date <= lastWeekEnd);
