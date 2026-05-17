@@ -38,29 +38,15 @@ pnpm run eslint
 pnpm run check
 ```
 
-Worktime helpers:
-
-```bash
-pnpm log:worktime 9
-pnpm log:worktime 9 --yesterday
-pnpm log:worktime 9 --date 2026-02-07
-pnpm log:worktime 2.5 --date 2026-04-28 --device macmini
-pnpm log:worktime:macmini
-pnpm log:worktime:test --yesterday
-```
-
 ## Repository Map
 
 - `src/pages/` contains route entry points.
 - `src/components/` contains Astro, Solid, and Svelte UI components.
 - `src/layouts/` contains shared page layouts.
 - `src/data/blog/` contains Markdown blog entries.
-- `src/data/worktime.json` stores legacy worktime totals as historical fallback data.
-- `src/data/worktime-sources/macmini.json` stores the macmini source. The Worktime card treats `src/data/worktime.json` as the macmini fallback and uses `macmini.json` when present for a date.
 - `src/lib/` contains shared helpers, constants, world data, and remark plugins.
 - `public/` contains static images, fonts, favicon, and preview assets.
-- `scripts/` contains worktime logging and ActivityWatch helper scripts.
-- `.github/workflows/deploy.yml` builds and deploys GitHub Pages from `master`; it also runs daily at 00:10 Asia/Shanghai with `TZ=Asia/Shanghai`.
+- `.github/workflows/deploy.yml` builds and deploys GitHub Pages from `master` on push or manual dispatch.
 
 ## Validation Notes
 
@@ -83,7 +69,4 @@ Latest local validation results:
 - Keep changes scoped; the site is customized from `astro-bento-portfolio`, and some template remnants still exist in README and constants.
 - Prefer existing Astro/UnoCSS conventions over introducing a new styling layer.
 - Use typed DOM access in Astro client scripts when touching script blocks.
-- Be careful with `src/data/worktime.json` and `src/data/worktime-sources/*.json`; the automation scripts can commit and push updates.
-- Worktime scripts default to the `macmini` source and reject other device names.
-- `pnpm log:worktime:macmini` overwrites today's `macmini` source value from local ActivityWatch.
 - Do not run destructive Git commands unless explicitly requested.
