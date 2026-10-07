@@ -52,9 +52,13 @@ measurements. It is not an instantaneous peak or total distance divided by time.
 
 The homepage's flip cards retain explicit bottom-right buttons and occasional
 idle flips (first appearance after about 3–6 seconds, then 8–14 seconds apart,
-returning after 3.5–5 seconds). A manually chosen face becomes the resting face;
-after a pointer-triggered flip, automatic flips resume after 10 seconds of reading
-time, even if the pointer remains over the card. Automatic flips still pause for
+returning after 3.5–5 seconds). Pointer entry previews the other face once; leaving
+within that preview restores the face visible before entry. A hover preview gets
+10 seconds of reading time before idle flips resume, even if the pointer stays
+over the card. Once the idle cycle resumes, leaving no longer rewinds the preview.
+A manually chosen face becomes the resting face and cancels any pending hover
+restoration; automatic flips resume after its own 10-second reading period.
+Touch input does not trigger hover previews. Automatic and hover flips pause for
 keyboard focus, focused editable fields, open dialogs, offscreen/background
 display and reduced-motion mode.
 Hidden faces are inert; only a keyboard-triggered flip moves keyboard focus.

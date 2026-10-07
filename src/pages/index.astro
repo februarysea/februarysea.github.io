@@ -47,8 +47,7 @@ import LinksCard from "../components/LinksCard.astro";
     </FlipCard>
     <FlipCard label="Site credits" frontLabel="Site author" backLabel="Theme credits" padding="p-3" compact colSpan="md:col-span-1" rowSpan="md:row-span-1" color="bg-[#050505]" borderColor="border-gray-600" class="h-[180px] lg:h-full">
       <div slot="front" class="h-full flex flex-col justify-center items-center font-sans text-center">
-        <p class="text-[10px] leading-3 text-gray-400">Theme based on <span class="font-bold text-white">Bento Portfolio</span></p>
-        <p class="text-[10px] leading-4 text-gray-500">by <a href="https://github.com/Ladvace/astro-bento-portfolio" target="_blank" class="hover:text-primary-500 underline">Gianmarco Cavallo</a></p>
+        <p class="theme-credit text-[10px] lg:text-[9.5px] xl:text-[10px] leading-4 text-gray-500 whitespace-nowrap"><span class="font-bold text-white">Bento Portfolio</span> · <a href="https://github.com/Ladvace/astro-bento-portfolio" target="_blank" rel="noopener noreferrer" class="hover:text-primary-500 underline">Gianmarco Cavallo</a></p>
       </div>
       <div slot="back" class="h-full flex flex-col justify-center items-center">
         <p class="text-[10px] leading-3 text-gray-400 font-sans">Modified by</p>

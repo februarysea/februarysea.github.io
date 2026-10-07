@@ -77,6 +77,8 @@ const {
       let disposed = false;
       let timer: number | undefined;
       let interactionUntil = 0;
+      let pointerInside = false;
+      let hoverReturn: { face: CardFace; interactionUntil: number } | undefined;
 
       container.dataset.flipReady = "true";
       container.querySelectorAll<HTMLButtonElement>("[data-flip-to]").forEach((button) => {
@@ -130,6 +132,8 @@ const {
         timer = window.setTimeout(() => {
           timer = undefined;
           if (!canPreview()) return;
+          // The idle cycle has taken over; leaving later must not rewind it.
+          hoverReturn = undefined;
           previewing = !previewing;
           hasPreviewed = true;
           showFace(previewing ? (restingFace === "front" ? "back" : "front") : restingFace);
@@ -144,6 +148,7 @@ const {
         const face = button.dataset.flipTo;
         if (face !== "front" && face !== "back") return;
         clearTimer();
+        hoverReturn = undefined;
         interactionUntil = Date.now() + 10000;
         restingFace = face;
         previewing = false;
@@ -151,6 +156,50 @@ const {
         // ten seconds to read before idle animation resumes, even while hovering.
         showFace(face, event.detail === 0);
         refresh();
+      }, { signal: events.signal });
+
+      const isWithinCard = (event: PointerEvent) => {
+        const bounds = container.getBoundingClientRect();
+        return event.clientX >= bounds.left && event.clientX <= bounds.right
+          && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+      };
+
+      function leaveHover() {
+        pointerInside = false;
+        const previous = hoverReturn;
+        hoverReturn = undefined;
+        if (!previous) return;
+        clearTimer();
+        interactionUntil = previous.interactionUntil;
+        // Never hide a face that acquired keyboard or editable-field focus.
+        if (canPreview()) {
+          previewing = previous.face !== restingFace;
+          showFace(previous.face);
+        }
+        refresh();
+      }
+
+      container.addEventListener("pointerenter", (event) => {
+        if (event.pointerType === "touch" || pointerInside || !isWithinCard(event)) return;
+        pointerInside = true;
+        if (!canPreview()) return;
+        clearTimer();
+        const visibleFace: CardFace = container.dataset.manualFace === "back" ? "back" : "front";
+        hoverReturn = { face: visibleFace, interactionUntil };
+        const nextFace = visibleFace === "front" ? "back" : "front";
+        previewing = nextFace !== restingFace;
+        hasPreviewed = true;
+        interactionUntil = Date.now() + 10000;
+        showFace(nextFace);
+        refresh();
+      }, { signal: events.signal });
+      container.addEventListener("pointerleave", (event) => {
+        // 3D faces can change hit-testing without the pointer leaving the card.
+        if (event.pointerType !== "touch" && !isWithinCard(event)) leaveHover();
+      }, { signal: events.signal });
+      window.addEventListener("pointermove", (event) => {
+        // Also catch a real exit after a transform-generated boundary event.
+        if (pointerInside && event.pointerType !== "touch" && !isWithinCard(event)) leaveHover();
       }, { signal: events.signal });
 
       container.addEventListener("focusin", refresh, { signal: events.signal });
