@@ -1,0 +1,160 @@
+---
+import { renderSvg } from "../../vendor/workout-motion/runtime/h2.js";
+import { getExerciseMotion } from "../lib/exercise-motion";
+
+interface Props {
+  exercise: string;
+  phase?: number;
+}
+
+const { exercise, phase = 0 } = Astro.props;
+const motion = getExerciseMotion(exercise);
+const initialPhase = (phase * 0.13) % 1;
+const still = motion ? renderSvg(motion, { size: 64, phase: initialPhase, decorative: true }) : null;
+---
+
+{still && (
+  <span
+    class="exercise-illustration"
+    data-exercise-loop
+    data-motion={motion}
+    data-phase={initialPhase}
+    aria-hidden="true"
+    set:html={still}
+  />
+)}
+
+<script>
+  import type { WorkoutPlayer } from "../../vendor/workout-motion/runtime/h2.js";
+
+  document.querySelectorAll<HTMLElement>("[data-exercise-gallery]").forEach((gallery) => {
+    const card = gallery.closest<HTMLElement>(".training-flip-card");
+    const inner = card?.querySelector<HTMLElement>(".flip-card-inner");
+    if (!card || !inner) return;
+
+    const hosts = [...gallery.querySelectorAll<HTMLElement>("[data-exercise-loop]")];
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const players = new Map<HTMLElement, WorkoutPlayer>();
+    const stills = new Map(hosts.map((host) => [host, host.innerHTML]));
+    let inView = false;
+    let loading = false;
+    let attempted = false;
+    let disposed = false;
+    let pageHidden = false;
+
+    const shouldPlay = () => {
+      const backVisible = card.dataset.manualFace
+        ? card.dataset.manualFace === "back"
+        : inner.classList.contains("flipped");
+      return inView && backVisible && !document.hidden && !pageHidden && !reducedMotion.matches;
+    };
+
+    // Load the continuous renderer only when the session face is actually visible.
+    // Server-rendered SVGs remain usable before loading, without JS, or on failure.
+    const mountPlayers = async () => {
+      if (loading || attempted || disposed) return;
+      loading = true;
+      attempted = true;
+      try {
+        const { createPlayer } = await import("../../vendor/workout-motion/runtime/h2.js");
+        if (disposed) return;
+        for (const host of hosts) {
+          const id = host.dataset.motion;
+          if (!id) continue;
+          try {
+            const player = createPlayer(host, id, {
+              autoplay: false,
+              phase: Number(host.dataset.phase) || 0,
+              speed: 1,
+              decorative: true,
+              onStateChange: (playing) => { host.dataset.playing = String(playing); },
+            });
+            players.set(host, player);
+            host.dataset.ready = "true";
+          } catch {
+            host.innerHTML = stills.get(host) ?? "";
+          }
+        }
+      } catch {
+        // A blocked animation chunk must not remove the exercise illustration.
+      } finally {
+        loading = false;
+        if (!disposed) updatePlayback();
+      }
+    };
+
+    const updatePlayback = () => {
+      if (disposed) return;
+      const playing = shouldPlay();
+      gallery.dataset.playing = String(playing);
+      if (playing && !attempted) void mountPlayers();
+      players.forEach((player) => { if (playing) player.play(); else player.pause(); });
+    };
+
+    const onPageHide = () => { pageHidden = true; updatePlayback(); };
+    const onPageShow = () => { pageHidden = false; updatePlayback(); };
+    document.addEventListener("visibilitychange", updatePlayback);
+    reducedMotion.addEventListener("change", updatePlayback);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
+
+    const visibility = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      updatePlayback();
+    });
+    visibility.observe(card);
+    const face = new MutationObserver(updatePlayback);
+    face.observe(card, { attributes: true, attributeFilter: ["data-manual-face"] });
+    face.observe(inner, { attributes: true, attributeFilter: ["class"] });
+
+    const destroy = () => {
+      disposed = true;
+      visibility.disconnect();
+      face.disconnect();
+      players.forEach((player) => player.destroy());
+      players.clear();
+      document.removeEventListener("visibilitychange", updatePlayback);
+      reducedMotion.removeEventListener("change", updatePlayback);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
+      document.removeEventListener("astro:before-swap", destroy);
+    };
+    document.addEventListener("astro:before-swap", destroy, { once: true });
+    updatePlayback();
+  });
+</script>
+
+<style>
+  .exercise-illustration {
+    --figure-paper: #050505;
+    --figure-ink: #f4f2ed;
+    --figure-detail: #bcb5b9;
+    --figure-muted: #888188;
+    display: block;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    max-height: 100%;
+    isolation: isolate;
+  }
+
+  .exercise-illustration :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Keep the authored line drawing legible at a 64px card thumbnail. */
+  .exercise-illustration :global(path) {
+    vector-effect: non-scaling-stroke;
+    stroke-width: 0.55px;
+  }
+
+  @media (max-width: 359px) {
+    .exercise-illustration {
+      flex-basis: 48px;
+      width: 48px;
+      height: 56px;
+    }
+  }
+</style>

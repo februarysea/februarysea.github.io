@@ -1,0 +1,142 @@
+---
+import FlipCard from "./FlipCard.astro";
+import ExerciseIllustration from "./ExerciseIllustration.astro";
+import records from "../data/training.json";
+import { formatTrainingDate, formatSetReps, getTrainingDate, getWorkSessions, getTrainingWindow, getTrainingWindowSummary, getLatestWorkSession, getSessionLifts, type TrainingData } from "../lib/training";
+import { velocityCeiling, velocityGeometry } from "../lib/velocity-chart";
+
+const training: TrainingData = records;
+const today = getTrainingDate();
+const window = getTrainingWindow(today);
+const summary = getTrainingWindowSummary(training.sessions, window);
+const recordedDates = new Set(getWorkSessions(training.sessions).map((session) => session.date));
+const coverageFrom = training.coverage.from.slice(0, 10);
+const coverageTo = training.coverage.to.slice(0, 10);
+const days = window.dates.map((date) => ({ date, active: recordedDates.has(date), covered: date >= coverageFrom && date <= coverageTo }));
+const latest = getLatestWorkSession(training.sessions);
+const lifts = getSessionLifts(latest);
+const latestReps = latest?.sets.reduce((total, set) => total + set.repCount, 0) ?? 0;
+const formatShortDate = (date: string) => formatTrainingDate(date, { month: "short", day: "numeric" });
+const updatedAt = training.updatedAt ? new Date(training.updatedAt) : null;
+const updatedLabel = updatedAt && Number.isFinite(updatedAt.getTime()) ? new Intl.DateTimeFormat("en", {
+  timeZone: "Asia/Shanghai", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
+}).format(updatedAt) : null;
+const speed = (value: number | null) => value === null ? "—" : value.toFixed(3);
+const sparkCeiling = velocityCeiling(lifts.flatMap((lift) => lift.setVelocities));
+const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, sparkCeiling));
+---
+
+<FlipCard
+  color="bg-[#050505]"
+  borderColor="border-rose-500"
+  class="training-flip-card relative z-10 min-h-[360px] md:min-h-[360px] lg:min-h-0"
+  label="Training"
+  frontLabel="Recent session"
+  backLabel="Overview"
+  toggleColor="text-rose-300"
+>
+  <div slot="front" class="training-front">
+    <div class="training-heading"><h2>Training</h2><span class="source-label">Enode One</span></div>
+    <div class="period-label"><span>Last 30 days</span><span>{formatShortDate(window.from)} – {formatShortDate(window.to)}</span></div>
+    <div class="overview-metrics">
+      <div><strong>{summary.trainingDays}</strong><span>Training days</span></div>
+      <div><strong>{summary.sets}</strong><span>Working sets</span></div>
+    </div>
+    <p class="overview-detail">{summary.reps} reps <span>·</span> {summary.exerciseCount} exercises</p>
+    <div class="activity-block">
+      <div class="training-activity" role="img" aria-label={`Last 30 days: ${summary.trainingDays} training days; ${days.filter((day) => !day.covered).length} days outside the synced range`}>
+        {days.map((day) => (
+          <span class:list={["activity-day", { active: day.active, unsynced: !day.covered }]} title={`${day.date}: ${day.active ? "working sets recorded" : day.covered ? "no recorded training" : "not synced"}`}></span>
+        ))}
+      </div>
+      <div class="activity-legend"><span><i class="active-dot"></i>Training</span><span><i></i>No record</span>{days.some((day) => !day.covered) && <span><i class="unsynced-dot"></i>Not synced</span>}</div>
+    </div>
+  </div>
+  <span slot="footer-front" class="footer-note" title={updatedAt && updatedLabel ? `${updatedAt.toISOString()} · Asia/Shanghai` : undefined}>{updatedLabel ? `Updated ${updatedLabel}` : "Awaiting first record"}</span>
+
+  <div slot="back" data-exercise-gallery class="training-back">
+    <div>
+      <div class="training-heading"><h2>Latest Training</h2>{latest && <span class="session-date">{formatShortDate(latest.date)}</span>}</div>
+      {latest && <p class="session-summary">{latest.sets.length} working sets <span>·</span> {latestReps} reps</p>}
+    </div>
+    {latest ? (
+      <>
+        <ul class="training-lifts">
+          {lifts.map((lift, index) => (
+            <li>
+              <div class="training-lift">
+                <ExerciseIllustration exercise={lift.exercise} phase={index} />
+                <span class="lift-copy"><span class="lift-name">{lift.exercise}</span><span class="lift-count">{formatSetReps(lift.sets)}</span></span>
+                <span class="lift-average" title="Average of all recorded repetition mean velocities in this exercise's working sets. The line shows each set's mean velocity.">
+                  <span class="lift-average-label">AVG <span>m/s</span></span>
+                  <span class="lift-velocity">{speed(lift.meanVelocityMps)}</span>
+                  <svg viewBox="0 0 76 22" width="76" height="22" role="img" aria-label={`Set mean velocities in meters per second: ${lift.setVelocities.map(speed).join(", ")}`}>
+                    <line x1="3" y1="20" x2="73" y2="20" stroke="#34282f" stroke-width="0.6" />
+                    {sparks[index].segments.map((points) => <polyline points={points} fill="none" stroke="#fda4af" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />)}
+                    {sparks[index].points.map((point) => <circle cx={point.x} cy={point.y} r="1.6" fill="#fda4af" />)}
+                  </svg>
+                </span>
+                <span class="lift-load">{lift.loadLabel}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </>
+    ) : <p class="empty-session">No working sets recorded yet.</p>}
+  </div>
+  <span slot="footer-back" class="footer-note artwork-credit">Art: <a href="https://jichunhou.me/workout-motion/" target="_blank" rel="noopener noreferrer">workout-motion</a></span>
+</FlipCard>
+
+<style>
+  .training-front, .training-back { width: 100%; height: 100%; min-height: 0; font-family: sans-serif; color: #f4f2ed; }
+  .training-front { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
+  .training-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .training-heading h2 { font-size: 20px; font-weight: 700; line-height: 1.3; }
+  .source-label { font: 9px ui-monospace, monospace; text-transform: uppercase; color: #fda4af; }
+  .period-label { display: flex; justify-content: space-between; gap: 12px; color: #9b949b; font-size: 11px; }
+  .period-label span:first-child { color: #d6cbd2; }
+  .overview-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .overview-metrics strong { display: block; font: 600 34px/1.1 sans-serif; letter-spacing: -1px; }
+  .overview-metrics span { display: block; color: #a099a0; font-size: 11px; margin-top: 5px; }
+  .overview-detail { color: #d0c5cd; font-size: 12px; }
+  .overview-detail span, .session-summary span { padding: 0 6px; color: #74636c; }
+  .training-activity { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 3px; }
+  .activity-day { display: block; aspect-ratio: 1; border-radius: 2px; background: #151316; border: 1px solid #383239; }
+  .activity-day.active { background: #fb8fa3; border-color: #fb8fa3; }
+  .activity-day.unsynced { background: transparent; border-color: #4a3f48; border-style: dashed; }
+  .activity-legend { display: flex; gap: 12px; margin-top: 8px; color: #867d84; font-size: 9px; }
+  .activity-legend span { display: inline-flex; align-items: center; gap: 4px; }
+  .activity-legend i { width: 5px; height: 5px; background: #302930; border-radius: 1px; }
+  .activity-legend .active-dot { background: #fb8fa3; }
+  .activity-legend .unsynced-dot { background: transparent; border: 1px dashed #867d84; }
+  .footer-note { color: #827981; font: 9px/1.5 sans-serif; }
+  .footer-note a { text-decoration: underline; text-underline-offset: 3px; }
+  .footer-note a:hover { color: #d2c6ce; }
+  .artwork-credit { color: #b8a7b1; font-size: 12px; }
+  .training-back { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 10px; }
+  .session-date { color: #fda4af; font-size: 10px; }
+  .session-summary { color: #9b9299; font-size: 10px; margin-top: 4px; }
+  .training-lifts { display: grid; grid-auto-rows: minmax(48px, 1fr); list-style: none; margin: 0; padding: 0; min-height: 0; gap: 4px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #583340 transparent; }
+  .training-lifts li { min-height: 0; }
+  .training-lift { width: 100%; height: 100%; display: grid; grid-template-columns: 44px minmax(0, 1fr) 64px 48px; align-items: center; gap: 8px; }
+  .training-lift :global(.exercise-illustration) { width: 44px; height: 48px; }
+  .lift-copy { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+  .lift-name { font-size: 12px; line-height: 1.25; }
+  .lift-count { color: #9b9299; font-size: 9px; line-height: 1.4; }
+  .lift-average { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .lift-average-label { color: #a997a2; font: 8px/1.2 ui-monospace, monospace; letter-spacing: .03em; }
+  .lift-average-label span { color: #887980; }
+  .lift-average svg { display: block; width: 64px; height: 16px; }
+  .lift-velocity { color: #e0c4d1; font: 12px/1.2 ui-monospace, monospace; }
+  .lift-load { color: #fda4af; font-size: 12px; line-height: 1.3; text-align: right; }
+  .empty-session { color: #a99da5; font-size: 13px; }
+  @media (max-width: 359px) {
+    .training-lift { grid-template-columns: 36px minmax(0, 1fr) 52px 38px; gap: 6px; }
+    .training-lift :global(.exercise-illustration) { width: 36px; }
+    .lift-average svg { width: 52px; }
+    .lift-name { font-size: 11px; }
+    .lift-count { font-size: 8px; }
+    .lift-load { font-size: 11px; }
+    .activity-legend { gap: 8px; }
+  }
+</style>

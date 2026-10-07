@@ -1,0 +1,74 @@
+---
+import FlipCard from "./FlipCard.astro";
+
+const links = [
+  {
+    name: "UMEP Lab",
+    href: "https://umeplab.github.io/",
+    description: "Urban mobility & environmental perception",
+  },
+  {
+    name: "ABMind",
+    href: "https://abmind.cc/",
+    description: "Agent-based modeling community",
+  },
+  {
+    name: "Shiqi Wang",
+    href: "https://shiqi-wang.com/",
+    description: "GeoAI Researcher",
+  },
+];
+---
+
+<FlipCard
+  label="Links"
+  frontLabel="About these links"
+  backLabel="Links"
+  toggleColor="text-orange-300"
+  colSpan="md:col-span-1"
+  rowSpan="md:row-span-2"
+  color="bg-[#050505]"
+  borderColor="border-orange-500"
+  padding="p-4"
+  class="h-[180px] lg:h-full"
+  compact
+>
+  <div slot="front" class="links-face">
+    <h2>Links</h2>
+    <div class="links-list">
+      {links.map((link) => (
+        <a href={link.href} target="_blank" rel="noopener noreferrer" class="link-entry">
+          <span>{link.name}</span><span class="link-arrow" aria-hidden="true">↗</span>
+        </a>
+      ))}
+    </div>
+  </div>
+  <div slot="back" class="links-face links-details">
+    {links.map((link) => (
+      <a href={link.href} target="_blank" rel="noopener noreferrer" class="link-detail">
+        <strong>{link.name}<span class="link-arrow" aria-hidden="true"> ↗</span></strong>
+        <span>{link.description}</span>
+      </a>
+    ))}
+  </div>
+</FlipCard>
+
+<style>
+  .links-face { display: flex; flex-direction: column; justify-content: center; gap: 4px; height: 100%; min-height: 0; font-family: sans-serif; }
+  .links-face h2 { margin: 0; color: #dfbfa5; font-size: 12px; font-weight: 500; line-height: 15px; }
+  .links-list { min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #72523e transparent; }
+  .link-entry { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; color: #eee5dd; font-size: 12px; line-height: 17px; text-decoration: none; }
+  .link-entry + .link-entry { border-top: 1px solid #3c2b20; }
+  .link-arrow { color: #daaa83; }
+  .links-details { justify-content: flex-start; gap: 10px; overflow-y: auto; scrollbar-width: thin; }
+  .link-detail { display: flex; flex-direction: column; gap: 2px; color: #eee5dd; text-decoration: none; }
+  .link-detail strong { font-size: 12px; font-weight: 500; line-height: 15px; }
+  .link-detail > span { color: #9f8b7b; font-size: 10px; line-height: 13px; }
+  .link-entry:hover, .link-detail:hover strong { color: #fed7aa; }
+  .link-entry:focus-visible, .link-detail:focus-visible { outline: 1px solid #daaa83; outline-offset: 1px; }
+  @media (min-width: 1024px) {
+    .links-face { gap: 2px; }
+    .links-face h2 { font-size: 11px; line-height: 14px; }
+    .links-details { gap: 8px; }
+  }
+</style>

@@ -2,7 +2,7 @@
 import FlipCard from "./FlipCard.astro";
 ---
 
-<FlipCard colSpan="md:col-span-3" rowSpan="md:row-span-4" color="bg-[#050505]" borderColor="border-cyan-500" class="h-[500px] md:h-[400px] lg:h-full">
+<FlipCard label="About me" frontLabel="Research interests" backLabel="About me" toggleColor="text-cyan-300" color="bg-[#050505]" borderColor="border-cyan-500" class="min-h-[360px] md:min-h-[360px] lg:min-h-0">
   <div slot="front" class="flex w-full h-full relative overflow-hidden">
     <!-- Complex Neural/Agent Network SVG -->
     <svg
@@ -10,7 +10,7 @@ import FlipCard from "./FlipCard.astro";
              right-[-80px] scale-[1.05]
              sm:right-[-110px] sm:scale-[1.1]
              md:right-[-150px] md:scale-125
-             lg:right-[-200px] lg:scale-[1.35]
+             lg:right-[-120px] lg:scale-[1.2]
              origin-bottom-right"
       viewBox="0 0 400 400"
       fill="none"
@@ -102,7 +102,7 @@ import FlipCard from "./FlipCard.astro";
          <animateMotion dur="4.5s" repeatCount="indefinite" begin="1.5s" path="M300 300 L260 380 L380 320" />
       </circle>
     </svg>
-    <div class="flex flex-col justify-between md:max-h-[300px] gap-4 relative z-10 md:max-w-[60%] lg:max-w-[55%]">
+    <div class="flex flex-col justify-between md:max-h-[300px] gap-4 relative z-10 md:max-w-[80%] lg:max-w-[70%]">
       <div class="flex flex-col h-full">
         <h6 class="text-sm font-light m-0 text-gray-500 font-sans">Welcome</h6>
         <div class="m-0 font-light text-xl flex flex-col gap-4 font-sans">
@@ -110,18 +110,20 @@ import FlipCard from "./FlipCard.astro";
           <div class="flex flex-col text-lg font-sans">
              <span>PhD Student</span>
              <span>UMEP Lab</span>
-             <span>@ Society Hub, UGOD Thrust</span>
-             <span>HKUST (Guangzhou)</span>
+             <span>@ HKUST(Guangzhou)</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div slot="back" class="w-full h-full flex flex-col justify-center items-center gap-4">
-    <h2 class="text-2xl font-bold font-sans">Research Interests</h2>
-    <p class="text-center text-sm text-gray-300 max-w-lg font-sans">
-       Agent-based modeling (ABM); artificial intelligence applications in urban studies; mechanistic interpretability of large language models; cognitive mapping in human mobility and urban cognition.
-    </p>
+  <div slot="back" class="w-full h-full max-w-lg mx-auto flex flex-col justify-center gap-4 font-sans">
+    <h2 class="m-0 text-2xl font-bold">Research Interests</h2>
+    <ul class="m-0 pl-4 grid gap-2 text-sm leading-5 text-gray-300 list-disc">
+      <li>Agent-based modeling (ABM)</li>
+      <li>Artificial intelligence applications in urban studies</li>
+      <li>Mechanistic interpretability of large language models</li>
+      <li>Cognitive mapping in human mobility and urban cognition</li>
+    </ul>
   </div>
 </FlipCard>

@@ -4,7 +4,7 @@ import { LINKS } from "../lib/constants";
 import { Icon } from "astro-icon/components";
 ---
 
-<FlipCard colSpan="md:col-span-1" rowSpan="md:row-span-4" color="bg-[#050505]" borderColor="border-purple-500" class="h-[300px] lg:h-full">
+<FlipCard label="Contact" frontLabel="Contact details" backLabel="Connect" toggleColor="text-purple-300" colSpan="md:col-span-1" rowSpan="md:row-span-4" color="bg-[#050505]" borderColor="border-purple-500" class="h-[300px] lg:h-full">
   <div slot="front" class="h-full flex flex-col justify-between">
     <header class="flex items-center">
       <h1 class="text-white text-xl font-bold font-sans">
@@ -24,22 +24,32 @@ import { Icon } from "astro-icon/components";
          </a>
        </div>
     </div>
-    <p class="text-xs text-gray-500 mt-2 text-right font-sans">Details on back...</p>
   </div>
 
-  <div slot="back" class="h-full flex flex-col justify-center">
-    <div class="flex flex-col w-full px-4">
+  <div slot="back" class="contact-details h-full flex flex-col justify-center">
+    <div class="flex flex-col w-full min-w-0">
       <h2 class="text-gray-500 mb-2 font-bold text-lg font-sans">Contact Info</h2>
       <div class="flex flex-col gap-4">
         <div class="flex flex-col">
             <span class="text-xs text-gray-500 font-sans">Email</span>
-            <a href={`mailto:${LINKS.email}`} class="text-sm text-white hover:text-primary-500 break-all font-sans">{LINKS.email}</a>
+            <a href={`mailto:${LINKS.email}`} class="contact-address text-white hover:text-primary-500" title={LINKS.email}>{LINKS.email}</a>
         </div>
         <div class="flex flex-col">
             <span class="text-xs text-gray-500 font-sans">GitHub</span>
-            <a href={LINKS.github} target="_blank" class="text-sm text-white hover:text-primary-500 break-all font-sans">{LINKS.github}</a>
+            <a href={LINKS.github} target="_blank" rel="noopener noreferrer" class="contact-address text-white hover:text-primary-500" title={LINKS.github}>@{LINKS.github.split("/").filter(Boolean).at(-1)}</a>
         </div>
       </div>
     </div>
   </div>
 </FlipCard>
+
+<style>
+  .contact-details { min-width: 0; }
+  .contact-address {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    white-space: nowrap;
+    font: 12px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+</style>

@@ -38,3 +38,10 @@ pnpm-debug.log*
 
 # Vercel
 .vercel/
+
+# Private Enode credentials and original training data
+.enode-private/
+
+# Python bytecode
+__pycache__/
+*.pyc
