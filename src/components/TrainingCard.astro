@@ -36,7 +36,7 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
   toggleColor="text-rose-300"
 >
   <div slot="front" class="training-front">
-    <div class="training-heading"><h2>Training</h2><span class="source-label">Enode One</span></div>
+    <div class="training-heading"><h2>Training</h2><a class="source-label" href="https://enode.ai/pages/enode-one" target="_blank" rel="noopener noreferrer">Enode One</a></div>
     <div class="period-label"><span>Last 30 days</span><span>{formatShortDate(window.from)} – {formatShortDate(window.to)}</span></div>
     <div class="overview-metrics">
       <div><strong>{summary.trainingDays}</strong><span>Training days</span></div>
@@ -93,6 +93,7 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
   .training-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .training-heading h2 { font-size: 20px; font-weight: 700; line-height: 1.3; }
   .source-label { font: 9px ui-monospace, monospace; text-transform: uppercase; color: #fda4af; }
+  .source-label:hover, .source-label:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
   .period-label { display: flex; justify-content: space-between; gap: 12px; color: #9b949b; font-size: 11px; }
   .period-label span:first-child { color: #d6cbd2; }
   .overview-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
