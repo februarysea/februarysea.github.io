@@ -75,6 +75,21 @@ def cell(value):
 def load_catalog(path):
     if not path.is_file():
         raise ExportError("Catalog database is missing.")
+    if path.suffix == ".json":
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict) or set(data) != {"schemaVersion", "metrics", "translations", "exercises"} or data["schemaVersion"] != 1:
+            raise ExportError("Invalid portable catalog.")
+        metrics, translations, exercises = (data[key] for key in ("metrics", "translations", "exercises"))
+        if not all(isinstance(value, dict) for value in (metrics, translations, exercises)):
+            raise ExportError("Invalid catalog mappings.")
+        for key, metric in metrics.items():
+            if not key or not isinstance(metric, dict) or set(metric) != {"key", "dimension", "loadingFactor", "name"}:
+                raise ExportError("Invalid metric definition.")
+            if not isinstance(metric["key"], str) or not isinstance(metric["name"], (str, type(None))) or not isinstance(metric["dimension"], (str, type(None))) or not isinstance(metric["loadingFactor"], (int, float, type(None))):
+                raise ExportError("Invalid metric definition values.")
+        if any(not isinstance(value, str) for mapping in (translations, exercises) for value in mapping.values()):
+            raise ExportError("Invalid catalog names.")
+        return metrics, translations, exercises
     metrics, translations, exercises = {}, {}, {}
     with sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True) as db:
         db.row_factory = sqlite3.Row

@@ -1,87 +1,191 @@
-
 name: Deploy to GitHub Pages
 
 on:
-  # 每次推送到 main 分支时触发
   push:
-    branches: [ master ]
-  # 允许在 GitHub Actions 页面手动触发
+    branches: [master]
+  schedule:
+    # 16:00 UTC = 00:00 Asia/Shanghai. GitHub may queue scheduled runs.
+    - cron: '0 16 * * *'
   workflow_dispatch:
+    inputs:
+      sync_enode:
+        description: Fetch Enode data (also works before enabling the daily schedule)
+        type: boolean
+        default: true
+      dry_run:
+        description: Validate and build only; do not deploy or save the checkpoint
+        type: boolean
+        default: true
+      force_audit:
+        description: Recheck all training details in the saved coverage
+        type: boolean
+        default: false
+      accept_deletions:
+        description: Accept missing records immediately, including bulk deletions (review first)
+        type: boolean
+        default: false
 
-# 赋予 GITHUB_TOKEN 必要的权限
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# 并发控制：防止多次推送导致部署冲突
+# Keep deployment and its checkpoint together; newer pushes must not cancel them.
 concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  build:
+  sync:
+    if: github.ref == 'refs/heads/master' && (vars.ENODE_SYNC_ENABLED == 'true' || inputs.sync_enode == true)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      state_revision: ${{ steps.state.outputs.state_revision }}
+    steps:
+      - name: Checkout trusted source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Test sync and disclosure checks
+        run: python3 -m unittest discover -s tests -p 'test_enode*.py'
+
+      - name: Load last successfully deployed state
+        id: state
+        run: >-
+          python3 scripts/enode_state_store.py load
+          --bootstrap config/enode-sync-bootstrap.json
+          --output "$RUNNER_TEMP/enode-previous.json"
+
+      # No package installation or site build runs in the credential-bearing job.
+      # Secrets are individual values, available only to this step.
+      - name: Fetch and validate incremental training data
+        env:
+          ENODE_SESSION_TOKEN: ${{ secrets.ENODE_SESSION_TOKEN }}
+          ENODE_API_KEY: ${{ secrets.ENODE_API_KEY }}
+          ENODE_DEVICE_ID: ${{ secrets.ENODE_DEVICE_ID }}
+          ENODE_DEVICE_NAME: ${{ secrets.ENODE_DEVICE_NAME }}
+          ENODE_PRIVATE_DIR: ${{ runner.temp }}/enode-private
+          FORCE_AUDIT: ${{ inputs.force_audit }}
+          ACCEPT_DELETIONS: ${{ inputs.accept_deletions }}
+        shell: bash
+        run: |
+          flags=()
+          if [[ "$FORCE_AUDIT" == "true" ]]; then flags+=(--force-audit); fi
+          if [[ "$ACCEPT_DELETIONS" == "true" ]]; then flags+=(--accept-deletions); fi
+          python3 scripts/enode_sync.py sync \
+            --state "$RUNNER_TEMP/enode-previous.json" \
+            --catalog config/enode-catalog.json \
+            --output-dir "$RUNNER_TEMP/enode-output" "${flags[@]}"
+
+      - name: Upload allowlisted data only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: enode-sync
+          path: |
+            ${{ runner.temp }}/enode-output/training.json
+            ${{ runner.temp }}/enode-output/sync-state.json
+          if-no-files-found: error
+          retention-days: 7
+
+  build:
+    needs: sync
+    if: >-
+      always() && !cancelled() && github.ref == 'refs/heads/master' &&
+      (needs.sync.result == 'success' || needs.sync.result == 'skipped') &&
+      (github.event_name != 'schedule' || vars.ENODE_SYNC_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Download validated training data
+        if: needs.sync.result == 'success'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: enode-sync
+          path: ${{ runner.temp }}/enode-output
+
+      - name: Apply validated training data
+        if: needs.sync.result == 'success'
+        run: |
+          python3 scripts/enode_sync.py validate \
+            --state "$RUNNER_TEMP/enode-output/sync-state.json" \
+            --public "$RUNNER_TEMP/enode-output/training.json"
+          cp "$RUNNER_TEMP/enode-output/training.json" src/data/training.json
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
         with:
           version: 9
 
-      - name: Detect package manager
-        id: detect-package-manager
-        run: |
-          if [ -f "${{ github.workspace }}/yarn.lock" ]; then
-            echo "manager=yarn" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT
-            echo "runner=yarn" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ -f "${{ github.workspace }}/pnpm-lock.yaml" ]; then
-            echo "manager=pnpm" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT
-            echo "runner=pnpm" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ -f "${{ github.workspace }}/package.json" ]; then
-            echo "manager=npm" >> $GITHUB_OUTPUT
-            echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "Unable to determine package manager"
-            exit 1
-          fi
-
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: "20"
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
+          node-version: '20'
+          cache: pnpm
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
 
       - name: Install dependencies
-        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        run: pnpm install --frozen-lockfile
 
-      - name: Build with Astro
+      - name: Validate and build
         run: |
-          ${{ steps.detect-package-manager.outputs.runner }} astro build
+          pnpm run eslint
+          pnpm run check
+          node --test tests/training.test.mjs
+          pnpm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: ./dist
 
   deploy:
+    needs: [sync, build]
+    # always() also permits normal deploys while the rollout flag skips sync.
+    if: always() && !cancelled() && needs.build.result == 'success' && inputs.dry_run != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+  persist:
+    needs: [sync, deploy]
+    if: needs.sync.result == 'success' && needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Download successfully deployed data
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: enode-sync
+          path: ${{ runner.temp }}/enode-output
+
+      - name: Save checkpoint on enode-data branch
+        env:
+          EXPECTED_REVISION: ${{ needs.sync.outputs.state_revision }}
+        run: >-
+          python3 scripts/enode_state_store.py persist
+          --directory "$RUNNER_TEMP/enode-output"
+          --expected-revision "$EXPECTED_REVISION"

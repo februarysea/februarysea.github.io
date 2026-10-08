@@ -25,12 +25,40 @@ from urllib.parse import quote, urlencode, urlsplit, parse_qs
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
-PRIVATE = ROOT / ".enode-private"
+PRIVATE = Path(os.environ.get("ENODE_PRIVATE_DIR", str(ROOT / ".enode-private")))
 BASE = "https://api.enode.ai/api"
 
 
 class EnodeError(Exception):
-    pass
+    def __init__(self, message, *, retryable=False):
+        super().__init__(message)
+        self.retryable = retryable
+
+
+def session_token():
+    token = os.environ.get("ENODE_SESSION_TOKEN")
+    if token:
+        return token
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        raise EnodeError("ENODE_SESSION_TOKEN is missing from this job.")
+    return read("session.json")["token"]
+
+
+def client_config():
+    if not os.environ.get("ENODE_SESSION_TOKEN"):
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            raise EnodeError("Enode Secrets are missing from this job.")
+        return read("client.json")
+    required = ("ENODE_API_KEY", "ENODE_DEVICE_ID", "ENODE_DEVICE_NAME")
+    if any(not os.environ.get(key) for key in required):
+        raise EnodeError("An Enode client Secret is missing.")
+    profile = json.loads((ROOT / "config/enode-client.json").read_text())
+    allowed = {"app-version", "device-type", "Accept-Language", "User-Agent", "timezone"}
+    if set(profile) != allowed or any(not isinstance(v, str) or not v for v in profile.values()):
+        raise EnodeError("Invalid portable Enode client profile.")
+    headers = {**profile, "api-key": os.environ["ENODE_API_KEY"],
+               "device-id": os.environ["ENODE_DEVICE_ID"], "device-name": os.environ["ENODE_DEVICE_NAME"]}
+    return {"apiKey": headers["api-key"], "deviceId": headers["device-id"], "nativeHeaders": headers}
 
 
 def private_dir():
@@ -84,7 +112,7 @@ def valid_timestamp(value):
 def request(path, method="GET", body=None, basic=None, auth=True, require_json=True):
     if not path.startswith("/") or "\r" in path or "\n" in path:
         raise EnodeError("Invalid API path")
-    config = read("client.json")
+    config = client_config()
     headers = {
         "device-type": "web",
         "device-name": "Enode personal export client",
@@ -102,11 +130,11 @@ def request(path, method="GET", body=None, basic=None, auth=True, require_json=T
     if basic:
         headers["Authorization"] = "Basic " + basic
     elif auth:
-        session = read("session.json")
-        claims = token_claims(session["token"])
+        token = session_token()
+        claims = token_claims(token)
         if claims.get("exp", float("inf")) <= dt.datetime.now().timestamp():
             raise EnodeError("Saved token has expired; sign in to One, open its history, then import-app-session again.")
-        headers["Authorization"] = "Bearer " + session["token"]
+        headers["Authorization"] = "Bearer " + token
     if body is not None:
         headers["Content-Type"] = "application/json"
     # Credentials are never placed in argv, logs, or printed responses.
@@ -132,7 +160,8 @@ def request(path, method="GET", body=None, basic=None, auth=True, require_json=T
         run = subprocess.run(["curl", "-q", "-m", "30", "--config", str(curl_config)],
                              capture_output=True, text=True)
         if run.returncode:
-            raise EnodeError(f"Network request failed (curl {run.returncode}): {run.stderr.strip()}")
+            raise EnodeError(f"Network request failed (curl {run.returncode}).",
+                             retryable=run.returncode in (6, 7, 18, 28, 35, 52, 55, 56))
         status = int(run.stdout)
         text = response.read_text() if response.exists() else ""
         try:
@@ -147,7 +176,8 @@ def request(path, method="GET", body=None, basic=None, auth=True, require_json=T
                 safe["nextStep"] = "Sign in to One, open its history, then import-app-session again."
             elif status in (314, 403):
                 safe["nextStep"] = "Account/client permission mismatch; stop and inspect the private error."
-            raise EnodeError(f"HTTP {status}: {json.dumps(safe, ensure_ascii=False)}")
+            raise EnodeError(f"HTTP {status}: {json.dumps(safe, ensure_ascii=False)}",
+                             retryable=status == 429 or 500 <= status < 600)
         if require_json and payload is None:
             raise EnodeError(f"HTTP {status} did not return valid non-null JSON; existing data retained.")
         return payload

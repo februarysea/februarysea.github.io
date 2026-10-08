@@ -138,7 +138,8 @@ def export_public(snapshot_path, catalog_path, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot", type=Path, required=True)
-    parser.add_argument("--catalog-db", type=Path, required=True)
+    parser.add_argument("--catalog", "--catalog-db", dest="catalog_db", type=Path, required=True,
+                        help="Portable JSON catalog or the local app SQLite database")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:

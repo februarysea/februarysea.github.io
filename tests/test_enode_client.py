@@ -6,6 +6,7 @@ import copy
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import stat
 import subprocess
@@ -30,6 +31,12 @@ def fake_token(exp=4102444800):
 
 class EnodeClientTests(unittest.TestCase):
     def setUp(self):
+        environment = mock.patch.dict(os.environ, {
+            "GITHUB_ACTIONS": "false", "ENODE_SESSION_TOKEN": "", "ENODE_API_KEY": "",
+            "ENODE_DEVICE_ID": "", "ENODE_DEVICE_NAME": "",
+        })
+        environment.start()
+        self.addCleanup(environment.stop)
         temporary = tempfile.TemporaryDirectory(prefix="enode-test-")
         self.addCleanup(temporary.cleanup)
         self.private = Path(temporary.name) / "private-\u6d4b\u8bd5"
@@ -88,6 +95,32 @@ class EnodeClientTests(unittest.TestCase):
                 for secret in (self.token, basic, self.api_key):
                     self.assertNotIn(secret, " ".join(argv))
                 self.assert_request_files_cleaned()
+
+    def test_actions_requires_secrets_even_if_local_credentials_exist(self):
+        with mock.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}), \
+             mock.patch.object(enode.subprocess, "run") as run:
+            with self.assertRaisesRegex(enode.EnodeError, "missing"):
+                enode.session_token()
+            with self.assertRaisesRegex(enode.EnodeError, "missing"):
+                enode.request("/synthetic-endpoint")
+            run.assert_not_called()
+
+    def test_actions_uses_individual_env_secrets_without_reading_local_files(self):
+        cloud_token = fake_token(exp=4102444801)
+        env = {"GITHUB_ACTIONS": "true", "ENODE_SESSION_TOKEN": cloud_token,
+               "ENODE_API_KEY": "synthetic-cloud-api", "ENODE_DEVICE_ID": "synthetic-cloud-device",
+               "ENODE_DEVICE_NAME": "synthetic-cloud-name"}
+        with mock.patch.dict(os.environ, env), \
+             mock.patch.object(enode, "read", side_effect=AssertionError("Local credentials read")), \
+             mock.patch.object(enode.subprocess, "run", side_effect=self.curl_response()):
+            enode.request("/synthetic-endpoint")
+        argv, options = self.requests[-1]
+        headers = dict(value.split(": ", 1) for value in options["header"])
+        self.assertEqual(headers["Authorization"], "Bearer " + cloud_token)
+        self.assertEqual(headers["api-key"], env["ENODE_API_KEY"])
+        self.assertEqual(headers["device-name"], env["ENODE_DEVICE_NAME"])
+        self.assertFalse(any(value in " ".join(argv) for value in env.values()))
+        self.assert_request_files_cleaned()
 
     def test_http_failures_do_not_retry_or_replace_session(self):
         previous = (self.private / "session.json").read_bytes()
