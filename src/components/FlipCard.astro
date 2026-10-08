@@ -12,13 +12,14 @@ interface Props {
   backLabel?: string;
   toggleColor?: string;
   compact?: boolean;
+  hideFrontToggle?: boolean;
 }
 
 const {
   colSpan, rowSpan, padding = "p-6", color = "bg-darkslate-500",
   borderColor = "border-darkslate-100", class: className,
   label = "Card", frontLabel = "Details", backLabel = "Overview",
-  toggleColor = "text-gray-400", compact = false,
+  toggleColor = "text-gray-400", compact = false, hideFrontToggle = false,
 } = Astro.props;
 ---
 
@@ -30,12 +31,15 @@ const {
   <div class="flip-card-inner relative w-full h-full transition-transform duration-700 transform-style-3d">
     <div data-flip-side="front" aria-hidden="false" class={`flip-card-front absolute inset-0 backface-hidden ${color} shadow-lg rounded-lg ${padding} border ${borderColor} flex flex-col overflow-hidden`}>
       <div class="flip-card-content"><slot name="front" /></div>
-      <div class="flip-card-footer">
-        <div class="flip-card-footer-note"><slot name="footer-front" /></div>
-        <button type="button" data-flip-to="back" class={`flip-card-toggle ${toggleColor}`} aria-label={`${label}: ${frontLabel}`} hidden>
-          {frontLabel}<span aria-hidden="true">↻</span>
-        </button>
-      </div>
+      {(!hideFrontToggle || Astro.slots.has("footer-front")) && (
+        <div class="flip-card-footer">
+          <div class="flip-card-footer-note"><slot name="footer-front" /></div>
+          {!hideFrontToggle && <button type="button" data-flip-to="back" class={`flip-card-toggle ${toggleColor}`} aria-label={`${label}: ${frontLabel}`} hidden>
+            {frontLabel}<span aria-hidden="true">↻</span>
+          </button>}
+        </div>
+      )}
+      {hideFrontToggle && <button type="button" data-flip-to="back" class="flip-card-surface-toggle" aria-label={`${label}: ${frontLabel}`} hidden></button>}
     </div>
 
     <div data-flip-side="back" aria-hidden="true" inert class={`flip-card-back absolute inset-0 backface-hidden rotate-y-180 ${color} shadow-lg rounded-lg ${padding} border ${borderColor} flex flex-col overflow-hidden`}>
@@ -288,6 +292,17 @@ const {
     outline-offset: 2px;
   }
   .flip-card-toggle[hidden] { display: none; }
+  .flip-card-surface-toggle {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: transparent;
+    cursor: pointer;
+  }
+  .flip-card-surface-toggle:focus-visible {
+    outline: 2px solid #99f6e4;
+    outline-offset: -5px;
+  }
   .flip-card-compact .flip-card-footer {
     margin-top: 4px;
     min-height: 20px;

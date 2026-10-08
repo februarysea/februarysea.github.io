@@ -62,10 +62,13 @@ Touch input does not trigger hover previews. Automatic and hover flips pause for
 keyboard focus, focused editable fields, open dialogs, offscreen/background
 display and reduced-motion mode.
 Hidden faces are inert; only a keyboard-triggered flip moves keyboard focus.
-The middle card shows a particle swarm on the front and Recent Work on the back.
+The middle card shows Conway's Game of Life on the front and Recent Work on the
+back. Its front has no visible corner toggle or footer; the full face is a native
+button so touch and keyboard users can still open Recent Work. Hover and idle
+flips remain available, and the back retains its return button.
 The publication metadata is verified against Crossref (DOI
 10.1016/j.engappai.2026.116203), including the matching ScienceDirect PII.
-The swarm pauses on the back and resumes on the front.
+The simulation pauses on the back and resumes on the front.
 
 ## Update
 
