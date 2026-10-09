@@ -56,11 +56,13 @@ const links = [
 <style>
   .links-face { display: flex; flex-direction: column; justify-content: center; gap: 4px; height: 100%; min-height: 0; font-family: sans-serif; }
   .links-face h2 { margin: 0; color: #dfbfa5; font-size: 12px; font-weight: 500; line-height: 15px; }
-  .links-list { min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #72523e transparent; }
+  .links-list { min-height: 0; overflow-y: auto; }
   .link-entry { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; color: #eee5dd; font-size: 12px; line-height: 17px; text-decoration: none; }
   .link-entry + .link-entry { border-top: 1px solid #3c2b20; }
   .link-arrow { color: #daaa83; }
-  .links-details { justify-content: flex-start; gap: 10px; overflow-y: auto; scrollbar-width: thin; }
+  .links-details { justify-content: flex-start; gap: 10px; overflow-y: auto; }
+  .links-list, .links-details { scrollbar-width: none; }
+  .links-list::-webkit-scrollbar, .links-details::-webkit-scrollbar { display: none; }
   .link-detail { display: flex; flex-direction: column; gap: 2px; color: #eee5dd; text-decoration: none; }
   .link-detail strong { font-size: 12px; font-weight: 500; line-height: 15px; }
   .link-detail > span { color: #9f8b7b; font-size: 10px; line-height: 13px; }
