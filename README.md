@@ -82,18 +82,16 @@ side is Recent work. `/usage-preview/` retains the alternate visualizations.
 Local session history and other accounts are not combined with this data.
 
 ```bash
-pnpm run usage:sync
 pnpm run usage:test
-python3 scripts/fetch-codex-profile.py --validate-snapshot src/data/codex-profile.json
+pnpm run usage:validate
 ```
 
-The sync command makes a read-only request to the same Profile service as the
-desktop client, using the current local sign-in from `$CODEX_HOME/auth.json`
-(default `~/.codex/auth.json`). This is an internal endpoint, not a documented
-public API. Credentials are never written to the snapshot or browser bundle.
-`CODEX_ACCOUNT_ID` optionally pins the expected account; a mismatch fails before
-the request. Temporary service errors retry up to three times. Failed fetches
-leave the last good snapshot intact.
+Collection and login renewal belong to the private `februarysea/codex-usage-sync`
+repository. Its daily GitHub Actions job uses a dedicated managed login and the
+official `account/usage/read` client interface. It commits only validated public
+statistics to this repository's `master` branch, triggering the existing Pages
+deployment. This website repository does not need Codex credentials or a local
+Mac collector. An unsuccessful collection leaves the last good snapshot intact.
 
 The public snapshot contains only its schema version, source, fetch timestamp,
 lifetime token total, and dated daily totals. Validation rejects extra fields,
@@ -107,9 +105,10 @@ Unreported trailing days stay blank. Hovering, tapping, or focusing a day shows
 its exact token count; arrow keys move between days. Narrow screens can scroll
 the wall horizontally, starting at the recent end.
 
-Scheduled Codex collection is not yet enabled. It requires a separately
-authorized private automation environment and a dedicated managed login with
-refresh-state persistence. Do not put Codex login credentials in this public
-repository or its Actions workflows. See the
+The private collector is scheduled for 00:23 Asia/Shanghai (16:23 UTC; GitHub may
+queue runs), with an explicit enable flag set after bootstrap verification.
+The private environment stores the latest refreshed login between runs. Never
+put Codex login credentials in this public repository or its Actions workflows.
+See the
 [official CI authentication guidance](https://learn.chatgpt.com/docs/auth/ci-cd-auth).
 The existing Enode daily schedule and deployment settings are unchanged.
