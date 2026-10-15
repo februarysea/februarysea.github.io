@@ -1,4 +1,4 @@
-"""Renew an isolated Codex session, persist it, and export only public statistics."""
+"""Renew isolated Codex sessions and export their combined public statistics."""
 import argparse
 import json
 import os
@@ -10,8 +10,11 @@ import threading
 import time
 from datetime import datetime, timezone
 
-from codex_usage import token_count, validate_snapshot
+from codex_usage import timestamp, token_count, validate_snapshot
 from codex_github import AUTH_ENVIRONMENT, WEBSITE_REPO, request
+
+
+AUTH_SECRETS = ("CODEX_AUTH_JSON", "CODEX_SECONDARY_AUTH_JSON")
 
 
 def validate_auth(raw, expected_account):
@@ -36,7 +39,9 @@ def mask_auth(auth):
                 print("::add-mask::" + value, flush=True)
 
 
-def persist_auth(raw, expected_account, github_token):
+def persist_auth(raw, expected_account, github_token, secret_name="CODEX_AUTH_JSON"):
+    if secret_name not in AUTH_SECRETS:
+        raise ValueError("Unexpected credential storage destination.")
     mask_auth(validate_auth(raw, expected_account))
     # Only the user-selected website environment may receive encrypted credentials.
     repository = request("/repos/" + WEBSITE_REPO, github_token)
@@ -45,7 +50,7 @@ def persist_auth(raw, expected_account, github_token):
     env = dict(os.environ)
     env["GH_TOKEN"] = github_token
     for attempt in range(3):
-        result = subprocess.run(["gh", "secret", "set", "CODEX_AUTH_JSON", "--repo", WEBSITE_REPO,
+        result = subprocess.run(["gh", "secret", "set", secret_name, "--repo", WEBSITE_REPO,
                                  "--env", AUTH_ENVIRONMENT], input=raw, text=True,
                                 capture_output=True, env=env, timeout=45)
         if result.returncode == 0:
@@ -183,15 +188,60 @@ def collect(raw_auth, account_id, persist, binary="codex", rpc_factory=CodexRPC)
         return normalize_usage(payload)
 
 
+def configured_accounts(environ):
+    count = environ.get("CODEX_ACCOUNT_COUNT") or "1"
+    if count not in ("1", "2"):
+        raise ValueError("Expected one or two configured Codex accounts.")
+    slots = ((AUTH_SECRETS[0], "CODEX_ACCOUNT_ID"),
+             (AUTH_SECRETS[1], "CODEX_SECONDARY_ACCOUNT_ID"))
+    accounts, seen = [], set()
+    for secret_name, account_key in slots[:int(count)]:
+        raw, account = environ.get(secret_name, ""), environ.get(account_key, "")
+        validate_auth(raw, account)
+        if account in seen:
+            raise ValueError("Duplicate Codex accounts would double-count usage.")
+        seen.add(account)
+        accounts.append((secret_name, raw, account))
+    return accounts
+
+
+def combine_snapshots(snapshots):
+    if not snapshots:
+        raise ValueError("No account statistics were collected.")
+    daily, total = {}, 0
+    for snapshot in snapshots:
+        validate_snapshot(snapshot)
+        total = token_count(total + snapshot["totalTokens"])
+        for bucket in snapshot["daily"]:
+            day = bucket["date"]
+            daily[day] = token_count(daily.get(day, 0) + bucket["totalTokens"])
+    # Use the oldest capture so the aggregate never claims a newer full refresh.
+    captured_at = min(snapshots, key=lambda item: timestamp(item["generatedAt"]))["generatedAt"]
+    return validate_snapshot({"version": 1, "source": "codex-profile-service",
+                              "generatedAt": captured_at, "totalTokens": total,
+                              "daily": [{"date": day, "totalTokens": value}
+                                        for day, value in sorted(daily.items())]})
+
+
+def collect_accounts(environ, *, collector=collect, persist=persist_auth):
+    # Validate every configured account before any session can rotate.
+    accounts = configured_accounts(environ)
+    github_token = environ["GH_TOKEN"]
+    snapshots = []
+    for secret_name, raw, account in accounts:
+        def save(value, account_id=account, destination=secret_name):
+            persist(value, account_id, github_token, secret_name=destination)
+        snapshots.append(collector(raw, account, save))
+    # A failure in any account prevents a partial aggregate from being exported.
+    return combine_snapshots(snapshots)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
-        raw = os.environ["CODEX_AUTH_JSON"]
-        account = os.environ["CODEX_ACCOUNT_ID"]
-        github_token = os.environ["GH_TOKEN"]
-        snapshot = collect(raw, account, lambda value: persist_auth(value, account, github_token))
+        snapshot = collect_accounts(os.environ)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         temporary = args.output.with_suffix(".json.tmp")
         temporary.write_text(json.dumps(snapshot, indent=2, allow_nan=False) + "\n")

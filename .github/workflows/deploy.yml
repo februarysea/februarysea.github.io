@@ -13,7 +13,7 @@ on:
         type: boolean
         default: true
       sync_codex:
-        description: Refresh the dedicated Codex login and fetch token usage
+        description: Refresh the dedicated Codex logins and fetch combined token usage
         type: boolean
         default: true
       dry_run:
@@ -128,10 +128,13 @@ jobs:
           APP_PRIVATE_KEY: ${{ secrets.CODEX_APP_PRIVATE_KEY }}
         run: python3 scripts/codex_github.py auth
 
-      - name: Renew login, save it, and collect statistics
+      - name: Renew logins, save them, and combine statistics
         env:
           CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
           CODEX_ACCOUNT_ID: ${{ secrets.CODEX_ACCOUNT_ID }}
+          CODEX_SECONDARY_AUTH_JSON: ${{ secrets.CODEX_SECONDARY_AUTH_JSON }}
+          CODEX_SECONDARY_ACCOUNT_ID: ${{ secrets.CODEX_SECONDARY_ACCOUNT_ID }}
+          CODEX_ACCOUNT_COUNT: ${{ vars.CODEX_ACCOUNT_COUNT || '1' }}
           GH_TOKEN: ${{ steps.auth_token.outputs.token }}
         run: python3 scripts/collect_codex_usage.py --output "$RUNNER_TEMP/codex-output/codex-profile.json"
 
