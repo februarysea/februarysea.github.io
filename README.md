@@ -76,24 +76,28 @@ or
 
 ## Codex token usage
 
-The homepage's Token usage heatmap uses the signed-in Codex Profile's daily
-token buckets and lifetime total from `src/data/codex-profile.json`. Its reverse
-side is Recent work. `/usage-preview/` retains the alternate visualizations.
-Local session history and other accounts are not combined with this data.
+The homepage's Token usage heatmap combines the configured Codex accounts' daily
+token buckets and lifetime totals in `src/data/codex-profile.json`. Counts for
+the same service date are added together; account identifiers and email addresses
+are never exported. Its reverse side is Recent work. `/usage-preview/` retains
+the alternate visualizations. Local session history is not used.
 
 ```bash
 pnpm run usage:test
 pnpm run usage:validate
 ```
 
-This repository's Pages workflow collects usage and renews a dedicated managed
-login using the official Codex client. The `sync-codex` job refreshes the login,
-saves it back to an encrypted environment Secret, and exports only validated
-public statistics. Build and deployment jobs receive that snapshot without any
-Codex credentials. After a successful deployment, the workflow saves the same
+This repository's Pages workflow collects usage and renews each account's dedicated
+managed login using the official Codex client. The `sync-codex` job refreshes each
+login in isolation, saves it back to its own encrypted environment Secret, and
+exports only validated combined public statistics. Build and deployment jobs
+receive that snapshot without any Codex credentials. After a successful deployment, the workflow saves the same
 snapshot on `master` using `GITHUB_TOKEN`, without triggering a second run.
 No additional repository, data branch, or daily Mac process is needed. Failed
-collection leaves the previous website snapshot in place.
+collection of either account leaves the previous website snapshot in place.
+The configured account count determines which credentials are required. Missing
+credentials never silently publish a one-account total, and duplicate account
+IDs fail before renewal.
 
 The public snapshot contains only its schema version, source, fetch timestamp,
 lifetime token total, and dated daily totals. Validation rejects extra fields,
@@ -118,10 +122,13 @@ commit statistics. Existing Enode synchronization remains in the same workflow.
 | Location | Name | Purpose |
 | --- | --- | --- |
 | `codex-auth` environment Secret | `CODEX_AUTH_JSON` | Independent managed login, replaced after renewal |
-| `codex-auth` environment Secret | `CODEX_ACCOUNT_ID` | Pin the selected account |
+| `codex-auth` environment Secret | `CODEX_ACCOUNT_ID` | Pin the first selected account |
+| `codex-auth` environment Secret | `CODEX_SECONDARY_AUTH_JSON` | Second account's independent login and renewal state |
+| `codex-auth` environment Secret | `CODEX_SECONDARY_ACCOUNT_ID` | Pin the second selected account |
 | `codex-auth` environment Secret | `CODEX_APP_PRIVATE_KEY` | Sign short-lived Secret write-back tokens |
 | Repository variable | `CODEX_APP_ID` | Owner-only GitHub App identity |
 | Repository variable | `CODEX_APP_INSTALLATION_ID` | Installation on this website repository only |
+| Repository variable | `CODEX_ACCOUNT_COUNT` | `2` requires both accounts; `1` supports a single account |
 | Repository variable | `CODEX_SYNC_ENABLED` | Enable only after verified cloud runs |
 
 The GitHub App needs only **Environments: read and write**, with metadata read
@@ -133,8 +140,11 @@ the `master` branch. Pull request checks never access its Secrets.
 Environment Secrets are loaded when a job starts, and the Pages workflow's
 concurrency group serializes renewal. Credentials are saved immediately after
 refresh and again when the client exits; failure to save prevents publication.
-Use a separate `codex login` for bootstrap, never the active desktop session.
-Delete the bootstrap copy once two cloud runs verify renewal and reuse.
+Use a separate `codex login` for each account, never its active desktop session.
+Store both second-account Secrets before setting `CODEX_ACCOUNT_COUNT=2`.
+Each account's rotated credentials overwrite only its own Secret; all configured
+accounts must succeed before their totals are combined. Delete each bootstrap
+copy once two cloud runs verify renewal and reuse.
 Revoked or invalidated refresh tokens can require a fresh independent login.
 
 The repository and Actions logs are public. Never commit auth files or PEM keys,
