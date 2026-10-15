@@ -41,12 +41,14 @@ const chartLabel = variant === "heatmap"
 <section
   id={id}
   data-usage-view={variant}
-  data-face="front"
+  data-flip-card={showRecentWork || undefined}
+  data-flip-pause-hover={showRecentWork || undefined}
+  data-manual-face="front"
   class="token-card md:col-span-2 lg:col-span-3 md:row-span-2"
   aria-labelledby={`${id}-title`}
 >
- <div class="token-card-inner">
- <div class="token-face token-front" data-usage-front>
+ <div class="token-card-inner" data-flip-inner>
+ <div class="token-face token-front" data-usage-front data-flip-side="front" aria-hidden="false">
   <header class="token-header">
     <div class="token-heading">
       <h2 id={`${id}-title`}>Token usage</h2>
@@ -76,7 +78,7 @@ const chartLabel = variant === "heatmap"
           {reportedCells.map((day) => <rect
             class={`wall-cell heat-${day.level}`} data-usage-day={day.date}
             data-usage-date={`${usageDate(day.date)}, ${day.date.slice(0, 4)}`}
-            data-usage-tokens={exactTokens(day.totalTokens ?? 0)}
+            data-usage-tokens={compactTokens(day.totalTokens ?? 0)}
             role="button" tabindex={day === reportedCells.at(-1) ? "0" : "-1"}
             aria-label={dayLabel(day)}
             x={36 + day.column * 12} y={25 + day.row * 12} width="9" height="9" rx="1.5"
@@ -141,19 +143,21 @@ const chartLabel = variant === "heatmap"
     {variant === "heatmap" && <span class="wall-legend" aria-label="Lighter teal indicates higher usage.">
       <span class="wall-scale">Less {[0, 1, 2, 3, 4].map((level) => <i class={`heat-${level}`}></i>)} More</span>
     </span>}
-    {showRecentWork && <button class="usage-flip" type="button" data-usage-flip="back" aria-label="Show recent work">Recent work <span aria-hidden="true">↻</span></button>}
+    {showRecentWork && <button class="usage-flip" type="button" data-flip-to="back" aria-label="Show recent work">Recent work <span aria-hidden="true">↻</span></button>}
   </footer>
  </div>
- {showRecentWork && <div class="token-face token-back" data-usage-back inert aria-hidden="true">
+ {showRecentWork && <div class="token-face token-back" data-usage-back data-flip-side="back" inert aria-hidden="true">
    <RecentWork titleId={`${id}-recent-work-title`} />
    <footer class="token-footer token-back-footer">
-     <button class="usage-flip" type="button" data-usage-flip="front" aria-label="Show token usage">Token usage <span aria-hidden="true">↻</span></button>
+     <button class="usage-flip" type="button" data-flip-to="front" aria-label="Show token usage">Token usage <span aria-hidden="true">↻</span></button>
    </footer>
  </div>}
  </div>
 </section>
 
 <script>
+  import "../lib/flip-cards";
+
   const initUsageCards = () => {
     document.querySelectorAll<HTMLElement>("[data-usage-view]").forEach((card) => {
       if (card.dataset.usageReady) return;
@@ -243,23 +247,7 @@ const chartLabel = variant === "heatmap"
         });
       }
 
-      const front = card.querySelector<HTMLElement>("[data-usage-front]");
-      const back = card.querySelector<HTMLElement>("[data-usage-back]");
-      card.querySelectorAll<HTMLButtonElement>("[data-usage-flip]").forEach((button) => {
-        button.addEventListener("click", () => {
-          if (!front || !back) return;
-          const showBack = button.dataset.usageFlip === "back";
-          hideTooltip();
-          card.dataset.face = showBack ? "back" : "front";
-          front.inert = showBack;
-          back.inert = !showBack;
-          front.setAttribute("aria-hidden", String(showBack));
-          back.setAttribute("aria-hidden", String(!showBack));
-          card.setAttribute("aria-labelledby", `${card.id}-${showBack ? "recent-work-title" : "title"}`);
-          const visibleFace = showBack ? back : front;
-          visibleFace.querySelector<HTMLButtonElement>("[data-usage-flip]")?.focus({ preventScroll: true });
-        });
-      });
+      card.addEventListener("card-flip", hideTooltip);
     });
   };
   initUsageCards();
@@ -289,7 +277,7 @@ const chartLabel = variant === "heatmap"
     transform-style: preserve-3d;
     transition: transform 600ms ease;
   }
-  .token-card[data-face="back"] .token-card-inner { transform: rotateY(180deg); }
+  .token-card[data-manual-face="back"] .token-card-inner { transform: rotateY(180deg); }
   .token-face {
     grid-area: 1 / 1;
     min-width: 0;
