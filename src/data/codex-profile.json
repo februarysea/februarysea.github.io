@@ -1,8 +1,8 @@
 {
   "version": 1,
   "source": "codex-profile-service",
-  "generatedAt": "2026-10-14T13:24:23.452004+00:00",
-  "totalTokens": 14171274983,
+  "generatedAt": "2026-10-15T13:40:13.109923+00:00",
+  "totalTokens": 14354296336,
   "daily": [
     {
       "date": "2025-12-29",
@@ -886,7 +886,15 @@
     },
     {
       "date": "2026-10-13",
-      "totalTokens": 246999235
+      "totalTokens": 255119079
+    },
+    {
+      "date": "2026-10-14",
+      "totalTokens": 165826157
+    },
+    {
+      "date": "2026-10-15",
+      "totalTokens": 9075352
     }
   ]
 }
