@@ -45,3 +45,8 @@ pnpm-debug.log*
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Codex login and GitHub App bootstrap credentials
+auth.json
+*.pem
+.codex/
