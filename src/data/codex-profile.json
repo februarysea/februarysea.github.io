@@ -1,8 +1,8 @@
 {
   "version": 1,
   "source": "codex-profile-service",
-  "generatedAt": "2026-10-15T13:40:13.109923+00:00",
-  "totalTokens": 14354296336,
+  "generatedAt": "2026-10-15T15:12:48.231070+00:00",
+  "totalTokens": 16292815298,
   "daily": [
     {
       "date": "2025-12-29",
@@ -174,7 +174,11 @@
     },
     {
       "date": "2026-03-26",
-      "totalTokens": 988809
+      "totalTokens": 10807709
+    },
+    {
+      "date": "2026-03-27",
+      "totalTokens": 2292631
     },
     {
       "date": "2026-03-28",
@@ -190,7 +194,7 @@
     },
     {
       "date": "2026-04-02",
-      "totalTokens": 5314830
+      "totalTokens": 15967575
     },
     {
       "date": "2026-04-03",
@@ -578,7 +582,7 @@
     },
     {
       "date": "2026-07-23",
-      "totalTokens": 24740159
+      "totalTokens": 29789600
     },
     {
       "date": "2026-07-24",
@@ -630,15 +634,15 @@
     },
     {
       "date": "2026-08-05",
-      "totalTokens": 29559986
+      "totalTokens": 35262884
     },
     {
       "date": "2026-08-06",
-      "totalTokens": 159585634
+      "totalTokens": 161551754
     },
     {
       "date": "2026-08-07",
-      "totalTokens": 88123343
+      "totalTokens": 91081332
     },
     {
       "date": "2026-08-08",
@@ -649,12 +653,20 @@
       "totalTokens": 79860868
     },
     {
+      "date": "2026-08-10",
+      "totalTokens": 612077
+    },
+    {
+      "date": "2026-08-11",
+      "totalTokens": 17778
+    },
+    {
       "date": "2026-08-12",
       "totalTokens": 27787
     },
     {
       "date": "2026-08-13",
-      "totalTokens": 113956067
+      "totalTokens": 114419698
     },
     {
       "date": "2026-08-14",
@@ -670,7 +682,7 @@
     },
     {
       "date": "2026-08-17",
-      "totalTokens": 28790228
+      "totalTokens": 45946072
     },
     {
       "date": "2026-08-18",
@@ -682,7 +694,7 @@
     },
     {
       "date": "2026-08-20",
-      "totalTokens": 25722772
+      "totalTokens": 25785855
     },
     {
       "date": "2026-08-21",
@@ -690,19 +702,19 @@
     },
     {
       "date": "2026-08-22",
-      "totalTokens": 6732444
+      "totalTokens": 6769117
     },
     {
       "date": "2026-08-23",
-      "totalTokens": 28631399
+      "totalTokens": 28970880
     },
     {
       "date": "2026-08-24",
-      "totalTokens": 25189404
+      "totalTokens": 25744814
     },
     {
       "date": "2026-08-25",
-      "totalTokens": 21868242
+      "totalTokens": 22340763
     },
     {
       "date": "2026-08-26",
@@ -710,7 +722,7 @@
     },
     {
       "date": "2026-08-27",
-      "totalTokens": 4865768
+      "totalTokens": 5000846
     },
     {
       "date": "2026-08-28",
@@ -730,7 +742,7 @@
     },
     {
       "date": "2026-09-01",
-      "totalTokens": 121143655
+      "totalTokens": 125074238
     },
     {
       "date": "2026-09-02",
@@ -738,7 +750,7 @@
     },
     {
       "date": "2026-09-03",
-      "totalTokens": 51081248
+      "totalTokens": 51217718
     },
     {
       "date": "2026-09-04",
@@ -750,19 +762,19 @@
     },
     {
       "date": "2026-09-07",
-      "totalTokens": 137742454
+      "totalTokens": 137781122
     },
     {
       "date": "2026-09-08",
-      "totalTokens": 113231165
+      "totalTokens": 113269848
     },
     {
       "date": "2026-09-09",
-      "totalTokens": 38769034
+      "totalTokens": 44803584
     },
     {
       "date": "2026-09-10",
-      "totalTokens": 29223911
+      "totalTokens": 35244420
     },
     {
       "date": "2026-09-11",
@@ -770,7 +782,7 @@
     },
     {
       "date": "2026-09-12",
-      "totalTokens": 32563407
+      "totalTokens": 32743519
     },
     {
       "date": "2026-09-13",
@@ -782,7 +794,7 @@
     },
     {
       "date": "2026-09-15",
-      "totalTokens": 60688160
+      "totalTokens": 60724865
     },
     {
       "date": "2026-09-16",
@@ -790,7 +802,7 @@
     },
     {
       "date": "2026-09-17",
-      "totalTokens": 36431588
+      "totalTokens": 37536671
     },
     {
       "date": "2026-09-18",
@@ -798,23 +810,27 @@
     },
     {
       "date": "2026-09-19",
-      "totalTokens": 50885278
+      "totalTokens": 51040796
     },
     {
       "date": "2026-09-20",
-      "totalTokens": 37085261
+      "totalTokens": 142145871
+    },
+    {
+      "date": "2026-09-21",
+      "totalTokens": 55350417
     },
     {
       "date": "2026-09-22",
-      "totalTokens": 61686025
+      "totalTokens": 220245060
     },
     {
       "date": "2026-09-23",
-      "totalTokens": 23736896
+      "totalTokens": 136178487
     },
     {
       "date": "2026-09-24",
-      "totalTokens": 69061894
+      "totalTokens": 168036597
     },
     {
       "date": "2026-09-25",
@@ -822,11 +838,11 @@
     },
     {
       "date": "2026-09-26",
-      "totalTokens": 131220454
+      "totalTokens": 186968867
     },
     {
       "date": "2026-09-27",
-      "totalTokens": 24578721
+      "totalTokens": 24640209
     },
     {
       "date": "2026-09-28",
@@ -842,11 +858,11 @@
     },
     {
       "date": "2026-10-02",
-      "totalTokens": 66511771
+      "totalTokens": 171752845
     },
     {
       "date": "2026-10-03",
-      "totalTokens": 69641233
+      "totalTokens": 70201418
     },
     {
       "date": "2026-10-04",
@@ -858,19 +874,19 @@
     },
     {
       "date": "2026-10-06",
-      "totalTokens": 37044343
+      "totalTokens": 37356367
     },
     {
       "date": "2026-10-07",
-      "totalTokens": 40861691
+      "totalTokens": 345025175
     },
     {
       "date": "2026-10-08",
-      "totalTokens": 19965101
+      "totalTokens": 52953048
     },
     {
       "date": "2026-10-09",
-      "totalTokens": 35586764
+      "totalTokens": 294815180
     },
     {
       "date": "2026-10-10",
@@ -878,19 +894,19 @@
     },
     {
       "date": "2026-10-11",
-      "totalTokens": 228467347
+      "totalTokens": 300769119
     },
     {
       "date": "2026-10-12",
-      "totalTokens": 52101607
+      "totalTokens": 339292369
     },
     {
       "date": "2026-10-13",
-      "totalTokens": 255119079
+      "totalTokens": 323079596
     },
     {
       "date": "2026-10-14",
-      "totalTokens": 165826157
+      "totalTokens": 312233500
     },
     {
       "date": "2026-10-15",
