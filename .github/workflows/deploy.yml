@@ -245,7 +245,7 @@ jobs:
 
   persist:
     needs: [sync, deploy]
-    if: needs.sync.result == 'success' && needs.deploy.result == 'success'
+    if: always() && !cancelled() && needs.sync.result == 'success' && needs.deploy.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -270,7 +270,7 @@ jobs:
 
   persist-codex:
     needs: [sync-codex, deploy]
-    if: needs.sync-codex.result == 'success' && needs.deploy.result == 'success'
+    if: always() && !cancelled() && needs.sync-codex.result == 'success' && needs.deploy.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
