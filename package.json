@@ -9,7 +9,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "eslint": "eslint 'src/**/*.{js,astro}'",
-    "check": "astro check"
+    "check": "astro check",
+    "usage:sync": "python3 scripts/fetch-codex-profile.py --output src/data/codex-profile.json",
+    "usage:test": "python3 -m unittest discover -s scripts -p 'test_codex_profile.py' && node --test scripts/test-token-usage.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",

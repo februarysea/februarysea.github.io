@@ -141,6 +141,8 @@ jobs:
           pnpm run eslint
           pnpm run check
           node --test tests/training.test.mjs
+          pnpm run usage:test
+          python3 scripts/fetch-codex-profile.py --validate-snapshot src/data/codex-profile.json
           pnpm run build
 
       - name: Upload Pages artifact

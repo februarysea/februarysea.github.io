@@ -1,0 +1,63 @@
+---
+import TokenUsageCard from "../components/TokenUsageCard.astro";
+
+const views = [
+  { variant: "heatmap", name: "Activity wall", label: "01 / 热力墙", description: "一格一天，用颜色记录一整年的使用节奏。" },
+  { variant: "bars", name: "Daily rhythm", label: "02 / 每日柱状图", description: "每天用了多少、哪天最多，一眼就能对比。" },
+  { variant: "area", name: "Usage flow", label: "03 / 趋势面积图", description: "更轻盈的轮廓，突出用量的起伏和最近的变化。" },
+  { variant: "ring", name: "Usage split", label: "04 / 用量占比", description: "最近 30 天与更早累计用量的占比。" },
+] as const;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Usage views — Chunhou Ji</title>
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <main>
+      <header class="preview-header">
+        <a href="/">← 返回首页</a>
+        <span class="preview-kicker">FOUR VIEWS. ONE USAGE.</span>
+        <h1>同一份用量，四种表达。</h1>
+        <p>首页已选用热力墙，以下保留其他样式供参考。</p>
+      </header>
+      <div class="preview-grid">
+        {views.map((view) => <article>
+          <div class="view-heading"><span>{view.label}</span><span>{view.name}</span></div>
+          <div class="view-card"><TokenUsageCard id={`preview-${view.variant}`} variant={view.variant} /></div>
+          <p class="view-description">{view.description}</p>
+        </article>)}
+      </div>
+      <p class="preview-note">全部采用当前 Codex Profile 的服务端统计。图表标注实际数据截至日期，未返回数据的日期留空；近 30 天以最后一条服务端记录为截止日。窄屏可横向滑动热力墙，悬停或点击格子可查看明细。</p>
+    </main>
+  </body>
+</html>
+
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(body) { margin: 0; background: #101212; color: #e7eeed; font-family: "JetBrains Mono", "PingFang SC", monospace; -webkit-font-smoothing: antialiased; }
+  main { max-width: 1180px; margin: 0 auto; padding: 40px 30px 28px; }
+  .preview-header { margin-bottom: 32px; }
+  .preview-header a { float: right; color: #a1b2b0; font-size: 11px; text-decoration: none; }
+  .preview-header a:hover { color: #00e5d4; }
+  .preview-kicker { color: #00e5d4; font-size: 10px; letter-spacing: 0.14em; }
+  h1 { margin: 14px 0 10px; font-size: clamp(23px, 3vw, 34px); font-weight: 500; letter-spacing: -0.03em; }
+  .preview-header p { margin: 0; color: #91a19f; font-size: 12px; }
+  .preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 22px; }
+  article { min-width: 0; display: flex; flex-direction: column; }
+  .view-heading { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 10px; }
+  .view-heading > :first-child { color: #bccecb; }
+  .view-heading > :last-child { color: #667f7b; }
+  .view-card { min-height: 350px; display: flex; flex: 1; }
+  .view-card :global(.token-card) { width: 100%; flex: 1; }
+  .view-description { margin: 10px 0 0; color: #91a19f; font-size: 11px; line-height: 1.6; }
+  .preview-note { margin: 26px 0 0; padding-top: 17px; border-top: 1px solid #ffffff0e; color: #728985; font-size: 10px; line-height: 1.8; }
+  @media (max-width: 700px) { main { padding: 28px 18px; } .preview-grid { grid-template-columns: 1fr; gap: 24px; } .preview-header a { float: none; display: block; margin-bottom: 26px; } }
+</style>

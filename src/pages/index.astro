@@ -3,7 +3,7 @@ import Layout from "../layouts/BasicLayout.astro";
 import FlipCard from "../components/FlipCard.astro";
 import IntroCard from "../components/IntroCard.astro";
 import ContactsCard from "../components/ContactsCard.astro";
-import UrbanCognitiveAgent from "../components/UrbanCognitiveAgent.astro";
+import TokenUsageCard from "../components/TokenUsageCard.astro";
 import TrainingCard from "../components/TrainingCard.astro";
 import Now from "../components/Now.astro";
 import LinksCard from "../components/LinksCard.astro";
@@ -15,14 +15,14 @@ import LinksCard from "../components/LinksCard.astro";
   title="Chunhou Ji - PhD Student & Researcher"
 >
   <main
-    class="portfolio-home text-white m-auto p-2 grid gap-2 max-w-6xl overflow-hidden relative w-full sm:p-4 sm:gap-2 md:grid-cols-2 md:gap-3 md:p-6 lg:h-screen lg:grid-rows-8 lg:grid-cols-4 lg:gap-4 lg:max-h-[800px]"
+    class="portfolio-home text-white m-auto p-2 grid gap-2 max-w-6xl overflow-hidden relative w-full sm:p-4 sm:gap-2 md:grid-cols-2 md:gap-3 md:p-6 lg:h-screen lg:grid-cols-4 lg:gap-4"
   >
     <div class="md:col-span-2 lg:col-span-4 lg:row-span-4 grid gap-2 md:grid-cols-2 md:gap-3 lg:grid-cols-[3fr_2fr] lg:gap-4 min-h-0">
       <IntroCard />
       <TrainingCard />
     </div>
     <ContactsCard />
-    <UrbanCognitiveAgent />
+    <TokenUsageCard showRecentWork />
     <LinksCard />
     <Now />
     <FlipCard
@@ -58,6 +58,18 @@ import LinksCard from "../components/LinksCard.astro";
 </Layout>
 
 <style is:global>
+  body:has(.portfolio-home) { min-height: 100svh; height: auto; }
+  .portfolio-home { flex-shrink: 0; }
+  @media (max-width: 1023px) {
+    .portfolio-home > .token-card { grid-column: 1 / -1; grid-row: auto; }
+  }
+  @media (min-width: 1024px) {
+    .portfolio-home {
+      min-height: 880px;
+      max-height: 940px;
+      grid-template-rows: repeat(4, minmax(0, 1fr)) repeat(2, minmax(130px, 1fr)) repeat(2, minmax(76px, 1fr));
+    }
+  }
   .portfolio-home,
   .portfolio-home :not(.be-water-card, .be-water-card *) {
     font-family: Menlo, Monaco, Consolas, "Liberation Mono", monospace !important;

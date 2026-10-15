@@ -1,0 +1,398 @@
+---
+import {
+  codexUsage, summarizeUsage, compactTokens, exactTokens, usageDate, contributionWall, dayLabel,
+} from "../lib/token-usage";
+import RecentWork from "./RecentWork.astro";
+
+interface Props {
+  variant?: "heatmap" | "bars" | "area" | "ring";
+  id?: string;
+  showRecentWork?: boolean;
+}
+
+const { variant = "heatmap", id = "token-usage-card", showRecentWork = false } = Astro.props;
+const summary = summarizeUsage();
+const wall = contributionWall(summary.daily);
+const reportedCells = wall.cells.filter((day) => !day.pending);
+const peak = Math.max(1, ...summary.recent.map((day) => day.totalTokens ?? 0));
+const points = summary.recent.map((day, index) => ({
+  ...day, x: (index / Math.max(1, summary.recent.length - 1)) * 360,
+  y: 64 - ((day.totalTokens ?? 0) / peak) * 56,
+}));
+const line = points.map((point, index) => `${index ? "L" : "M"}${point.x},${point.y}`).join(" ");
+const fill = `${line} L360,64 L0,64 Z`;
+const circumference = 2 * Math.PI * 28;
+let segmentOffset = 0;
+const segments = [
+  { label: "Last 30 days", value: summary.periodTokens ?? 0, color: "var(--usage-accent)" },
+  { label: "Earlier usage", value: Math.max(0, summary.totalTokens - (summary.periodTokens ?? 0)), color: "var(--usage-level-2)" },
+].map((segment) => {
+  const length = (segment.value / Math.max(1, summary.totalTokens)) * circumference;
+  const result = { ...segment, length, offset: segmentOffset };
+  segmentOffset += length;
+  return result;
+});
+const rangeLabel = variant === "ring" ? "Lifetime breakdown" : "Daily token activity";
+const chartLabel = variant === "heatmap"
+  ? `Daily token activity from ${wall.start} through ${summary.dataThrough ?? "the latest available date"}. Select a day for its token count; use arrow keys to move between days.`
+  : `Daily token consumption from ${summary.recent[0].date} to ${summary.dataThrough ?? "an update is pending"}.`;
+---
+
+<section
+  id={id}
+  data-usage-view={variant}
+  data-face="front"
+  class="token-card md:col-span-2 lg:col-span-3 md:row-span-2"
+  aria-labelledby={`${id}-title`}
+>
+ <div class="token-card-inner">
+ <div class="token-face token-front" data-usage-front>
+  <header class="token-header">
+    <div class="token-heading">
+      <h2 id={`${id}-title`}>Token usage</h2>
+      {variant !== "heatmap" && <p class="token-range">{rangeLabel}</p>}
+    </div>
+    <div class="token-metrics">
+      <div class="token-total">
+        <p class="token-eyebrow">Lifetime tokens</p>
+        <p class="token-number" title={`${exactTokens(summary.totalTokens)} recorded tokens`}>{compactTokens(summary.totalTokens)}</p>
+      </div>
+      <div class="token-period" title={summary.dataThrough ? `${summary.recent[0].date} – ${summary.dataThrough}` : "Awaiting daily usage data"}>
+        <p class="token-eyebrow">Last 30 days</p>
+        <p class="token-recent-number">{summary.periodTokens === null ? "—" : compactTokens(summary.periodTokens)}</p>
+      </div>
+    </div>
+  </header>
+
+  <figure class={`token-chart token-chart-${variant}`}>
+    {variant === "heatmap" && (
+      <div class="token-wall-scroll" data-usage-scroll>
+        <svg viewBox={`0 0 ${wall.columns * 12 + 36} 110`} role="group" aria-labelledby={`${id}-chart-title`}>
+          <title id={`${id}-chart-title`}>{chartLabel}</title>
+          {wall.months.map((month) => <text class="wall-label" x={36 + month.column * 12} y="11">{month.label}</text>)}
+          {[{ day: "Mon", row: 1 }, { day: "Wed", row: 3 }, { day: "Fri", row: 5 }].map((day) =>
+            <text class="wall-weekday" x="0" y={33 + day.row * 12}>{day.day}</text>
+          )}
+          {reportedCells.map((day) => <rect
+            class={`wall-cell heat-${day.level}`} data-usage-day={day.date}
+            data-usage-date={`${usageDate(day.date)}, ${day.date.slice(0, 4)}`}
+            data-usage-tokens={exactTokens(day.totalTokens ?? 0)}
+            role="button" tabindex={day === reportedCells.at(-1) ? "0" : "-1"}
+            aria-label={dayLabel(day)}
+            x={36 + day.column * 12} y={25 + day.row * 12} width="9" height="9" rx="1.5"
+          />)}
+        </svg>
+      </div>
+    )}
+    {variant === "heatmap" && <div class="usage-tooltip" role="tooltip" hidden>
+      <span data-tooltip-date></span>
+      <strong><span data-tooltip-tokens></span> <span class="tooltip-unit">tokens</span></strong>
+    </div>}
+    {variant !== "heatmap" && !summary.dataThrough && <p class="usage-empty">Daily usage is awaiting an update.</p>}
+    {variant === "bars" && summary.dataThrough && (
+      <>
+        <svg class="usage-plot" viewBox="0 0 360 64" preserveAspectRatio="none" role="img" aria-labelledby={`${id}-chart-title`}>
+          <title id={`${id}-chart-title`}>{chartLabel}</title>
+          <line class="plot-rule" x1="0" x2="360" y1="32" y2="32" />
+          {summary.recent.map((day, index) => {
+            const height = day.totalTokens ? Math.max(2, (day.totalTokens / peak) * 56) : 1;
+            return <rect class:list={{ "usage-bar": true, "usage-bar-empty": day.totalTokens === 0 }}
+              x={index * 12 + 1} y={64 - height} width="7" height={height} rx="1.5"
+            ><title>{dayLabel(day)}</title></rect>;
+          })}
+        </svg>
+        <figcaption class="plot-dates"><span>{usageDate(summary.recent[0].date)}</span><span>{usageDate(summary.dataThrough)}</span></figcaption>
+      </>
+    )}
+    {variant === "area" && summary.dataThrough && (
+      <>
+        <svg class="usage-plot" viewBox="0 0 360 64" preserveAspectRatio="none" role="img" aria-labelledby={`${id}-chart-title`}>
+          <title id={`${id}-chart-title`}>{chartLabel}</title>
+          <defs><linearGradient id={`${id}-gradient`} x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="var(--usage-accent)" stop-opacity="0.32"/><stop offset="100%" stop-color="var(--usage-accent)" stop-opacity="0"/></linearGradient></defs>
+          <line class="plot-rule" x1="0" x2="360" y1="32" y2="32" />
+          <path d={fill} fill={`url(#${id}-gradient)`} />
+          <path class="area-line" d={line} />
+          {points.map((point) => <circle class="area-point" cx={point.x} cy={point.y} r="2"><title>{dayLabel(point)}</title></circle>)}
+        </svg>
+        <figcaption class="plot-dates"><span>{usageDate(summary.recent[0].date)}</span><span>{usageDate(summary.dataThrough)}</span></figcaption>
+      </>
+    )}
+    {variant === "ring" && summary.dataThrough && (
+      <div class="ring-layout">
+        <svg class="usage-ring" viewBox="0 0 76 76" role="img" aria-labelledby={`${id}-chart-title`}>
+          <title id={`${id}-chart-title`}>Lifetime token usage: {segments.map((segment) => `${segment.label}: ${exactTokens(segment.value)}`).join("; ")}.</title>
+          <circle cx="38" cy="38" r="28" fill="none" stroke="var(--usage-level-0)" stroke-width="7" />
+          {segments.map((segment) => <circle cx="38" cy="38" r="28" fill="none" stroke={segment.color} stroke-width="7"
+            stroke-dasharray={`${segment.length} ${circumference - segment.length}`} stroke-dashoffset={-segment.offset}
+            transform="rotate(-90 38 38)"
+          ><title>{segment.label}: {exactTokens(segment.value)} tokens</title></circle>)}
+        </svg>
+        <dl class="ring-legend">
+          {segments.map((segment) => <div><dt><i style={`background: ${segment.color}`}></i>{segment.label}</dt><dd>{compactTokens(segment.value)}</dd></div>)}
+        </dl>
+      </div>
+    )}
+  </figure>
+
+  <footer class="token-footer">
+    <span class="token-updated" title={`Usage data through ${summary.dataThrough ?? "the latest available day"}. Snapshot fetched ${codexUsage.generatedAt}.`}>
+      {summary.dataThrough ? <>As of <time datetime={summary.dataThrough}>{usageDate(summary.dataThrough)}</time></> : "Awaiting daily data"}
+    </span>
+    {variant === "heatmap" && <span class="wall-legend" aria-label="Lighter teal indicates higher usage.">
+      <span class="wall-scale">Less {[0, 1, 2, 3, 4].map((level) => <i class={`heat-${level}`}></i>)} More</span>
+    </span>}
+    {showRecentWork && <button class="usage-flip" type="button" data-usage-flip="back" aria-label="Show recent work">Recent work <span aria-hidden="true">↻</span></button>}
+  </footer>
+ </div>
+ {showRecentWork && <div class="token-face token-back" data-usage-back inert aria-hidden="true">
+   <RecentWork titleId={`${id}-recent-work-title`} />
+   <footer class="token-footer token-back-footer">
+     <button class="usage-flip" type="button" data-usage-flip="front" aria-label="Show token usage">Token usage <span aria-hidden="true">↻</span></button>
+   </footer>
+ </div>}
+ </div>
+</section>
+
+<script>
+  const initUsageCards = () => {
+    document.querySelectorAll<HTMLElement>("[data-usage-view]").forEach((card) => {
+      if (card.dataset.usageReady) return;
+      card.dataset.usageReady = "true";
+
+      const calendar = card.querySelector<HTMLElement>("[data-usage-scroll]");
+      const chart = card.querySelector<HTMLElement>(".token-chart");
+      const tooltip = card.querySelector<HTMLElement>(".usage-tooltip");
+      const tooltipDate = card.querySelector<HTMLElement>("[data-tooltip-date]");
+      const tooltipTokens = card.querySelector<HTMLElement>("[data-tooltip-tokens]");
+      const days = [...card.querySelectorAll<SVGRectElement>("[data-usage-day]")];
+      let selectedDay: SVGRectElement | null = null;
+
+      const hideTooltip = () => {
+        if (tooltip) tooltip.hidden = true;
+        selectedDay?.removeAttribute("data-selected");
+        selectedDay = null;
+      };
+      const showTooltip = (day: SVGRectElement) => {
+        if (!chart || !tooltip || !tooltipDate || !tooltipTokens) return;
+        selectedDay?.removeAttribute("data-selected");
+        selectedDay = day;
+        day.setAttribute("data-selected", "true");
+        tooltipDate.textContent = day.dataset.usageDate ?? "";
+        tooltipTokens.textContent = day.dataset.usageTokens ?? "";
+        tooltip.hidden = false;
+
+        const cellBounds = day.getBoundingClientRect();
+        const chartBounds = chart.getBoundingClientRect();
+        const halfWidth = tooltip.offsetWidth / 2;
+        const center = cellBounds.left - chartBounds.left + cellBounds.width / 2;
+        tooltip.style.left = `${Math.max(halfWidth + 2, Math.min(chartBounds.width - halfWidth - 2, center))}px`;
+        tooltip.style.top = `${cellBounds.top - chartBounds.top - 9}px`;
+      };
+      const eventDay = (event: Event) => event.target instanceof SVGRectElement
+        && event.target.hasAttribute("data-usage-day") ? event.target : null;
+
+      if (calendar) {
+        calendar.scrollLeft = calendar.scrollWidth;
+        calendar.addEventListener("pointerover", (event) => {
+          const day = eventDay(event);
+          if (day) showTooltip(day);
+          else hideTooltip();
+        });
+        calendar.addEventListener("pointerleave", hideTooltip);
+        calendar.addEventListener("focusin", (event) => {
+          const day = eventDay(event);
+          if (!day) return;
+          days.forEach((cell) => { cell.tabIndex = cell === day ? 0 : -1; });
+          showTooltip(day);
+        });
+        calendar.addEventListener("focusout", hideTooltip);
+        calendar.addEventListener("click", (event) => {
+          const day = eventDay(event);
+          if (!day) return;
+          day.focus({ preventScroll: true });
+          showTooltip(day);
+        });
+        calendar.addEventListener("scroll", hideTooltip, { passive: true });
+        calendar.addEventListener("keydown", (event) => {
+          const day = eventDay(event);
+          if (!day) return;
+          if (event.key === "Escape") {
+            hideTooltip();
+            return;
+          }
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            showTooltip(day);
+            return;
+          }
+          const steps: Record<string, number> = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 };
+          let next = days.indexOf(day);
+          if (event.key === "Home") next = 0;
+          else if (event.key === "End") next = days.length - 1;
+          else if (event.key in steps) next += steps[event.key];
+          else return;
+          event.preventDefault();
+          const target = days[Math.max(0, Math.min(days.length - 1, next))];
+          // Move the calendar without scrolling the whole page or the card.
+          const targetBounds = target.getBoundingClientRect();
+          const calendarBounds = calendar.getBoundingClientRect();
+          if (targetBounds.left < calendarBounds.left) calendar.scrollLeft -= calendarBounds.left - targetBounds.left + 4;
+          if (targetBounds.right > calendarBounds.right) calendar.scrollLeft += targetBounds.right - calendarBounds.right + 4;
+          target.focus({ preventScroll: true });
+          requestAnimationFrame(() => showTooltip(target));
+        });
+      }
+
+      const front = card.querySelector<HTMLElement>("[data-usage-front]");
+      const back = card.querySelector<HTMLElement>("[data-usage-back]");
+      card.querySelectorAll<HTMLButtonElement>("[data-usage-flip]").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (!front || !back) return;
+          const showBack = button.dataset.usageFlip === "back";
+          hideTooltip();
+          card.dataset.face = showBack ? "back" : "front";
+          front.inert = showBack;
+          back.inert = !showBack;
+          front.setAttribute("aria-hidden", String(showBack));
+          back.setAttribute("aria-hidden", String(!showBack));
+          card.setAttribute("aria-labelledby", `${card.id}-${showBack ? "recent-work-title" : "title"}`);
+          const visibleFace = showBack ? back : front;
+          visibleFace.querySelector<HTMLButtonElement>("[data-usage-flip]")?.focus({ preventScroll: true });
+        });
+      });
+    });
+  };
+  initUsageCards();
+  document.addEventListener("astro:page-load", initUsageCards);
+</script>
+
+<style>
+  .token-card {
+    --usage-accent: #00e5d4;
+    --usage-highlight: #b5fff5;
+    --usage-muted: #9ba9a7;
+    --usage-level-0: #132321;
+    --usage-level-1: #0b4a43;
+    --usage-level-2: #007c71;
+    --usage-level-3: #00b8a8;
+    container: token-usage / inline-size;
+    min-width: 0;
+    min-height: 260px;
+    perspective: 1200px;
+    color: #f5f5f5;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .token-card-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 600ms ease;
+  }
+  .token-card[data-face="back"] .token-card-inner { transform: rotateY(180deg); }
+  .token-face {
+    grid-area: 1 / 1;
+    min-width: 0;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 22px;
+    border: 1px solid var(--usage-accent);
+    border-radius: 8px;
+    background: radial-gradient(ellipse at 5% 100%, #00e5d406, transparent 65%), #050505;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  .token-back { transform: rotateY(180deg); }
+  .token-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .token-header h2 { margin: 0; color: #f5f5f5; font: 700 20px/1.3 "JetBrains Mono", monospace; white-space: nowrap; }
+  .token-range { font-family: inherit; margin: 7px 0 0; color: var(--usage-muted); font-size: 11px; line-height: 1.4; }
+  .token-metrics { display: flex; align-items: flex-end; gap: 28px; }
+  .token-metrics p { margin: 0; font-family: inherit; }
+  .token-eyebrow { color: var(--usage-muted); font-size: 11px; line-height: 1.5; white-space: nowrap; }
+  .token-number, .token-recent-number { padding-top: 3px; font-weight: 500; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .token-number { font-size: 32px; }
+  .token-recent-number { color: var(--usage-highlight); font-size: 24px; }
+  .token-period { padding-bottom: 2px; }
+  .token-chart { position: relative; min-width: 0; margin: 0; }
+  .token-wall-scroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--usage-level-2) #050505; padding-bottom: 3px; }
+  .token-wall-scroll:focus-visible { outline: 1px solid var(--usage-accent); outline-offset: 4px; border-radius: 3px; }
+  .token-wall-scroll svg { display: block; width: 100%; min-width: 660px; height: auto; }
+  .wall-label, .wall-weekday { fill: var(--usage-muted); font: 11px "JetBrains Mono", monospace; }
+  .wall-cell { cursor: pointer; stroke: #ffffff09; stroke-width: 0.5; transition: filter 120ms ease; }
+  .wall-cell[data-selected], .wall-cell:focus-visible { outline: none; filter: brightness(1.35); stroke: var(--usage-highlight); stroke-width: 1; }
+  .usage-tooltip {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    gap: 4px;
+    padding: 10px 12px;
+    border: 1px solid #31534d;
+    border-radius: 6px;
+    background: #10211e;
+    box-shadow: 0 6px 20px #0008;
+    color: #b2c6c0;
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+  }
+  .usage-tooltip[hidden] { display: none; }
+  .usage-tooltip strong { color: #f0fff9; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .tooltip-unit { color: #a3bdb5; font-size: 11px; font-weight: 400; }
+  .heat-0 { fill: var(--usage-level-0); background: var(--usage-level-0); }
+  .heat-1 { fill: var(--usage-level-1); background: var(--usage-level-1); }
+  .heat-2 { fill: var(--usage-level-2); background: var(--usage-level-2); }
+  .heat-3 { fill: var(--usage-level-3); background: var(--usage-level-3); }
+  .heat-4 { fill: var(--usage-accent); background: var(--usage-accent); }
+  .usage-plot { display: block; width: 100%; height: 100px; overflow: visible; }
+  .plot-rule { stroke: #ffffff12; stroke-dasharray: 2 4; }
+  .usage-bar { fill: var(--usage-accent); }
+  .usage-bar:hover { fill: var(--usage-highlight); }
+  .usage-bar-empty { fill: var(--usage-level-1); }
+  .plot-dates { display: flex; justify-content: space-between; margin-top: 8px; color: var(--usage-muted); font-size: 11px; }
+  .area-line { fill: none; stroke: var(--usage-accent); stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .area-point { fill: var(--usage-accent); opacity: 0; }
+  .area-point:hover { opacity: 1; }
+  .usage-empty { padding: 24px 0; color: var(--usage-muted); font-size: 12px; }
+  .ring-layout { display: flex; align-items: center; justify-content: center; gap: 24px; }
+  .usage-ring { display: block; flex: 0 0 108px; width: 108px; height: 108px; }
+  .ring-legend { display: grid; gap: 14px; margin: 0; font-size: 12px; }
+  .ring-legend div { display: flex; justify-content: space-between; gap: 24px; }
+  .ring-legend dt { display: flex; align-items: center; gap: 8px; color: var(--usage-muted); }
+  .ring-legend dd { margin: 0; color: var(--usage-highlight); }
+  .ring-legend i { width: 7px; height: 7px; border-radius: 50%; }
+  .token-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; padding-top: 10px; border-top: 1px solid #ffffff12; color: var(--usage-muted); font-size: 11px; line-height: 1.5; }
+  .token-updated { white-space: nowrap; }
+  .token-updated time { color: #d4dfdc; }
+  .wall-legend, .wall-scale { display: inline-flex; align-items: center; }
+  .wall-legend { gap: 12px; margin-left: auto; }
+  .wall-scale { gap: 3px; }
+  .wall-legend i { width: 8px; height: 8px; border-radius: 1.5px; }
+  .usage-flip { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 28px; margin: -5px -6px; padding: 5px 6px; border: 0; border-radius: 4px; background: transparent; color: #b5fff5; font: inherit; white-space: nowrap; cursor: pointer; }
+  .usage-flip:hover { background: #00e5d410; color: #fff; }
+  .usage-flip:focus-visible { outline: 1px solid var(--usage-accent); outline-offset: 2px; }
+  .usage-flip span { font-size: 16px; line-height: 1; }
+  .token-back-footer { justify-content: flex-end; }
+  @container token-usage (max-width: 560px) {
+    .token-header { flex-wrap: wrap; gap: 18px; }
+    .token-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; }
+    .token-range { margin: 0; text-align: right; }
+    .token-metrics { justify-content: space-between; width: 100%; }
+    .wall-legend { margin-left: auto; }
+    .usage-flip { margin-left: auto; }
+  }
+  @container token-usage (max-width: 350px) {
+    .token-heading { display: block; }
+    .token-range { margin-top: 6px; text-align: left; }
+    .ring-layout { gap: 12px; }
+    .usage-ring { flex-basis: 86px; width: 86px; height: 86px; }
+    .ring-legend { font-size: 11px; }
+    .ring-legend div { gap: 12px; }
+  }
+  @media (max-width: 600px) { .token-face { padding: 20px; gap: 20px; } }
+  @media (prefers-reduced-motion: reduce) { .wall-cell, .token-card-inner { transition: none; } }
+</style>
