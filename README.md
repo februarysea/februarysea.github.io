@@ -110,8 +110,10 @@ and Last 30 days ends on the last reported day, including explicit zero values.
 Unreported trailing days stay blank. Hovering, tapping, or focusing a day shows
 a compact token count (K/M/B); arrow keys move between days. Narrow screens can
 scroll the wall horizontally, starting at the recent end. The homepage card shares
-the other cards' idle flip cycle, pausing while hovered or focused so daily values
-remain readable. Reduced motion disables automatic flipping.
+the other cards' idle flip cycle: every card pauses on mouse entry and resumes
+on mouse exit without changing faces immediately. Buttons still flip manually.
+Clicking a date does not keep the card paused after leaving; keyboard navigation
+and editing retain focus protection. Reduced motion disables automatic flipping.
 
 Codex shares the existing daily Pages schedule at **00:00 Asia/Shanghai**
 (16:00 UTC; GitHub may queue runs). `CODEX_SYNC_ENABLED=true` enables collection
