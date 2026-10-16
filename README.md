@@ -112,8 +112,8 @@ a compact token count (K/M/B); arrow keys move between days. Narrow screens can
 scroll the wall horizontally, starting at the recent end. The homepage card shares
 the same flip controller as every other card. Each face has its own countdown:
 8–14 seconds on the front and 6–10 seconds on the back. Mouse entry immediately
-switches to the opposite face and pauses its fresh countdown; mouse exit resumes
-that countdown without changing faces. Flip buttons also switch faces and reset
+switches to the opposite face and pauses its fresh countdown; mouse exit switches
+faces again and starts the newly shown face's full countdown. Flip buttons also switch faces and reset
 the countdown, which stays paused while hovered. Ordinary clicks, including heatmap
 dates, do not change the timer or leave it paused after exit. Keyboard navigation
 and editing retain focus protection. Reduced motion disables automatic flipping.

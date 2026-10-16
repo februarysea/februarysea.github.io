@@ -123,7 +123,7 @@ function initFlipCards() {
     function leaveHover() {
       if (!pointerInside) return;
       pointerInside = false;
-      refresh();
+      flipTo(currentFace === "front" ? "back" : "front");
     }
 
     container.addEventListener("pointerenter", (event) => {
