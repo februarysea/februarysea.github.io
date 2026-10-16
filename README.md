@@ -110,9 +110,12 @@ and Last 30 days ends on the last reported day, including explicit zero values.
 Unreported trailing days stay blank. Hovering, tapping, or focusing a day shows
 a compact token count (K/M/B); arrow keys move between days. Narrow screens can
 scroll the wall horizontally, starting at the recent end. The homepage card shares
-the other cards' idle flip cycle: every card pauses on mouse entry and resumes
-on mouse exit without changing faces immediately. Buttons still flip manually.
-Clicking a date does not keep the card paused after leaving; keyboard navigation
+the same flip controller as every other card. Each face has its own countdown:
+8–14 seconds on the front and 6–10 seconds on the back. Mouse entry immediately
+switches to the opposite face and pauses its fresh countdown; mouse exit resumes
+that countdown without changing faces. Flip buttons also switch faces and reset
+the countdown, which stays paused while hovered. Ordinary clicks, including heatmap
+dates, do not change the timer or leave it paused after exit. Keyboard navigation
 and editing retain focus protection. Reduced motion disables automatic flipping.
 
 Codex shares the existing daily Pages schedule at **00:00 Asia/Shanghai**

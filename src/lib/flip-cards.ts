@@ -12,7 +12,7 @@ function refreshFlipCards() {
 }
 
 function initFlipCards() {
-  document.querySelectorAll<HTMLElement>("[data-flip-card]").forEach((container, index) => {
+  document.querySelectorAll<HTMLElement>("[data-flip-card]").forEach((container) => {
     if (controllers.has(container)) return;
     const inner = container.querySelector<HTMLElement>("[data-flip-inner]");
     const front = container.querySelector<HTMLElement>('[data-flip-side="front"]');
@@ -20,13 +20,12 @@ function initFlipCards() {
     if (!inner || !front || !back) return;
 
     const events = new AbortController();
-    let restingFace: CardFace = container.dataset.manualFace === "back" ? "back" : "front";
-    let previewing = false;
-    let hasPreviewed = false;
+    let currentFace: CardFace = container.dataset.manualFace === "back" ? "back" : "front";
     let inView = false;
     let disposed = false;
     let timer: number | undefined;
-    let interactionUntil = 0;
+    let timerStartedAt = 0;
+    let remainingMs = durationFor(currentFace);
     let pointerInside = container.matches(":hover");
 
     container.dataset.flipReady = "true";
@@ -57,15 +56,20 @@ function initFlipCards() {
       container.dispatchEvent(new CustomEvent("card-flip"));
     };
 
-    function clearTimer() {
-      window.clearTimeout(timer);
-      timer = undefined;
+    function durationFor(face: CardFace) {
+      return face === "front" ? 8000 + Math.random() * 6000 : 6000 + Math.random() * 4000;
     }
 
-    function canPreview() {
+    function pauseTimer() {
+      if (timer === undefined) return;
+      window.clearTimeout(timer);
+      timer = undefined;
+      remainingMs = Math.max(0, remainingMs - (performance.now() - timerStartedAt));
+    }
+
+    function canAutoFlip() {
       const focused = document.activeElement;
-      // A mouse/touch click may leave an SVG day focused after the pointer exits.
-      // Only keyboard navigation or editing should keep the card paused for focus.
+      // Pointer-created focus must not keep a card paused after the pointer exits.
       const readingWithKeyboard = focused instanceof Element && container.contains(focused)
         && ((keyboardNavigation && focused.matches(":focus-visible"))
           || focused.matches("input, textarea, select")
@@ -75,26 +79,28 @@ function initFlipCards() {
         && !document.querySelector("dialog[open]");
     }
 
+    function flipTo(face: CardFace, moveFocus = false) {
+      pauseTimer();
+      currentFace = face;
+      // Every newly shown face receives a fresh countdown, even while paused.
+      remainingMs = durationFor(face);
+      showFace(face, moveFocus);
+      refresh();
+    }
+
     function refresh() {
-      if (!canPreview()) {
-        clearTimer();
+      if (!canAutoFlip()) {
+        pauseTimer();
         return;
       }
       if (timer !== undefined) return;
-      // Let the first staggered peek make the interaction discoverable, then settle.
-      const idleDelay = previewing ? 3500 + Math.random() * 1500
-        : hasPreviewed ? 8000 + Math.random() * 6000
-          : 3000 + (index * 550) % 2600 + Math.random() * 400;
-      const readingTime = interactionUntil - Date.now();
-      const delay = readingTime > 0 ? readingTime : idleDelay;
+      timerStartedAt = performance.now();
       timer = window.setTimeout(() => {
         timer = undefined;
-        if (!canPreview()) return;
-        previewing = !previewing;
-        hasPreviewed = true;
-        showFace(previewing ? (restingFace === "front" ? "back" : "front") : restingFace);
-        refresh();
-      }, delay);
+        remainingMs = 0;
+        if (!canAutoFlip()) return;
+        flipTo(currentFace === "front" ? "back" : "front");
+      }, remainingMs);
     }
 
     container.addEventListener("click", (event) => {
@@ -103,14 +109,9 @@ function initFlipCards() {
       if (!button || button.closest("[data-flip-card]") !== container) return;
       const face = button.dataset.flipTo;
       if (face !== "front" && face !== "back") return;
-      clearTimer();
-      interactionUntil = Date.now() + 10000;
-      restingFace = face;
-      previewing = false;
-      // Keep the selected face for at least ten seconds, and while hovered.
+      // Explicit buttons reset the new face's timer; hover still keeps it paused.
       // Keyboard activation moves focus to the matching control on the new face.
-      showFace(face, event.detail === 0);
-      refresh();
+      flipTo(face, event.detail === 0);
     }, { signal: events.signal });
 
     const isWithinCard = (event: PointerEvent) => {
@@ -120,6 +121,7 @@ function initFlipCards() {
     };
 
     function leaveHover() {
+      if (!pointerInside) return;
       pointerInside = false;
       refresh();
     }
@@ -127,7 +129,7 @@ function initFlipCards() {
     container.addEventListener("pointerenter", (event) => {
       if (event.pointerType === "touch" || pointerInside || !isWithinCard(event)) return;
       pointerInside = true;
-      clearTimer();
+      flipTo(currentFace === "front" ? "back" : "front");
     }, { signal: events.signal });
     container.addEventListener("pointerleave", (event) => {
       // 3D faces can change hit-testing without the pointer leaving the card.
@@ -138,11 +140,6 @@ function initFlipCards() {
       if (pointerInside && event.pointerType !== "touch" && !isWithinCard(event)) leaveHover();
     }, { signal: events.signal });
 
-    container.addEventListener("pointerdown", () => {
-      clearTimer();
-      interactionUntil = Date.now() + 10000;
-      refresh();
-    }, { signal: events.signal });
     container.addEventListener("focusin", refresh, { signal: events.signal });
     container.addEventListener("focusout", () => queueMicrotask(refresh), { signal: events.signal });
 
@@ -156,7 +153,7 @@ function initFlipCards() {
       refresh,
       destroy: () => {
         disposed = true;
-        clearTimer();
+        pauseTimer();
         events.abort();
         visibility.disconnect();
         delete container.dataset.flipReady;
