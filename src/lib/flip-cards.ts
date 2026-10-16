@@ -5,6 +5,7 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const controllers = new Map<HTMLElement, { refresh: () => void; destroy: () => void }>();
 let dialogObserver: MutationObserver | undefined;
 let pageHidden = false;
+let keyboardNavigation = true;
 
 function refreshFlipCards() {
   controllers.forEach(({ refresh }) => refresh());
@@ -19,7 +20,6 @@ function initFlipCards() {
     if (!inner || !front || !back) return;
 
     const events = new AbortController();
-    const pauseOnHover = container.hasAttribute("data-flip-pause-hover");
     let restingFace: CardFace = container.dataset.manualFace === "back" ? "back" : "front";
     let previewing = false;
     let hasPreviewed = false;
@@ -27,8 +27,7 @@ function initFlipCards() {
     let disposed = false;
     let timer: number | undefined;
     let interactionUntil = 0;
-    let pointerInside = pauseOnHover && container.matches(":hover");
-    let hoverReturn: { face: CardFace; interactionUntil: number } | undefined;
+    let pointerInside = container.matches(":hover");
 
     container.dataset.flipReady = "true";
     container.querySelectorAll<HTMLButtonElement>("[data-flip-to]").forEach((button) => {
@@ -65,11 +64,14 @@ function initFlipCards() {
 
     function canPreview() {
       const focused = document.activeElement;
+      // A mouse/touch click may leave an SVG day focused after the pointer exits.
+      // Only keyboard navigation or editing should keep the card paused for focus.
       const readingWithKeyboard = focused instanceof Element && container.contains(focused)
-        && (pauseOnHover || focused.matches(":focus-visible, input, textarea, select")
+        && ((keyboardNavigation && focused.matches(":focus-visible"))
+          || focused.matches("input, textarea, select")
           || (focused instanceof HTMLElement && focused.isContentEditable));
       return !disposed && inView && !document.hidden && !pageHidden
-        && !reducedMotion.matches && !readingWithKeyboard && !(pauseOnHover && pointerInside)
+        && !reducedMotion.matches && !readingWithKeyboard && !pointerInside
         && !document.querySelector("dialog[open]");
     }
 
@@ -88,8 +90,6 @@ function initFlipCards() {
       timer = window.setTimeout(() => {
         timer = undefined;
         if (!canPreview()) return;
-        // The idle cycle has taken over; leaving later must not rewind it.
-        hoverReturn = undefined;
         previewing = !previewing;
         hasPreviewed = true;
         showFace(previewing ? (restingFace === "front" ? "back" : "front") : restingFace);
@@ -104,12 +104,11 @@ function initFlipCards() {
       const face = button.dataset.flipTo;
       if (face !== "front" && face !== "back") return;
       clearTimer();
-      hoverReturn = undefined;
       interactionUntil = Date.now() + 10000;
       restingFace = face;
       previewing = false;
-      // Explicit pointer flips give ten seconds to read. Cards with hover
-      // pausing also wait until the pointer and reading focus have left.
+      // Keep the selected face for at least ten seconds, and while hovered.
+      // Keyboard activation moves focus to the matching control on the new face.
       showFace(face, event.detail === 0);
       refresh();
     }, { signal: events.signal });
@@ -122,39 +121,13 @@ function initFlipCards() {
 
     function leaveHover() {
       pointerInside = false;
-      const previous = hoverReturn;
-      hoverReturn = undefined;
-      if (!previous) {
-        refresh();
-        return;
-      }
-      clearTimer();
-      interactionUntil = previous.interactionUntil;
-      // Never hide a face that acquired keyboard or editable-field focus.
-      if (canPreview()) {
-        previewing = previous.face !== restingFace;
-        showFace(previous.face);
-      }
       refresh();
     }
 
     container.addEventListener("pointerenter", (event) => {
       if (event.pointerType === "touch" || pointerInside || !isWithinCard(event)) return;
       pointerInside = true;
-      if (pauseOnHover) {
-        clearTimer();
-        return;
-      }
-      if (!canPreview()) return;
       clearTimer();
-      const visibleFace: CardFace = container.dataset.manualFace === "back" ? "back" : "front";
-      hoverReturn = { face: visibleFace, interactionUntil };
-      const nextFace = visibleFace === "front" ? "back" : "front";
-      previewing = nextFace !== restingFace;
-      hasPreviewed = true;
-      interactionUntil = Date.now() + 10000;
-      showFace(nextFace);
-      refresh();
     }, { signal: events.signal });
     container.addEventListener("pointerleave", (event) => {
       // 3D faces can change hit-testing without the pointer leaving the card.
@@ -166,7 +139,6 @@ function initFlipCards() {
     }, { signal: events.signal });
 
     container.addEventListener("pointerdown", () => {
-      if (!pauseOnHover) return;
       clearTimer();
       interactionUntil = Date.now() + 10000;
       refresh();
@@ -197,6 +169,17 @@ function initFlipCards() {
     dialogObserver.observe(document.body, { attributes: true, subtree: true, attributeFilter: ["open"] });
   }
 }
+
+// Track the input that created focus, rather than treating every focused day
+// as keyboard reading. Capture runs before the card's click/focus handlers.
+document.addEventListener("pointerdown", () => {
+  keyboardNavigation = false;
+  refreshFlipCards();
+}, { capture: true });
+document.addEventListener("keydown", () => {
+  keyboardNavigation = true;
+  refreshFlipCards();
+}, { capture: true });
 
 initFlipCards();
 document.addEventListener("astro:page-load", initFlipCards);
