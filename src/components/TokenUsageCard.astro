@@ -146,10 +146,9 @@ const chartLabel = variant === "heatmap"
   </footer>
  </div>
  {showRecentWork && <div class="token-face token-back" data-usage-back data-flip-side="back" inert aria-hidden="true">
-   <RecentWork titleId={`${id}-recent-work-title`} />
-   <footer class="token-footer token-back-footer">
-     <button class="usage-flip" type="button" data-flip-to="front" aria-label="Show token usage">Token usage <span aria-hidden="true">↻</span></button>
-   </footer>
+   <RecentWork titleId={`${id}-recent-work-title`}>
+     <button slot="actions" class="usage-flip usage-return" type="button" data-flip-to="front" aria-label="Show token usage">Token usage <span aria-hidden="true">↻</span></button>
+   </RecentWork>
  </div>}
  </div>
 </section>
@@ -363,7 +362,7 @@ const chartLabel = variant === "heatmap"
   .usage-flip:hover { background: #00e5d410; color: #fff; }
   .usage-flip:focus-visible { outline: 1px solid var(--usage-accent); outline-offset: 2px; }
   .usage-flip span { font-size: 16px; line-height: 1; }
-  .token-back-footer { justify-content: flex-end; }
+  .usage-return { flex-shrink: 0; margin: 0; border: 1px solid #00e5d433; font-size: 11px; line-height: 1.5; }
   @container token-usage (max-width: 560px) {
     .token-header { flex-wrap: wrap; gap: 18px; }
     .token-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; }
