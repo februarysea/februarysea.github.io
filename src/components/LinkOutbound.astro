@@ -1,0 +1,105 @@
+---
+interface Props {
+  kind: "friends" | "organizations";
+}
+
+const { kind } = Astro.props;
+---
+
+<svg class:list={["link-outbound", `link-outbound-${kind}`]} width="164" height="78" viewBox="0 0 164 78" fill="none" aria-hidden="true" focusable="false">
+  {kind === "friends" ? (
+    <>
+      <g class="friend-card friend-left" data-link-motion>
+        <rect class="card-outline" x="31" y="17" width="38" height="49" rx="8" />
+        <circle class="portrait" cx="50" cy="33" r="6" />
+        <path class="portrait" d="M39 52C39 39 61 39 61 52" />
+        <path class="name-line" d="M44 58H56" />
+      </g>
+      <g class="friend-card friend-right" data-link-motion>
+        <rect class="card-outline" x="95" y="17" width="38" height="49" rx="8" />
+        <circle class="portrait" cx="114" cy="33" r="6" />
+        <path class="portrait" d="M103 52C103 39 125 39 125 52" />
+        <path class="name-line" d="M108 58H120" />
+      </g>
+      <g class="greeting" data-link-motion>
+        <path class="speech-bubble" d="M73 9H91Q96 9 96 14V21Q96 26 91 26H84L78 31V26H73Q68 26 68 21V14Q68 9 73 9Z" />
+        <circle cx="76" cy="18" r="1.2" />
+        <circle cx="82" cy="18" r="1.2" />
+        <circle cx="88" cy="18" r="1.2" />
+      </g>
+      <path class="external-mark" d="M137 18L145 10M138 10H145V17" />
+    </>
+  ) : (
+    <>
+      <path class="ground-line" d="M28 67H136" />
+      <g class="organization-buildings">
+        <path class="side-building" d="M37 66V35Q37 32 40 32H62V66M100 66V38H121Q124 38 124 41V66" />
+        <rect class="main-building" x="62" y="13" width="38" height="53" rx="3" />
+        <path class="building-door" d="M76 66V55H86V66" />
+      </g>
+      <g class="office-lights lights-first" data-link-motion>
+        <rect x="70" y="22" width="5" height="5" rx="0.7" />
+        <rect x="87" y="22" width="5" height="5" rx="0.7" />
+        <rect x="70" y="42" width="5" height="5" rx="0.7" />
+        <rect x="87" y="42" width="5" height="5" rx="0.7" />
+        <rect x="45" y="41" width="5" height="5" rx="0.7" />
+        <rect x="110" y="55" width="5" height="5" rx="0.7" />
+      </g>
+      <g class="office-lights lights-second" data-link-motion>
+        <rect x="70" y="32" width="5" height="5" rx="0.7" />
+        <rect x="87" y="32" width="5" height="5" rx="0.7" />
+        <rect x="45" y="53" width="5" height="5" rx="0.7" />
+        <rect x="110" y="45" width="5" height="5" rx="0.7" />
+      </g>
+      <g class="organization-arrow" data-link-motion>
+        <path d="M111 28L130 9M116 9H130V23" />
+      </g>
+    </>
+  )}
+</svg>
+
+<style>
+  .link-outbound { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .card-outline { fill: #100d09; stroke: #b99064; stroke-width: 1.2; }
+  .portrait { stroke: #e2bc90; stroke-width: 1.5; stroke-linecap: round; }
+  .name-line { stroke: #a98058; stroke-width: 1; stroke-linecap: round; }
+  .friend-left { transform-origin: 50px 58px; animation: friend-hello-left 5.5s ease-in-out infinite; }
+  .friend-right { transform-origin: 114px 58px; animation: friend-hello-right 5.5s ease-in-out infinite; }
+  .greeting { transform-origin: 82px 26px; animation: friend-greeting 5.5s ease-in-out infinite; }
+  .speech-bubble { fill: #1d160e; stroke: #d6ad82; stroke-width: 1; }
+  .greeting circle { fill: #e2bc90; }
+  .external-mark { stroke: #a98058; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+  .organization-buildings { fill: #100d09; stroke: #b99064; stroke-width: 1.2; stroke-linejoin: round; }
+  .side-building { stroke-opacity: 0.6; }
+  .main-building { stroke: #d6ad82; }
+  .ground-line { stroke: #a98058; stroke-width: 1; opacity: 0.35; }
+  .building-door { fill: #050505; stroke-opacity: 0.6; }
+  .office-lights { fill: #d6ad82; stroke: #b99064; stroke-width: 0.5; animation: office-light 6s ease-in-out infinite; }
+  .lights-second { animation-delay: -3s; }
+  .organization-arrow { stroke: #e2bc90; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; animation: organization-visit 6s ease-in-out infinite; }
+  @keyframes friend-hello-left {
+    0%, 15%, 100% { transform: translate(-2px, 0) rotate(-7deg); }
+    40%, 65% { transform: translate(7px, -1px) rotate(-2deg); }
+  }
+  @keyframes friend-hello-right {
+    0%, 15%, 100% { transform: translate(2px, 0) rotate(7deg); }
+    40%, 65% { transform: translate(-7px, -1px) rotate(2deg); }
+  }
+  @keyframes friend-greeting {
+    0%, 15%, 100% { transform: translateY(3px) scale(0.85); opacity: 0.4; }
+    40%, 65% { transform: translateY(-2px) scale(1); opacity: 1; }
+  }
+  @keyframes office-light {
+    0%, 100% { fill-opacity: 0.15; }
+    40%, 65% { fill-opacity: 0.8; }
+  }
+  @keyframes organization-visit {
+    0%, 20%, 100% { transform: translate(0, 0); }
+    45%, 65% { transform: translate(5px, -4px); }
+  }
+  :global([data-flip-side][aria-hidden="true"]) [data-link-motion] { animation-play-state: paused; }
+  @media (prefers-reduced-motion: reduce) {
+    [data-link-motion] { animation: none; }
+    .office-lights { fill-opacity: 0.5; }
+  }
+</style>

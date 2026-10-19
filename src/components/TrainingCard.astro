@@ -29,7 +29,7 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
 <FlipCard
   color="bg-[#050505]"
   borderColor="border-rose-500"
-  class="training-flip-card relative z-10 min-h-[360px] md:min-h-[360px] lg:min-h-0"
+  class="training-flip-card relative z-10"
   label="Training"
   frontLabel="Recent session"
   backLabel="Overview"
@@ -92,7 +92,7 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
   .training-front { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
   .training-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .training-heading h2 { font-size: 20px; font-weight: 700; line-height: 1.3; }
-  .source-label { font: 9px ui-monospace, monospace; text-transform: uppercase; color: #fda4af; }
+  .source-label { font: 10px ui-monospace, monospace; text-transform: uppercase; color: #fda4af; }
   .source-label:hover, .source-label:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
   .period-label { display: flex; justify-content: space-between; gap: 12px; color: #9b949b; font-size: 11px; }
   .period-label span:first-child { color: #d6cbd2; }
@@ -139,5 +139,13 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
     .lift-count { font-size: 8px; }
     .lift-load { font-size: 11px; }
     .activity-legend { gap: 8px; }
+  }
+  @media (min-width: 1024px) {
+    .training-front { gap: 7px; }
+    .training-heading h2 { font-size: 18px; }
+    .overview-metrics strong { font-size: 32px; }
+    .overview-detail { font-size: 11px; }
+    .activity-legend { margin-top: 5px; }
+    .artwork-credit { font-size: 10px; }
   }
 </style>

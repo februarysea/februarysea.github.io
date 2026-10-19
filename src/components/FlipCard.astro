@@ -13,6 +13,7 @@ interface Props {
   toggleColor?: string;
   compact?: boolean;
   hideFrontToggle?: boolean;
+  customControls?: boolean;
 }
 
 const {
@@ -20,6 +21,7 @@ const {
   borderColor = "border-darkslate-100", class: className,
   label = "Card", frontLabel = "Details", backLabel = "Overview",
   toggleColor = "text-gray-400", compact = false, hideFrontToggle = false,
+  customControls = false,
 } = Astro.props;
 ---
 
@@ -31,7 +33,7 @@ const {
   <div data-flip-inner class="flip-card-inner relative w-full h-full transition-transform duration-700 transform-style-3d">
     <div data-flip-side="front" aria-hidden="false" class={`flip-card-front absolute inset-0 backface-hidden ${color} shadow-lg rounded-lg ${padding} border ${borderColor} flex flex-col overflow-hidden`}>
       <div class="flip-card-content"><slot name="front" /></div>
-      {(!hideFrontToggle || Astro.slots.has("footer-front")) && (
+      {!customControls && (!hideFrontToggle || Astro.slots.has("footer-front")) && (
         <div class="flip-card-footer">
           <div class="flip-card-footer-note"><slot name="footer-front" /></div>
           {!hideFrontToggle && <button type="button" data-flip-to="back" class={`flip-card-toggle ${toggleColor}`} aria-label={`${label}: ${frontLabel}`} hidden>
@@ -39,17 +41,17 @@ const {
           </button>}
         </div>
       )}
-      {hideFrontToggle && <button type="button" data-flip-to="back" class="flip-card-surface-toggle" aria-label={`${label}: ${frontLabel}`} hidden></button>}
+      {!customControls && hideFrontToggle && <button type="button" data-flip-to="back" class="flip-card-surface-toggle" aria-label={`${label}: ${frontLabel}`} hidden></button>}
     </div>
 
     <div data-flip-side="back" aria-hidden="true" inert class={`flip-card-back absolute inset-0 backface-hidden rotate-y-180 ${color} shadow-lg rounded-lg ${padding} border ${borderColor} flex flex-col overflow-hidden`}>
       <div class="flip-card-content"><slot name="back" /></div>
-      <div class="flip-card-footer">
+      {!customControls && <div class="flip-card-footer">
         <div class="flip-card-footer-note"><slot name="footer-back" /></div>
         <button type="button" data-flip-to="front" class={`flip-card-toggle ${toggleColor}`} aria-label={`${label}: ${backLabel}`} hidden>
           {backLabel}<span aria-hidden="true">↻</span>
         </button>
-      </div>
+      </div>}
     </div>
   </div>
 </div>

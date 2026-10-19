@@ -1,76 +1,56 @@
 ---
 import FlipCard from "./FlipCard.astro";
+import LinkOutbound from "./LinkOutbound.astro";
 
-const links = [
-  {
-    name: "UMEP Lab",
-    href: "https://umeplab.github.io/",
-    description: "Urban mobility & environmental perception",
-  },
-  {
-    name: "ABMind",
-    href: "https://abmind.cc/",
-    description: "Agent-based modeling community",
-  },
-  {
-    name: "Shiqi Wang",
-    href: "https://shiqi-wang.com/",
-    description: "GeoAI Researcher",
-  },
+const friends = [
+  { name: "Shiqi Wang", href: "https://shiqi-wang.com/" },
+];
+const organizations = [
+  { name: "UMEP Lab", href: "https://umeplab.github.io/" },
+  { name: "ABMind", href: "https://abmind.cc/" },
 ];
 ---
 
-<FlipCard
-  label="Links"
-  frontLabel="About these links"
-  backLabel="Links"
-  toggleColor="text-orange-300"
-  colSpan="md:col-span-1"
-  rowSpan="md:row-span-2"
-  color="bg-[#050505]"
-  borderColor="border-orange-500"
-  padding="p-4"
-  class="h-[180px] lg:h-full"
-  compact
->
+<FlipCard label="Links" color="bg-[#050505]" borderColor="border-[#946b43]" padding="p-0" class="links-card" customControls>
   <div slot="front" class="links-face">
-    <h2>Links</h2>
-    <div class="links-list">
-      {links.map((link) => (
-        <a href={link.href} target="_blank" rel="noopener noreferrer" class="link-entry">
-          <span>{link.name}</span><span class="link-arrow" aria-hidden="true">↗</span>
-        </a>
-      ))}
-    </div>
+    <h2>Friends</h2>
+    <nav class="links-list" aria-label="Friends' websites">
+      {friends.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer">{link.name} <span aria-hidden="true">↗</span></a>)}
+    </nav>
+    <div class="links-art"><LinkOutbound kind="friends" /></div>
+    <button type="button" data-flip-to="back" aria-label="Show organizations" hidden>Organizations <span aria-hidden="true">↻</span></button>
   </div>
-  <div slot="back" class="links-face links-details">
-    {links.map((link) => (
-      <a href={link.href} target="_blank" rel="noopener noreferrer" class="link-detail">
-        <strong>{link.name}<span class="link-arrow" aria-hidden="true"> ↗</span></strong>
-        <span>{link.description}</span>
-      </a>
-    ))}
+  <div slot="back" class="links-face">
+    <h2>Organizations</h2>
+    <nav class="links-list" aria-label="Organizations and communities">
+      {organizations.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer">{link.name} <span aria-hidden="true">↗</span></a>)}
+    </nav>
+    <div class="links-art"><LinkOutbound kind="organizations" /></div>
+    <button type="button" data-flip-to="front" aria-label="Show friends" hidden>Friends <span aria-hidden="true">↻</span></button>
   </div>
 </FlipCard>
 
 <style>
-  .links-face { display: flex; flex-direction: column; justify-content: center; gap: 4px; height: 100%; min-height: 0; font-family: sans-serif; }
-  .links-face h2 { margin: 0; color: #dfbfa5; font-size: 12px; font-weight: 500; line-height: 15px; }
-  .links-list { min-height: 0; overflow-y: auto; }
-  .link-entry { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; color: #eee5dd; font-size: 12px; line-height: 17px; text-decoration: none; }
-  .link-entry + .link-entry { border-top: 1px solid #3c2b20; }
-  .link-arrow { color: #daaa83; }
-  .links-details { justify-content: flex-start; gap: 10px; overflow-y: auto; }
-  .links-list, .links-details { scrollbar-width: none; }
-  .links-list::-webkit-scrollbar, .links-details::-webkit-scrollbar { display: none; }
-  .link-detail { display: flex; flex-direction: column; gap: 2px; color: #eee5dd; text-decoration: none; }
-  .link-detail strong { font-size: 12px; font-weight: 500; line-height: 15px; }
-  .link-detail > span { color: #9f8b7b; font-size: 10px; line-height: 13px; }
-  .link-entry:hover, .link-detail:hover strong { color: #fed7aa; }
-  .link-entry:focus-visible, .link-detail:focus-visible { outline: 1px solid #daaa83; outline-offset: 1px; }
-  @media (min-width: 1024px) {
-    .links-face { gap: 2px; }
-    .links-face h2 { font-size: 11px; line-height: 14px; }
-    .links-details { gap: 8px; }
+  .links-face { display: grid; grid-template-columns: minmax(0, 1fr) clamp(88px, 29%, 152px); grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "heading art" "links art" "toggle toggle"; gap: 4px 12px; height: 100%; padding: 10px 16px; min-width: 0; }
+  h2 { grid-area: heading; margin: 0; color: #d6ad82; font-size: 11px; font-weight: 700; line-height: 1.5; }
+  button { grid-area: toggle; display: inline-flex; justify-self: end; align-self: end; align-items: center; gap: 7px; padding: 3px 0 3px 5px; border: 0; border-radius: 3px; background: transparent; color: #d6ad82; font: inherit; font-size: 11px; line-height: 1.5; white-space: nowrap; cursor: pointer; }
+  button[hidden] { display: none; }
+  a { color: #eee5dd; font-size: 12px; line-height: 1.5; text-decoration: none; }
+  a:hover, button:hover { color: #ffe0bd; }
+  a:focus-visible, button:focus-visible { outline: 1px solid #daaa83; outline-offset: 3px; }
+  .links-list { grid-area: links; display: flex; align-items: center; align-content: center; flex-wrap: wrap; gap: 4px 20px; min-height: 0; }
+  .links-list a { white-space: nowrap; }
+  .links-art { grid-area: art; position: relative; min-width: 0; min-height: 0; pointer-events: none; }
+  a span { color: #b99064; }
+  @media (max-width: 1023px) {
+    .links-face { padding: 14px 16px; }
+  }
+  @media (pointer: coarse) {
+    button, a { min-height: 36px; }
+    a { display: inline-flex; align-items: center; gap: 6px; }
+    .links-face { grid-template-rows: auto 1fr auto; }
+  }
+  @media (pointer: coarse) and (max-width: 1023px) {
+    :global(.portfolio-home .links-card) { min-height: 164px; }
   }
 </style>
