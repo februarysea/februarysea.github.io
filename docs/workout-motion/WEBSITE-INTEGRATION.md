@@ -1,31 +1,41 @@
 # Personal website integration
 
-The homepage uses workout-motion's public H2 API, pinned to
-`975788a1023ba46f700383b681ae22f27bb51a76` from
-https://github.com/februarysea/workout-motion.
+The homepage uses workout-motion's public H2 API from
+https://github.com/februarysea/workout-motion. The bundled fallback snapshot is
+`424fbcc1548b6e14a2276bc0886c13c7a228eb81` (v0.2.0, 92 motions).
+Each GitHub Actions build also imports the latest `main` snapshot, recording its
+exact commit and checksums in the deployed `SOURCE.json`.
 
 `vendor/workout-motion/runtime/h2.js` is compiled from the public Git snapshot.
 The complete compiled module tree, declarations, source checksums and original
 license notices are included. The library has no runtime dependencies; the
-website build does not download it or require the independent library checkout.
+local build does not download it or require the independent library checkout.
 The legacy root entry is retained in the complete snapshot but never imported by
 the website. Do not edit vendored modules to change a movement.
 
 ## Display
 
-`src/lib/exercise-motion.ts` maps the seven imported Enode exercise names to H2
-IDs. Names, dates, loads and counts in the training data remain unchanged.
+`src/lib/exercise-motion.ts` builds its lookup from the library's IDs, English
+labels and Chinese labels. Matching ignores case, spacing and separators.
+New same-name motions become available after the next successful Actions build;
+there is no fixed list of supported Enode names. Unmatched or ambiguous names
+remain without artwork instead of guessing an exercise variation.
+`config/exercise-motion-aliases.json` holds explicit personal choices and takes
+priority over catalog matching. Names, dates, loads and counts in the training
+data remain unchanged.
 The latest session mounts an illustration for each exercise in the existing
 card, scrolling the list when it contains more rows than fit.
 
 The H2 Overhead Press uses a grip wider than the shoulders. Landmine Press uses
 the library's single-arm split-switch push press. Squat uses the high-bar back
-squat; Hang Clean uses the hang power clean. These are artwork mappings, not new
+squat; Hang Clean uses the hang power clean. Lateral Raise uses Cable Lateral
+Raise (`cable-lateral-raise`), as selected for this site's training records,
+rather than the library's dumbbell lateral raise. These are artwork mappings, not new
 measurements or changes to the exercise records.
 
 The component server-renders a static SVG, then lazily imports the player when
 the session face is visible. The original authored cycle durations are retained
-at speed 1 (the seven motions range from 3.6 to 4.2 seconds). There is no manual
+at speed 1. There is no manual
 pause button. Playback stops on the card's front face and respects visibility
 and reduced-motion preferences. The page keeps static artwork if
 JavaScript or the animation chunk is unavailable. Page navigation releases the
@@ -72,13 +82,27 @@ The simulation pauses on the back and resumes on the front.
 
 ## Update
 
-After a new public library commit has been reviewed, use an exact commit SHA
-available in a local checkout:
+GitHub Actions fetches public `workout-motion/main` after installing the site's
+locked dependencies, resolves its exact commit SHA, and runs the import script.
+This runs on normal pushes, daily builds and manual builds. It does not execute
+upstream package lifecycle scripts or install additional library dependencies.
+The sync validates every motion and retains existing IDs and configured alias
+targets. New catalog entries do not require editing a hard-coded count.
+
+If fetching, compiling or validating the library fails, the workflow restores
+the bundled snapshot and emits a warning. The browser uses the built snapshot;
+it makes no runtime requests to GitHub. Publishing the library alone does not
+trigger this site's build; daily synchronization will pick it up, or a normal
+manual build can be run sooner.
+
+To refresh the bundled fallback, use an exact commit SHA available in a local
+checkout:
 
 ```sh
 node scripts/sync-workout-motion.mjs --source /path/to/workout-motion --revision <full-40-character-sha>
 pnpm run eslint
 pnpm run check
+node --test tests/exercise-motion.test.mjs
 pnpm run build
 ```
 
@@ -86,5 +110,6 @@ The sync script reads committed blobs, compiles with the website's existing
 TypeScript, validates the H2 catalog and records checksums in SOURCE.json before
 replacing the snapshot. It does not run package lifecycle scripts, install
 dependencies, modify the library checkout, fetch training data or deploy.
-The current catalog-count check intentionally requires review when upstream adds
-motions. Preserve original LICENSE and NOTICE in both vendor and public output.
+An upstream TypeScript version change or removed/renamed motion requires a
+manual compatibility update. Preserve original LICENSE and NOTICE in both vendor
+and public output.

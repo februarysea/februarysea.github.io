@@ -5,6 +5,8 @@ export interface AnatomyLandmark {
     width: number;
     /** Average outward surface normal, for back-face suppression by the renderer. */
     normal: Vec3;
+    /** Curved drawings use a local normal for each segment, retaining stable IDs. */
+    normals?: Vec3[];
 }
 /**
  * The same H2 pectoral / abdominal drawing in the body's own coordinate frame.

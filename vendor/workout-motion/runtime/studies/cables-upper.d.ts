@@ -1,0 +1,10 @@
+export declare const standingCableFlyStudy: import("./rig.js").MotionStudy;
+export declare const lowCableFlyStudy: import("./rig.js").MotionStudy;
+export declare const singleArmCableRowStudy: import("./rig.js").MotionStudy;
+export declare const kneelingCablePulldownStudy: import("./rig.js").MotionStudy;
+export declare const cableLateralRaiseStudy: import("./rig.js").MotionStudy;
+export declare const cableReverseFlyStudy: import("./rig.js").MotionStudy;
+export declare const cableBicepsCurlStudy: import("./rig.js").MotionStudy;
+export declare const overheadCableExtensionStudy: import("./rig.js").MotionStudy;
+export declare const standingCablePressStudy: import("./rig.js").MotionStudy;
+export declare const upperCableStudies: readonly [import("./rig.js").MotionStudy, import("./rig.js").MotionStudy, import("./rig.js").MotionStudy, import("./rig.js").MotionStudy, import("./rig.js").MotionStudy, import("./rig.js").MotionStudy, import("./rig.js").MotionStudy, import("./rig.js").MotionStudy, import("./rig.js").MotionStudy];

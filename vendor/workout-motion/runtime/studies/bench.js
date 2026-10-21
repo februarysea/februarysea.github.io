@@ -6,12 +6,15 @@ const SHOULDER_HEIGHT = 0.67;
 // Preserve the shared rig's torso length while allowing a small natural arch.
 const SHOULDER_Z = HIP_Z - Math.sqrt(BODY.torso ** 2 - (SHOULDER_HEIGHT - HIP_HEIGHT) ** 2);
 const GRIP_HALF = 0.34;
-const LOW_BAR_HEIGHT = 0.85;
+const TORSO_UP_Y = (SHOULDER_HEIGHT - HIP_HEIGHT) / BODY.torso;
+const TORSO_UP_Z = (SHOULDER_Z - HIP_Z) / BODY.torso;
+// Lower pectoral section: torso radius .125 m plus the .011 m shaft radius.
+const LOW_BAR_HEIGHT = HIP_HEIGHT + BODY.torso * .78 * TORSO_UP_Y - .136 * TORSO_UP_Z;
 const LOW_ELBOW_HEIGHT = LOW_BAR_HEIGHT - BODY.forearm;
 const ELBOW_OUT = GRIP_HALF - BODY.shoulderHalf;
 const ELBOW_DOWN = LOW_ELBOW_HEIGHT - SHOULDER_HEIGHT;
 const ELBOW_FORWARD = Math.sqrt(BODY.upperArm ** 2 - ELBOW_OUT ** 2 - ELBOW_DOWN ** 2);
-const LOW_BAR_Z = SHOULDER_Z + ELBOW_FORWARD;
+const LOW_BAR_Z = HIP_Z + BODY.torso * .78 * TORSO_UP_Z + .136 * TORSO_UP_Y;
 const HIGH_BAR_Z = -0.25;
 // A 2 mm reach reserve avoids an IK singularity and keeps a soft elbow at the top.
 const TOP_REACH = BODY.upperArm + BODY.forearm - 0.002;

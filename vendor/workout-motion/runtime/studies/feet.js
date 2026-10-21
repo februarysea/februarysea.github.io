@@ -2,6 +2,14 @@ import { add, cross, mul, unit, v } from "./rig.js";
 /** Shared shoe coordinates for the renderer and apparatus-clearance checks. */
 export function shoeGeometry(pose, side) {
     const ankle = pose.joints[`${side}Ankle`], toe = pose.joints[`${side}Toe`];
+    const frame = pose.footFrames?.[side];
+    if (frame) {
+        const forward = unit(frame.forward), normal = unit(frame.normal), across = unit(cross(normal, forward)), footLength = .17;
+        const point = (along, lateral, height) => add(add(add(ankle, mul(forward, along)), mul(across, lateral)), mul(normal, height - .085));
+        const rings = [[-.065, .043, .068], [0, .052, .108], [.085, .053, .066], [.19, .045, .044]];
+        const points = rings.flatMap(([along, width, top]) => [point(along, -width, .015), point(along, width, .015), point(along, -width, top), point(along, width, top)]);
+        return { point, points, forward, across, footLength };
+    }
     const forward = unit(v(toe.x - ankle.x, 0, toe.z - ankle.z));
     const across = unit(cross(v(0, 1, 0), forward));
     const pitch = pose.footPitch?.[side] ?? 0, c = Math.cos(pitch), s = Math.sin(pitch);

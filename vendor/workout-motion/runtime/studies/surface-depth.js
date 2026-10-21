@@ -1,6 +1,7 @@
 import { blend, dot, length, sub, unit, v } from "./rig.js";
 import { garmentGeometry, garmentRingPoints } from "./shorts.js";
 import { clipLineOutside, flattenPath, pointInPolygon } from "./contours.js";
+import { shoeGeometry } from "./feet.js";
 /** Opt-in visible-surface ordering for close hanging arms and low hand-held bars. */
 export function refineSurfaceDepth(pose, original) {
     const parts = original.map(part => ({ ...part })), byId = new Map(parts.map(part => [part.id, part]));
@@ -20,7 +21,7 @@ export function refineSurfaceDepth(pose, original) {
         }
     };
     const surface = (a, b, radius) => depth(blend(a, b, .5)) + radius * Math.sqrt(Math.max(0, 1 - dot(unit(sub(b, a)), view) ** 2));
-    const yokeDepth = Math.max(...garment.pelvis.flatMap(ring => garmentRingPoints(ring)).map(depth), (byId.get("torso")?.depth ?? -Infinity) + .030);
+    const yokeDepth = Math.max(...garment.pelvis.flatMap(ring => garmentRingPoints(ring)).map(depth), pose.torsoCurve ? -Infinity : (byId.get("torso")?.depth ?? -Infinity) + .030);
     shift(["shorts", "shorts-yoke-outline", "waistband"], yokeDepth + .001, "shorts");
     for (const side of ["left", "right"]) {
         const sleeve = garment.legs.find(leg => leg.name === side);
@@ -40,7 +41,7 @@ export function refineSurfaceDepth(pose, original) {
         shift([`${side}-leg`, `${side}-quadriceps`, `${side}-quadriceps-inner`, `${side}-calf`, `${side}-shin`], legDepth, `${side}-leg`);
         const shoe = byId.get(`${side}-shoe`);
         if (shoe)
-            shift([`${side}-shoe`, `${side}-sole`, `${side}-laces`], Math.max(shoe.depth, legDepth + .004), `${side}-shoe`);
+            shift([`${side}-shoe`, `${side}-sole`, `${side}-laces`], pose.localOcclusion?.rollers || pose.surfaceFeet ? Math.max(...shoeGeometry(pose, side).points.map(depth)) - .012 : Math.max(shoe.depth, legDepth + .004), `${side}-shoe`);
         const hand = byId.get(`${side}-hand`);
         if (hand) {
             const contact = pose.handholds?.[side]?.center ?? pose.handContacts?.[side]?.center ?? pose.grips?.[side] ?? wrist;
@@ -48,6 +49,18 @@ export function refineSurfaceDepth(pose, original) {
             const handDepth = Math.max(depth(contact) + .045, forearm + .002);
             shift(parts.filter(part => part.id.startsWith(`${side}-`) && /-(?:hand|thumb|grip|finger-\d|wrist-crease)$/.test(part.id)).map(part => part.id), handDepth, `${side}-hand`);
         }
+    }
+    // Curved floor/rotated studies use local torso faces and physical limb/cloth
+    // depths above. The following upright world-Y/Z overlap rules do not apply.
+    if (pose.torsoCurve) {
+        const hands = parts.filter(part => /^(?:left|right)-hand$/.test(part.id)).flatMap(part => flattenPath(part.d));
+        for (const rod of pose.apparatus?.rods ?? [])
+            for (let i = 0; i < 8; i++) {
+                const part = byId.get(`apparatus-${rod.id}-${i}`);
+                if (part)
+                    part.d = clipLineOutside(part.d, hands);
+            }
+        return parts;
     }
     const polygons = new Map();
     const polygonOf = (part) => {

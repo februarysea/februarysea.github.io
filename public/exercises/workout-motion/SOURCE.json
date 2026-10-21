@@ -1,10 +1,10 @@
 {
   "upstreamUrl": "https://github.com/februarysea/workout-motion",
-  "revision": "975788a1023ba46f700383b681ae22f27bb51a76",
-  "revisionUrl": "https://github.com/februarysea/workout-motion/tree/975788a1023ba46f700383b681ae22f27bb51a76",
+  "revision": "424fbcc1548b6e14a2276bc0886c13c7a228eb81",
+  "revisionUrl": "https://github.com/februarysea/workout-motion/tree/424fbcc1548b6e14a2276bc0886c13c7a228eb81",
   "package": {
     "name": "@februarysea/workout-motion",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "license": "PolyForm-Noncommercial-1.0.0"
   },
   "entry": "runtime/h2.js",
@@ -18,47 +18,70 @@
     "COMMERCIAL-LICENSE.md": "74dbb641f405cd0294264da025d4e8c3e9826986027e2b11b3e6bc9894ebd1e0",
     "LICENSE": "ffcca38841adb694b6f380647e15f17c446a4d1656fed51a1e2041d064c94cc8",
     "NOTICE": "32a55244d6e784eb26de099641b3d12f7cb6ad50dffc6419679570c2ab4f66d1",
-    "package.json": "00f2bbafa10da2d9be02ed89851666395079b9de92e00f6a022212598cf86ecd",
-    "README.md": "0efe42ca7831d8504f5b23e3d392c0e9cc21e432a18b11dc401edfb0b160c665",
-    "README.zh-CN.md": "bb9d183ac782898e5dffbc6ecada97438059410cb879abe8edec4e56ab17d3df",
+    "package.json": "2a0545b73264d782d9cb16ca957ed9a10184d846ef24c43d4171bc3eb7e96e26",
+    "README.md": "8a3fc81a6ccbeed1d32ca7de4e492b5a12721ac03b8d62e5a89cfa0295cc2a43",
+    "README.zh-CN.md": "4eed94169d6d34b62c3615d8f774a37180860588dc6da11f90e47d128ae3bd74",
     "src/geometry.ts": "7adae3b5960d2b661e189bfdba3cd1613227b1816337065497b10f917367c2a5",
-    "src/h2.ts": "55b8501078d49b892c40f08bb68b6748e9db7863da23203e18319e1fd3e1de65",
+    "src/h2.ts": "4bb3aa091caabfde64d2fbb4c39b53fdfe69e2b9c688ace24446284abdc74a41",
     "src/index.ts": "a79033283707a71de2823da11b9918bcfcbba924e310bfa85c6bfe9d2a020586",
     "src/lower.ts": "c86cf97b17ece74b952b6a011a4d01ae5c29b078027f883af38969226db9478c",
     "src/player.ts": "0ac9874144624c948b325d9e17dff41809b3d21dfe6c5c83ac810db54100820b",
     "src/presses.ts": "a6c092b9d573066e5aac23a2710b5eb60486188b10651c2bbcc185018bba6c27",
-    "src/review.ts": "d566561754ff42a955fdce3f2ada64e176d1e1ea24fbe251b191bd47e53c9b86",
-    "src/studies/anatomy.ts": "e8eae6e6c307dab0a0ba8df1696147b7dc2d2527776bd9fb83538ef2756eac7b",
+    "src/review.ts": "e1aee3bd62a63fee9427c79b03c73e97e2ea15137fd2039dc6a2ad4a262a6e76",
+    "src/studies/anatomy.ts": "4c6a730d698b15541050a72d3be2843387a984596b996f5bc040c1f6ab172d40",
     "src/studies/barbell-curl.ts": "7939b866dea01588a2f7afe88ae37b611e6d6e067d375ca02efb85a48fb4f0a5",
-    "src/studies/bench.ts": "3d9ca63193e66ba3f6633560ca175ec39b2b98684a952fd8193cf530e01ae58f",
+    "src/studies/bench.ts": "d0060f93be5e739b871b83472674e6c8f1e8291b87e0f66f2bca7d7d9d514bc6",
     "src/studies/bent-over-row.ts": "e20be6644a8d42c9c27f0cc0c280f4ff55cfcbf65a2a6b6da0e8b4885824982b",
-    "src/studies/box-jumps.ts": "cc4779c66167f857bda71f697656a55999b7d06a4e7c18034b3b74d05711c9ee",
+    "src/studies/bodyweight-common.ts": "4edeef00c0737ce38f11ae44b6cf0e01ce56bd8232fcbebe5b8a89343f9d13a9",
+    "src/studies/bodyweight-floor.ts": "a62f8d340fadcd43dfe3843c88d8ec72c85ad2bb7a044a722e89ef5cf92acdea",
+    "src/studies/bodyweight-lower.ts": "cd4cc6c624b0431168343f07f90ff20548d3aa553c4a78a46582a0682f26f17b",
+    "src/studies/bodyweight-upper.ts": "6f8b5481f7abd111ca9929fdcad3874baa8bef46e36ff5bcf7b9aef1db59f18d",
+    "src/studies/box-jumps.ts": "b7dc1ce630acac5ed4d17c7b7181b56488b12a369ee67899bb5a3ae2a50af5b6",
+    "src/studies/cable-common.ts": "916e0daf4dc706494dfaac30814590c78e2d77233ec3c3666447a58a8ab85a1a",
     "src/studies/cable-dip.ts": "2a80d2e11900a5af53b2eb20175d76130d151d1a76063dc5b66c1518b541bdd1",
+    "src/studies/cables-core.ts": "86931acb6aba885b02d74c874c53cfb8b3614ae982d0176685646e3b2c278fe2",
+    "src/studies/cables-lower.ts": "55d162e6a267d3189daa52fc9661650e9e0ea0d7f53e3c46ca7b1137ee3c4d52",
+    "src/studies/cables-upper.ts": "b744192db6d41058f5206670efb2196735a2c25bca12f4095ca6cda0a6f4be3a",
     "src/studies/character.ts": "f57fdc4f4fdb806b1b79ca34a56fe3b8923948f42dea8252f02e19be916c3bf3",
     "src/studies/clean.ts": "1ff980896a02b243ffab7f78155560ca86660c81d5483317cb506efe0c70bc3e",
+    "src/studies/contact-occlusion.ts": "5852fe3784c57e1ed9810804bbaf157ae6ec96237c55353c013ab84a4c088ae7",
     "src/studies/contours.ts": "48b62ca5df9795e27744e3c80a5dcf104e97bbc118262e647f1b1282acf9c082",
+    "src/studies/core-common.ts": "835bf8b15e3ee78981fe16df027d54c1c30908cee34bcd10fff032673a4f5c74",
+    "src/studies/core-stability.ts": "dd8ab4087d07c4932ecdf87cf88dc1d79e6eb7887faf83b55e7e6657c7de1f8c",
     "src/studies/deadlifts.ts": "145541a74b493af613ef5cad06d45b1b10226bde9ff809b36ad370531221e30a",
-    "src/studies/draw.ts": "da5f33db8355a487f2c4e2af27171229cfe877f52483b2737bd9201a18606a97",
-    "src/studies/dumbbell-expansion.ts": "056fb90244ccdf4aef6322159e0f9604bc84df5a757c370ba79aa5e90e30af21",
-    "src/studies/feet.ts": "a284f6aff6c861f40a4348426d0cdb8887a2c1acc5e9850211e1d190a99c76b5",
+    "src/studies/draw.ts": "47057bccb7ed9c7d5e6b4580a09be51d6deb03875d49d20d184f02abfe6e0f5e",
+    "src/studies/dumbbell-expansion.ts": "ca31f6d033c98d7bec41bcae744a1ff6710a2c41d2181afe2ec501fcb9782513",
+    "src/studies/expansion-common.ts": "ecc5c3bdd30d3a3086d0c046d478c1924f58d319a0a2d5515ac10c80fcf917bc",
+    "src/studies/expansion-lower.ts": "427ac85814f16dad420759ba3076b8abe93f03bf831d43af78317a185c741253",
+    "src/studies/expansion-pull.ts": "ba3006760a8face6f99b9dd7796ea21f51233862a117e513a2a74f08f9996105",
+    "src/studies/expansion-push.ts": "dde636557ceb56cef34ed255c77795624a89736ab7d29e3b5f3f345c497e2e65",
+    "src/studies/feet.ts": "c1388bdb493ac1611a834e9debade9b52ca1d83cb7b21fc598ada295a4cb5b1b",
+    "src/studies/floor-contact.ts": "a13e6e50215e7cd9292fa32efe56b9f89bddc17afd58a26175404795c6da6a76",
     "src/studies/front-squat.ts": "d22b13d8df3c7fbf2a69762642389eb5fffe31c373da3c7929cc0a48d6283635",
-    "src/studies/grip.ts": "2add05235875bef50b6a2d99232828d0b725117be3eceffde4ee8fc2266549cb",
+    "src/studies/grip.ts": "96879cf56a11755cb9754c22c52df61d9aff42e958a8a19d7e0f3f883fa574dd",
     "src/studies/landmine.ts": "aa4dc9a316eac1621300dd63687c0fcee3ffbe91c4a2f88c1913748c25d1431a",
+    "src/studies/local-overlap.ts": "9c34814e6f17e88601285916ae1768ba5b7625e7f9c2e81b08a3e192c57b85a9",
     "src/studies/lower-expansion.ts": "ebb7b84a332416bcbb6651252279a2319f2352bf4c0f37c8787397a8df048e7d",
+    "src/studies/machine-common.ts": "796863c512199f9cc44c124a927eb2c1fb4f4b6542571dc149cba9909a5a5ad0",
+    "src/studies/machines-accessory.ts": "7b84f9c69d8c0b22949d546c9634e025d4e586bd7fef4a86a5621a6c96f93be1",
+    "src/studies/machines-lower.ts": "14caec5558e5703741430eb08c8b92041be443ff3d84db2ce14b640bfb20c68d",
+    "src/studies/machines-smith.ts": "151c0a468b549e7556a7c8b10dde3925ba2eeac2e5ac9f4a6c6641976ea96f45",
+    "src/studies/machines-upper.ts": "555271a1040b1ce1edb8ad456bc6627cb013365b20749196dd2af9ecf9976821",
     "src/studies/overhead.ts": "4ddb65533686c0fd451b98d5e968ac16a700c942caec23e2fc10a5f75488a7ac",
     "src/studies/power-clean.ts": "06d2fcb6fb10976467e3ad52495dde7a2aee8df44c6ab776aeaa7470ca0cfb47",
     "src/studies/pullup.ts": "0e9960aba04e6f36020dc4288566bb8f8e25e9faf1839834e54248f1c0923019",
-    "src/studies/rig.ts": "1d9799b01bfd9f7067f6f7d6186633c3c36775f7e2bff3cd418e5e812f321ce1",
+    "src/studies/rig.ts": "ad7f7ef60a9c4c8d0e5e1663d5882fb5718fe05d41110e1fb96e31f10729e39c",
     "src/studies/romanian.ts": "58b02aa97f76aa374d345d3b36f22ec265ae6ad31c5ffd7ea8f9b5e47cc07c86",
-    "src/studies/shorts.ts": "5f8317189607ba867acb8a88ca81bddbbcc1feeb3210ca1766ce3488b73a8ffc",
+    "src/studies/shorts.ts": "dd017466973dd69c7c4c3b571fc74b77c658936d68ef56ada71b754a03d5ac2c",
     "src/studies/squat.ts": "1bea3735804dcc1a9ecaefe73983b8c9c4007502d7e7062620558a93ded65d6c",
-    "src/studies/surface-depth.ts": "63af6c88fcade60eb69a075c63f3268dd0210c2d627ff725d1fb789f312da108",
+    "src/studies/surface-depth.ts": "29519a85af4f0895c4af5564e7b55a5e7dd2929900c16fe1773c0ea977c43741",
+    "src/studies/torso-curve.ts": "dff3b645355f0d2f437d11bb372d915022e5b77969528e417fdf20b0b19e84d1",
     "src/types.ts": "736f6c1801089237155c7962d7c505ba6cf006139d58c650072a8248f86cf4cf",
     "src/vertical.ts": "6f72f3e012e5d2fc7ca2be550fdea5a098ab3c323a27185593c800b496aa9502",
     "tsconfig.json": "3a1683519e22d2ac30cfdd7196f117ba4c3021afc5b63af990a6f4b59b9f94e9"
   },
-  "exerciseCount": 29,
-  "runtimeBytes": 246076,
+  "exerciseCount": 92,
+  "runtimeBytes": 440852,
   "modules": {
     "geometry.d.ts": {
       "bytes": 1326,
@@ -69,12 +92,12 @@
       "sha256": "fc4de036602324417ce7c232d5ea55869feb2ec7b3406c31eac7850f6f418110"
     },
     "h2.d.ts": {
-      "bytes": 1194,
-      "sha256": "a5539f78b5e1eb3901d68b49b317541ec151acb813a00f8844b0b8de817911b7"
+      "bytes": 1225,
+      "sha256": "11a41e4338af03a76b71a4f8f7278b508c673ce863f8611c2f0827379a661276"
     },
     "h2.js": {
-      "bytes": 1382,
-      "sha256": "b150b05a18fe529afdc09498a3ee5f1e440e6c3af3971a1a69798a0257c3552e"
+      "bytes": 1438,
+      "sha256": "3aec9367ac221d850cd6c7e2b8136d63bc36a69594cfc312cf6dc8c273f6620a"
     },
     "index.d.ts": {
       "bytes": 626,
@@ -109,20 +132,20 @@
       "sha256": "6d4f4d3b26ca18515798d2001ba795e179a3eb20f979c2d522a5c38242c59323"
     },
     "review.d.ts": {
-      "bytes": 2996,
-      "sha256": "3c1b5c6362a95475cad5febd31949322eab9d93bd29f04df3facda8d59028c52"
+      "bytes": 8225,
+      "sha256": "e911d663ea31c34b4fcbb6e85a19f17ee60ff532875e863a3edda330f0c5cc7f"
     },
     "review.js": {
-      "bytes": 9034,
-      "sha256": "c8d1ccc84eb11ee895b0bde54b21e46d317d2a11280041d3998dbf6d3a6d5301"
+      "bytes": 10593,
+      "sha256": "ac1f285aef81f5815b08fda040203ee3a90164fd3887bc2b6aac95dc99f27435"
     },
     "studies/anatomy.d.ts": {
-      "bytes": 665,
-      "sha256": "0a0ba41cac09b3d8d3f633a3880b8b007bcbf2dc4da0bf8e4fe41883a2b091ba"
+      "bytes": 773,
+      "sha256": "194b7d6b4e48d1bfbd3cce54aa89b5c05381c0c18b43bbbedacfe7114e782055"
     },
     "studies/anatomy.js": {
-      "bytes": 4812,
-      "sha256": "be73c1d4ca9db6c1774f672202110b9953830057adc0ac5782c95ea19305a7eb"
+      "bytes": 5180,
+      "sha256": "e46b0c687231d2a0b750ea0766302e2e03e47eef963864cb9e51c58f37b3660f"
     },
     "studies/barbell-curl.d.ts": {
       "bytes": 412,
@@ -137,8 +160,8 @@
       "sha256": "70222b2630a468123c0b1a9ae1722016ef8c2da9c882a9183691e6c5f8f87ab9"
     },
     "studies/bench.js": {
-      "bytes": 3137,
-      "sha256": "c481bfdd99360f76e1425f6910f913ca5cfcea755745e8c195c74fa6393f8877"
+      "bytes": 3421,
+      "sha256": "c378a85a24fca83f9e71df82c75c598af017ce6a8338f594e3468e5e38341050"
     },
     "studies/bent-over-row.d.ts": {
       "bytes": 430,
@@ -148,13 +171,53 @@
       "bytes": 4263,
       "sha256": "7d96a4b4bb22d4cd4d3cd017ba590003a306541f318a6c63e43124561c2cdf18"
     },
+    "studies/bodyweight-common.d.ts": {
+      "bytes": 1070,
+      "sha256": "b7425f2a221097a5955e90c001e6fa58fbb33d7f859bc25e9764f4e7c1c7c911"
+    },
+    "studies/bodyweight-common.js": {
+      "bytes": 3297,
+      "sha256": "88a42e6ecf8c1f836c8e0c6069f95e22c2c153c31032ff9b7f0f51ce7f942f63"
+    },
+    "studies/bodyweight-floor.d.ts": {
+      "bytes": 257,
+      "sha256": "7f5e03bfc30138f635f009a935cc6e986edca4b8f84e4bb794e6488b367fb6e9"
+    },
+    "studies/bodyweight-floor.js": {
+      "bytes": 3134,
+      "sha256": "57c70644024485d462174478ad77a532b06143a2f0509f8c51ec83f0457d9d8d"
+    },
+    "studies/bodyweight-lower.d.ts": {
+      "bytes": 163,
+      "sha256": "3641613c6a79026136759a4a0bf175bb82fd1fdac037e1480d38db7cd5f09112"
+    },
+    "studies/bodyweight-lower.js": {
+      "bytes": 1291,
+      "sha256": "e0b27584199528daf84b94c78e1a41e73e3d4444d0e93491648078fcf5185d3b"
+    },
+    "studies/bodyweight-upper.d.ts": {
+      "bytes": 468,
+      "sha256": "69192651eba7f8df3d8dae3da02e88de272735a9e1f858780080d46593017b02"
+    },
+    "studies/bodyweight-upper.js": {
+      "bytes": 4783,
+      "sha256": "721f396fce360d197f6d26bd7f5dc229c1af40d50c1df3667ccc22b46d0473b2"
+    },
     "studies/box-jumps.d.ts": {
       "bytes": 201,
       "sha256": "1afec83e189d3ff88767e03fec93541e33e252c337b05764d4a214ad54576774"
     },
     "studies/box-jumps.js": {
-      "bytes": 18834,
-      "sha256": "1fae4b41f99bdb0f0fcc7c44f711a31b3f7755ffc05fa558c19f15cd1e79f42b"
+      "bytes": 21759,
+      "sha256": "aec6b7a468ae6f009f9094a0c3c51e95f71ba332ed5c1854fc66099d30f2cc2f"
+    },
+    "studies/cable-common.d.ts": {
+      "bytes": 950,
+      "sha256": "b1fb7081d9366398a35c49764c86fbc44e8d584246518776ec19f91f3dd602a7"
+    },
+    "studies/cable-common.js": {
+      "bytes": 4302,
+      "sha256": "ace66f1f31b138ff618343a0b1ed7de08921668deb1347dd48b1756d0db26889"
     },
     "studies/cable-dip.d.ts": {
       "bytes": 578,
@@ -163,6 +226,30 @@
     "studies/cable-dip.js": {
       "bytes": 12250,
       "sha256": "c421b82e713d206ff033faf7b8b111e23bfc2951a831850b819e90b1771d1594"
+    },
+    "studies/cables-core.d.ts": {
+      "bytes": 258,
+      "sha256": "e7250c74cb9ac2c59bfde3dcc123f2266da343c31ca018cb7132459b7d6e3285"
+    },
+    "studies/cables-core.js": {
+      "bytes": 3330,
+      "sha256": "229bb31d9b9b8ddec0b9bae0ac9e6668a6663fdf1f25d340a4210d269877dbaf"
+    },
+    "studies/cables-lower.d.ts": {
+      "bytes": 159,
+      "sha256": "0b129ddce4905d16428ec30dfeda74e4f3fcbc0846e4c48fa14b97846dc7e880"
+    },
+    "studies/cables-lower.js": {
+      "bytes": 1244,
+      "sha256": "2bb24fd874cf312b2bafe58d9e03b33f9a4619b3900802c06fdbdeb3d9a84c6c"
+    },
+    "studies/cables-upper.d.ts": {
+      "bytes": 1031,
+      "sha256": "5aa45a72f64f8855207cca8686169e51b59f1b2e4c95e0232f7bb8b5ca10e89f"
+    },
+    "studies/cables-upper.js": {
+      "bytes": 10401,
+      "sha256": "3261dc38b77a31be8fc0ac85b834022ea5d5b05d01b703f09198ff5f30e9e667"
     },
     "studies/character.d.ts": {
       "bytes": 170,
@@ -180,6 +267,14 @@
       "bytes": 7531,
       "sha256": "f6e9e42ab63163c7e6c2f28e14fcce7be4b41cb69de9f201764fed3c3e080dd6"
     },
+    "studies/contact-occlusion.d.ts": {
+      "bytes": 432,
+      "sha256": "4d88a61cfca9f38654e21462c293232174c785ea91f41a8de7b6030eb0e57755"
+    },
+    "studies/contact-occlusion.js": {
+      "bytes": 10073,
+      "sha256": "8594932bb4bf941b47e1fa625c5f7af5de315287615e7f19898dcd828bef7f31"
+    },
     "studies/contours.d.ts": {
       "bytes": 1159,
       "sha256": "2863cf06cfa327184906675a2c02730f6c2ec74fe88a38c334ec1cbbf82306c6"
@@ -187,6 +282,22 @@
     "studies/contours.js": {
       "bytes": 8091,
       "sha256": "0502146056f051eddd98d07e3c16c876418d82b4c4a9f3118c81e3559edce23a"
+    },
+    "studies/core-common.d.ts": {
+      "bytes": 770,
+      "sha256": "7a7cf45a69cf3706344b1ac122f06503ae19051f6d613e456d098b5c464b0547"
+    },
+    "studies/core-common.js": {
+      "bytes": 2185,
+      "sha256": "d2854e6eed853b23bc5d3f517c60a56edaae32d8b1b1be6a94628529bfc3448a"
+    },
+    "studies/core-stability.d.ts": {
+      "bytes": 348,
+      "sha256": "3e9445d172ed5b5325958a90d035ef695dc0323969369b2783dd2df39dc8375c"
+    },
+    "studies/core-stability.js": {
+      "bytes": 3426,
+      "sha256": "b208902c04cd9cb18ecc73f0a0d64222a6ca828799e2db8fac23a8437a5d3914"
     },
     "studies/deadlifts.d.ts": {
       "bytes": 159,
@@ -201,24 +312,64 @@
       "sha256": "b8f7006f2e8b289c20cbd4bc84c29d1136a6a7c83db0c7eabfcfe0a90d128e5e"
     },
     "studies/draw.js": {
-      "bytes": 45244,
-      "sha256": "6578c71546a9a3caf6f489700110a64f13347675bd82626559e9a0f5c30dd5b4"
+      "bytes": 60689,
+      "sha256": "ac891960c903fd888a9538e8bd13a2acb58aef795c821b16d9d271fa88aee09b"
     },
     "studies/dumbbell-expansion.d.ts": {
       "bytes": 333,
       "sha256": "98b20ae74c5071ee273a909a19db35e31bf56ec890e02b004e5b0c688e22c3bb"
     },
     "studies/dumbbell-expansion.js": {
-      "bytes": 13974,
-      "sha256": "87d82b891e68d05786985751a8867c49f47c69c263877ed73bcb9a9d0d3462e8"
+      "bytes": 14056,
+      "sha256": "35a0ab9c8e3d39def66c53fcc62e349e5a5983bac25a84bb986432441f6e8bbb"
+    },
+    "studies/expansion-common.d.ts": {
+      "bytes": 1911,
+      "sha256": "851ac1f42cbf315ecf9b798008ee3645788534f395b3aa50a6023821054cadbd"
+    },
+    "studies/expansion-common.js": {
+      "bytes": 5886,
+      "sha256": "5616fcf159c2e9de28bc61ff169eaa50838e6b30066bc0d932a4db81a595630f"
+    },
+    "studies/expansion-lower.d.ts": {
+      "bytes": 920,
+      "sha256": "539e7532aeb7d13c302fb09476a96cf26353ea61329c865b4978038a5986b1d5"
+    },
+    "studies/expansion-lower.js": {
+      "bytes": 11930,
+      "sha256": "29c26150ee8fa9eeef5a9a27d39f283923932692ed0ae81d17f7143612331f25"
+    },
+    "studies/expansion-pull.d.ts": {
+      "bytes": 926,
+      "sha256": "871a236878780768ee5286a78bf48c7ff99b10e63c192827fb52feeccb54986a"
+    },
+    "studies/expansion-pull.js": {
+      "bytes": 10448,
+      "sha256": "b897a7ebcb4b08b5ecda5c3a1ad4e8f71d7801dd51e19a350af462b8e16dbe96"
+    },
+    "studies/expansion-push.d.ts": {
+      "bytes": 1040,
+      "sha256": "37f8bbbec3ab86e083ac9aed1fe5ffcc8d476d5f478cfb59605ff264e8980fc3"
+    },
+    "studies/expansion-push.js": {
+      "bytes": 6648,
+      "sha256": "2d99b6e18ee587d82adb41fb955015da90ecc9188cc6411f5e6f733770a72641"
     },
     "studies/feet.d.ts": {
       "bytes": 433,
       "sha256": "133d2ebd76c16cd981ec947c5dcbbe338be9fa1fc807797f5812512745a004d9"
     },
     "studies/feet.js": {
-      "bytes": 1527,
-      "sha256": "314f48355fa900b17d5070b0cd77ac95e3fce27e1b4fcd0b466f77d895d4e26a"
+      "bytes": 2204,
+      "sha256": "8e60089707287259893a2bfcae0b1ca58f339a9d3fc7910569fc88dbb964fc3d"
+    },
+    "studies/floor-contact.d.ts": {
+      "bytes": 350,
+      "sha256": "0f9268c56272d8adaf4ce38cd4a303a102af37c04baddfe6b9d07f96032d5689"
+    },
+    "studies/floor-contact.js": {
+      "bytes": 2630,
+      "sha256": "3ff2fddee3f68c728c1922c51b8e7828aa5c34c97d482f9e5a33ddeb263a6310"
     },
     "studies/front-squat.d.ts": {
       "bytes": 422,
@@ -233,8 +384,8 @@
       "sha256": "bcbf4e40d07ce8456972064b62b577d4d8034a8a629553d588711d6f52b5a31f"
     },
     "studies/grip.js": {
-      "bytes": 2286,
-      "sha256": "f0ef75a126bd28ede905b8ba66e09cf8e071eeabf2c2df32393800c6d79aacfe"
+      "bytes": 2318,
+      "sha256": "a8eb331a23db3b8c3d1331646764c474bdf5e1dca173395e941044827c4aa0d3"
     },
     "studies/landmine.d.ts": {
       "bytes": 184,
@@ -244,6 +395,14 @@
       "bytes": 10091,
       "sha256": "f84ba3138e5869804d4f337a3e9dd487adea9d2e0bd145a34c1d22066f52d10e"
     },
+    "studies/local-overlap.d.ts": {
+      "bytes": 184,
+      "sha256": "6d9e968b5109a42a83ef5eb643ee99fa6f8fa7d05846f58b53b29b19d6bbf7aa"
+    },
+    "studies/local-overlap.js": {
+      "bytes": 14325,
+      "sha256": "d218cafd9cb7a3aa0a8492754614d1953364bb5590ed802e9e939d929f2b29b1"
+    },
     "studies/lower-expansion.d.ts": {
       "bytes": 590,
       "sha256": "7b0abbcc0c71c78c4458bc7ea16efdf5000c9043b75eaa1a44909d0a938e1cd3"
@@ -251,6 +410,46 @@
     "studies/lower-expansion.js": {
       "bytes": 9355,
       "sha256": "dbb5cad467de018d46e453798f89b6471771463ffe84073a11c49c15afa464a0"
+    },
+    "studies/machine-common.d.ts": {
+      "bytes": 2028,
+      "sha256": "b21a6d9593f2e33246cf58ff2d70a7013cd83916fab079c8682c3b7b0b0505e2"
+    },
+    "studies/machine-common.js": {
+      "bytes": 5205,
+      "sha256": "eb0bd1ba92602fbd12fd56ba982480c595306c1ae6fe5ff70d732480493f32de"
+    },
+    "studies/machines-accessory.d.ts": {
+      "bytes": 706,
+      "sha256": "079c40f7ce15be76ba3eb3978a28555c16b139781a821ef318ac70db73e6811d"
+    },
+    "studies/machines-accessory.js": {
+      "bytes": 15196,
+      "sha256": "39b7b22e4f825bce30b9d9af1a899cf3084cb3d2cb9885b4a72ef931d159a21a"
+    },
+    "studies/machines-lower.d.ts": {
+      "bytes": 465,
+      "sha256": "3c85cccf3e9cf93046a0d43872129103dfbcfb341ec9c31760848bf2925031d2"
+    },
+    "studies/machines-lower.js": {
+      "bytes": 7511,
+      "sha256": "16fd2aceb9e853c10a066a9d920fa17ebc6badba9284f31af9e1ace08f98fb0f"
+    },
+    "studies/machines-smith.d.ts": {
+      "bytes": 361,
+      "sha256": "00524dbfb88a544e24e5f8fadb13f474a4d3e0cfa984786eb33e40ddbb487cf5"
+    },
+    "studies/machines-smith.js": {
+      "bytes": 6550,
+      "sha256": "bc9d5312a51870985db70c636d038da378156b19aa6a7dace5ffaf00e68775de"
+    },
+    "studies/machines-upper.d.ts": {
+      "bytes": 585,
+      "sha256": "b7fa9a5469642d0206a1906e88912655bc09446750725bec30f0965084de2620"
+    },
+    "studies/machines-upper.js": {
+      "bytes": 9099,
+      "sha256": "a4bde50890c4f8082e9a7797f696e7c9f5e4322599a4b74f681464d56206c841"
     },
     "studies/overhead.d.ts": {
       "bytes": 186,
@@ -277,8 +476,8 @@
       "sha256": "8d49b533b1530951c2ae4a5eb72c9f535f17a42e30cef405f86e1616e2325bbd"
     },
     "studies/rig.d.ts": {
-      "bytes": 4749,
-      "sha256": "92b2a06f06bfa6174dd2c7eb926b95d37dda4dfefb7115c9686f5a9630558f20"
+      "bytes": 6720,
+      "sha256": "64f67bb3299d7da1e35330e8f6d8948e4ae851e0aa7b172b38d1e37a666217c0"
     },
     "studies/rig.js": {
       "bytes": 1574,
@@ -297,8 +496,8 @@
       "sha256": "b63c45f53aee83d6af887b87f5659fa3894b8a30914ae8662ac195cffd02187c"
     },
     "studies/shorts.js": {
-      "bytes": 5422,
-      "sha256": "3cbf8066b0b9a70b8f98e6fb940eb0dc79bf37d6b065a170ba3a06e6db453d86"
+      "bytes": 6552,
+      "sha256": "c78dc751626bf8e2d390f26ae6f9858978b5dfd89b2b7e3fb0e377b4d0cd9d69"
     },
     "studies/squat.d.ts": {
       "bytes": 333,
@@ -313,8 +512,16 @@
       "sha256": "90a079b9e9fadbf8c9da0d85843d2224273ab05877a2bcd1393206672b9b43f0"
     },
     "studies/surface-depth.js": {
-      "bytes": 10259,
-      "sha256": "d2f374557cd5970b1a0fe5e95d3a4c4ab5d0735acbfcc59099a0362a138f2394"
+      "bytes": 11049,
+      "sha256": "2e29e3ce433717a64b12d83211073095f1dd2005979d80b395451699f8d21feb"
+    },
+    "studies/torso-curve.d.ts": {
+      "bytes": 1456,
+      "sha256": "48cab735eca8fcf493acd718428c5742c95f49548669ee3de37af9331f358b33"
+    },
+    "studies/torso-curve.js": {
+      "bytes": 4357,
+      "sha256": "d0f063b344f1fcc37aaac8d55d9c45966ad5c2b932d04f204522c9f5ce86f10f"
     },
     "types.d.ts": {
       "bytes": 504,

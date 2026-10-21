@@ -215,11 +215,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Update workout-motion library
+        id: workout_motion
+        continue-on-error: true
+        timeout-minutes: 2
+        run: |
+          motion_source="$(mktemp -d "$RUNNER_TEMP/workout-motion.XXXXXX")"
+          git clone --depth 1 --branch main https://github.com/februarysea/workout-motion.git "$motion_source"
+          motion_revision="$(git -C "$motion_source" rev-parse HEAD)"
+          node scripts/sync-workout-motion.mjs --source "$motion_source" --revision "$motion_revision"
+          echo "workout-motion revision: $motion_revision" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep bundled motions if library update fails
+        if: steps.workout_motion.outcome == 'failure'
+        run: |
+          git restore --worktree -- vendor/workout-motion public/exercises/workout-motion
+          git clean -fd -- vendor/workout-motion public/exercises/workout-motion
+          echo "::warning::workout-motion update failed; using the bundled library."
+
       - name: Validate and build
         run: |
           pnpm run eslint
           pnpm run check
-          node --test tests/training.test.mjs
+          node --test tests/training.test.mjs tests/exercise-motion.test.mjs
           pnpm run usage:test
           pnpm run usage:validate
           pnpm run build

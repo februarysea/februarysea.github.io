@@ -19,7 +19,7 @@ export function gripFrame(pose, name) {
             ? unit(sub(hold.palmNormal, mul(along, dot(hold.palmNormal, along))))
             : unit(radial);
         const across = unit(cross(along, palm));
-        const thumb = hold.grip === "pronated" ? mul(along, name === "left" ? 1 : -1) : along;
+        const thumb = hold.thumb ? unit(hold.thumb) : hold.grip === "pronated" ? mul(along, name === "left" ? 1 : -1) : along;
         return { center: hold.center, reach, along, across, palm, thumb };
     }
     const onLandmine = pose.landmine?.hand === name;

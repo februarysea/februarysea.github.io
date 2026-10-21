@@ -27,12 +27,24 @@ export declare function bendJoint(start: Vec3, end: Vec3, first: number, second:
 export type JointName = "head" | "neck" | "leftShoulder" | "rightShoulder" | "leftElbow" | "rightElbow" | "leftWrist" | "rightWrist" | "leftHip" | "rightHip" | "leftKnee" | "rightKnee" | "leftAnkle" | "rightAnkle" | "leftToe" | "rightToe";
 export interface StudyPose {
     joints: Record<JointName, Vec3>;
+    /** Optional fixed thorax anchor when scapular elevation moves the shoulder joints. */
+    torsoShoulders?: Vec3;
+    /** Optional constant-arclength spinal bend used only by newly authored core studies. */
+    torsoCurve?: {
+        pelvisUp: Vec3;
+        flexion: number;
+        lateral?: number;
+        twist?: number;
+    };
+    /** New grounded studies keep sampled surface envelopes free of spline overshoot. */
+    exactSurfaceContours?: true;
     /** Shaft contacts; optional palmNormal points out of the palmar surface, not toward the wrist. */
     handholds?: Partial<Record<"left" | "right", {
         center: Vec3;
         axis: Vec3;
         grip?: "pronated" | "neutral";
         palmNormal?: Vec3;
+        thumb?: Vec3;
     }>>;
     /** Palm volume center; forward points toward fingertips, normal away from support. */
     handContacts?: Partial<Record<"left" | "right", {
@@ -46,6 +58,26 @@ export interface StudyPose {
     };
     /** Refine local body/equipment overlap without changing accepted illustrations. */
     occlusion?: "surface";
+    /** Resolve local head/pad and supported foot/box overlaps. */
+    supportOcclusion?: boolean;
+    /** Opt-in contact repairs for reviewed overlaps, without changing other art. */
+    localOcclusion?: {
+        handheld?: boolean;
+        elbows?: boolean;
+        shoulders?: boolean;
+        shoulderInk?: boolean;
+        chestBar?: boolean;
+        hips?: boolean;
+        rollers?: boolean;
+    };
+    /** Surface-attached detail for revised shoes, with true local depth. */
+    surfaceFeet?: true;
+    /** Dashed annotations show the travel of a moving load, separate from apparatus. */
+    motionGuides?: readonly {
+        id: string;
+        from: Vec3;
+        to: Vec3;
+    }[];
     dumbbells?: readonly {
         id: string;
         center: Vec3;
@@ -71,9 +103,22 @@ export interface StudyPose {
             id: string;
             center: Vec3;
             axis: Vec3;
+            across?: Vec3;
+            normal?: Vec3;
             length: number;
             width: number;
             thickness: number;
+            headSupport?: boolean;
+            armSupport?: boolean;
+            backdrop?: boolean;
+        }[];
+        /** Cylindrical machine pads and pivots; center lies on the cylinder axis. */
+        rollers?: readonly {
+            id: string;
+            center: Vec3;
+            axis: Vec3;
+            length: number;
+            radius: number;
         }[];
     };
     bar?: {
@@ -106,9 +151,16 @@ export interface StudyPose {
     feet?: "flat" | "air";
     /** Optional ankle-relative shoe rotation in radians; positive lifts the toes. */
     footPitch?: Partial<Record<"left" | "right", number>>;
+    /** Explicit shoe frame for inclined machine footplates, without Euler-angle ambiguity. */
+    footFrames?: Partial<Record<"left" | "right", {
+        forward: Vec3;
+        normal: Vec3;
+    }>>;
     /** Opt-in pelvis-to-thigh fabric transition for deeply flexed hip poses. */
     shorts?: {
         hipFlexion?: boolean;
+        anchoredWaist?: boolean;
+        continuousYoke?: boolean;
     };
     /** Optional local floor marks beside separated support points, in world space. */
     groundContacts?: readonly Vec3[];
@@ -131,6 +183,8 @@ export interface MotionStudy {
     chinese: string;
     subtitle: string;
     durationMs: number;
+    /** An authored static support exercise; it must not acquire an artificial repetition. */
+    isometric?: true;
     /** Named points for inspecting a multi-stage action without assuming .5 is its end. */
     keyframes?: readonly {
         phase: number;

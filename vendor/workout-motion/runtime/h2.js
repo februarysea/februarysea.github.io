@@ -1,8 +1,9 @@
 import { createStudyPlayer, renderStudy, reviewStudies } from "./review.js";
 const catalog = new Map(reviewStudies.map((study) => {
-    const { id, label, chinese, subtitle, durationMs, keyframes } = study;
+    const { id, label, chinese, subtitle, durationMs, keyframes, isometric } = study;
     const metadata = Object.freeze({
         id, label, chinese, subtitle, durationMs,
+        ...(isometric ? { isometric } : {}),
         ...(keyframes ? { keyframes: Object.freeze(keyframes.map((keyframe) => Object.freeze({ ...keyframe }))) } : {}),
     });
     return [id, metadata];

@@ -53,7 +53,7 @@ export const singleArmDumbbellRowStudy = {
         const leftShoulder = add(shoulder, v(-BODY.shoulderHalf, 0, 0));
         const rightShoulder = add(shoulder, v(BODY.shoulderHalf, 0, 0));
         const leftWrist = v(-.20, .465, shoulder.z + .025);
-        const rightWrist = blend(add(rightShoulder, v(.07, -.58, 0)), v(.29, .815, -.035), a);
+        const rightWrist = blend(add(rightShoulder, v(.07, -.58, 0)), v(.35, .815, -.035), a);
         const rightElbow = bendJoint(rightShoulder, rightWrist, BODY.upperArm, BODY.forearm, v(.2, .5, -1));
         const axis = neutralAxis(rightElbow, rightWrist);
         const hold = dumbbellHold(rightElbow, rightWrist, axis, "neutral");
@@ -125,6 +125,8 @@ export const inclineDumbbellPressStudy = {
                     { id: "incline-rear-foot", a: v(-.3, .03, -.47), b: v(.3, .03, -.47), radius: .025 },
                 ] },
             shorts: { hipFlexion: true }, camera: { yaw: 52, pitch: 11, viewBox: "20 105 310 250" },
+            supportOcclusion: true,
+            localOcclusion: { elbows: true },
         };
     },
 };
@@ -180,7 +182,7 @@ export const lateralRaiseStudy = {
     subtitle: "肘保持微屈，双臂向侧方稍向前抬至肩高，再受控落下", durationMs: 3400,
     keyframes: frames("体侧预备", "侧向抬臂", "肩高顶端", .43),
     pose(phase) {
-        const a = amountAt(phase, .43), joints = standingJoints(), angle = .12 + (Math.PI / 2 - .12) * a;
+        const a = amountAt(phase, .43), joints = standingJoints(), angle = .17 + (Math.PI / 2 - .17) * a;
         for (const [side, sign] of [["left", -1], ["right", 1]]) {
             const sh = joints[`${side}Shoulder`];
             // A fixed 12 degree elbow bend, with the forearm slightly forward of the

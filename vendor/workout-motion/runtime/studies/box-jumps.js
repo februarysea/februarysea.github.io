@@ -23,7 +23,7 @@ function interpolate(a, b, q) {
     const t = smooth(q), ap = pitchOf(a), bp = pitchOf(b);
     return { hip: blend(a.hip, b.hip, t), ankles: [blend(a.ankles[0], b.ankles[0], t), blend(a.ankles[1], b.ankles[1], t)],
         lean: lerp(a.lean, b.lean, t), arms: lerp(a.arms, b.arms, t), elbows: lerp(a.elbows ?? .16, b.elbows ?? .16, t),
-        pitches: [lerp(ap[0], bp[0], t), lerp(ap[1], bp[1], t)], roll: lerp(a.roll ?? 0, b.roll ?? 0, t), armSplit: lerp(a.armSplit ?? 0, b.armSplit ?? 0, t) };
+        pitches: [lerp(ap[0], bp[0], t), lerp(ap[1], bp[1], t)], roll: lerp(a.roll ?? 0, b.roll ?? 0, t), armSplit: lerp(a.armSplit ?? 0, b.armSplit ?? 0, t), heading: lerp(a.heading ?? 0, b.heading ?? 0, t) };
 }
 const stance = (center, surface = 0) => [add(center, v(-HALF_STANCE, surface + .07, 0)), add(center, v(HALF_STANCE, surface + .07, 0))];
 const rotateFoot = (z, y, pitch) => v(0, y * Math.cos(pitch) + z * Math.sin(pitch), z * Math.cos(pitch) - y * Math.sin(pitch));
@@ -57,10 +57,10 @@ function flight(from, to, q, seconds) {
         roll: lerp(from.roll ?? 0, to.roll ?? 0, smooth(q)),
     };
 }
-function absorb(from, flatFeet, velocity, q, seconds) {
+function absorb(from, flatFeet, velocity, q, seconds, surfaceHeight = HEIGHT) {
     const elapsed = q * seconds, brake = Math.min(elapsed, .10), distanceTime = brake - brake * brake / .20;
     const frame = {
-        hip: v(from.hip.x + velocity.x * distanceTime, hermite(from.hip.y, HEIGHT + .59, velocity.y, 0, q, seconds), from.hip.z + velocity.z * distanceTime),
+        hip: v(from.hip.x + velocity.x * distanceTime, hermite(from.hip.y, surfaceHeight + .59, velocity.y, 0, q, seconds), from.hip.z + velocity.z * distanceTime),
         ankles: flatFeet, lean: lerp(from.lean, .37, smooth(q)), arms: lerp(from.arms, .20, smooth(q)),
         elbows: lerp(from.elbows ?? .7, .42, smooth(q)), roll: (from.roll ?? 0) * (1 - smooth(q)),
     };
@@ -77,7 +77,7 @@ function swingFoot(from, to, q) {
     return point;
 }
 /** Hip tangents carry through successive steps; the support shoe remains planted. */
-function walk(frames, times, time) {
+function walk(frames, times, time, highStep = false) {
     let index = 0;
     while (index < frames.length - 2 && time > times[index + 1])
         index++;
@@ -95,7 +95,7 @@ function walk(frames, times, time) {
     const moving = index % 2 === 0 ? 0 : 1, support = moving === 0 ? 1 : 0;
     const frame = interpolate(a, b, q), sway = Math.sin(Math.PI * q), supportSign = support ? 1 : -1;
     frame.hip = hermitePoint(a.hip, b.hip, velocity(index), velocity(index + 1), q, seconds);
-    frame.hip.x += supportSign * .023 * sway * (1 - 2 * smooth(q));
+    frame.hip.x += supportSign * .023 * sway * (1 - 2 * smooth(q)) * Math.cos(frame.heading ?? 0);
     if (a.hip.y > b.hip.y + .15) {
         if (Math.abs(b.hip.x - a.hip.x) > .2)
             frame.hip.x -= .20 * sway * sway;
@@ -103,10 +103,25 @@ function walk(frames, times, time) {
             frame.hip.z -= .13 * sway;
     }
     frame.hip.y -= .012 * sway * sway;
+    // After the leading foot has landed, extend that supporting leg early so
+    // the trailing knee rises above the edge before it advances onto the box.
+    if (highStep && index === 1)
+        frame.hip.y += .060 * sway;
     frame.ankles[moving] = swingFoot(a.ankles[moving], b.ankles[moving], q);
+    if (highStep && b.ankles[moving].y > a.ankles[moving].y + .4) {
+        // Lift the whole shoe above the tall edge before translating onto it.
+        const from = a.ankles[moving], to = b.ankles[moving];
+        const horizontal = smooth(at(q, .43, .90));
+        frame.ankles[moving] = blend(from, to, horizontal);
+        frame.ankles[moving].y = q < .55
+            ? lerp(from.y, to.y + .055, smooth(q / .55))
+            : lerp(to.y + .055, to.y, smooth(at(q, .75, 1)));
+    }
     frame.ankles[support] = a.ankles[support];
     frame.pitches = [0, 0];
     frame.pitches[moving] = .14 * Math.sin(Math.PI * (b.ankles[moving].y < a.ankles[moving].y - .03 ? clamp(q / .90) : q));
+    if (highStep && b.ankles[moving].y > a.ankles[moving].y + .4)
+        frame.pitches[moving] = 0;
     frame.armSplit = (moving ? 1 : -1) * .24 * sway;
     frame.elbows = lerp(a.elbows ?? .16, b.elbows ?? .16, smooth(q)) + .12 * sway;
     frame.roll = supportSign * .025 * sway;
@@ -114,21 +129,22 @@ function walk(frames, times, time) {
 }
 function skeleton(frame, boxes, camera) {
     const roll = frame.roll ?? 0, c = Math.cos(roll), s = Math.sin(roll);
-    const up = v(s, c * Math.cos(frame.lean), c * Math.sin(frame.lean));
-    const across = v(c, -s * Math.cos(frame.lean), -s * Math.sin(frame.lean));
-    const forward = v(0, -Math.sin(frame.lean), Math.cos(frame.lean));
+    const turn = (p, heading = frame.heading ?? 0) => heading === 0 ? p : v(p.x * Math.cos(heading) + p.z * Math.sin(heading), p.y, -p.x * Math.sin(heading) + p.z * Math.cos(heading));
+    const up = turn(v(s, c * Math.cos(frame.lean), c * Math.sin(frame.lean)));
+    const across = turn(v(c, -s * Math.cos(frame.lean), -s * Math.sin(frame.lean)));
+    const forward = turn(v(0, -Math.sin(frame.lean), Math.cos(frame.lean)));
     const shoulders = add(frame.hip, mul(up, BODY.torso)), pitches = pitchOf(frame);
     const side = (sign, index) => {
-        const hip = add(frame.hip, v(sign * BODY.hipHalf, 0, 0)), shoulder = add(shoulders, mul(across, sign * BODY.shoulderHalf));
-        const ankle = frame.ankles[index], knee = bendJoint(hip, ankle, BODY.thigh, BODY.shin, v(sign * .08, 0, 1));
+        const hip = add(frame.hip, turn(v(sign * BODY.hipHalf, 0, 0))), shoulder = add(shoulders, mul(across, sign * BODY.shoulderHalf));
+        const ankle = frame.ankles[index], knee = bendJoint(hip, ankle, BODY.thigh, BODY.shin, turn(v(sign * .08, 0, 1)));
         const angle = frame.arms + sign * (frame.armSplit ?? 0), bend = frame.elbows ?? .16;
         const upper = unit(add(add(mul(forward, Math.sin(angle)), mul(up, -Math.cos(angle))), mul(across, sign * .13)));
         const lower = unit(add(add(mul(forward, Math.sin(angle + bend)), mul(up, -Math.cos(angle + bend))), mul(across, sign * .05)));
         const elbow = add(shoulder, mul(upper, BODY.upperArm)), wrist = add(elbow, mul(lower, BODY.forearm));
-        return { hip, shoulder, ankle, knee, elbow, wrist, toe: add(ankle, rotateFoot(.17, -.045, pitches[index])) };
+        return { hip, shoulder, ankle, knee, elbow, wrist, toe: add(ankle, turn(rotateFoot(.17, -.045, pitches[index]), frame.footHeadings?.[index] ?? frame.heading ?? 0)) };
     };
     const left = side(-1, 0), right = side(1, 1);
-    return { joints: {
+    return { supportOcclusion: true, joints: {
             head: add(shoulders, mul(up, .235)), neck: add(shoulders, mul(up, .115)),
             leftShoulder: left.shoulder, rightShoulder: right.shoulder, leftElbow: left.elbow, rightElbow: right.elbow,
             leftWrist: left.wrist, rightWrist: right.wrist, leftHip: left.hip, rightHip: right.hip,
@@ -199,33 +215,45 @@ export const lateralBoxJumpStudy = {
     durationMs: 4000, keyframes: directFrames(true), pose: directJump(true),
 };
 function dropSequence() {
-    // Ground contact leaves a 24 cm toe-to-box gap; the low drop platform stays 20 cm.
-    const start = -1.05, ground = -.35, target = .35, exit = -.38, returnFloor = -.54, lowHeight = .20;
+    // Step from the higher platform, rebound from the floor to the lower box.
+    const start = -1.05, ground = -.35, target = .35, exit = -.38, returnFloor = -.43, dropHeight = .45, targetHeight = .30;
     const point = (z, y = 0) => v(0, y, z);
-    const lowFeet = stance(point(start), lowHeight), groundFeet = stance(point(ground)), targetFeet = stance(point(target), HEIGHT);
+    const highFeet = stance(point(start), dropHeight), groundFeet = stance(point(ground)), targetFeet = stance(point(target), targetHeight);
     const exitFeet = stance(point(exit)), returnFeet = stance(point(returnFloor));
     const boxes = [
-        { id: "drop-platform", center: point(start), width: .76, depth: .60, height: lowHeight },
-        { id: "target", center: point(target), width: .62, depth: .54, height: HEIGHT },
+        { id: "drop-platform", center: point(start), width: .76, depth: .60, height: dropHeight },
+        { id: "target", center: point(target), width: .62, depth: .54, height: targetHeight },
     ];
-    const standing = { hip: point(start, lowHeight + STAND), ankles: lowFeet, lean: .025, arms: .06, elbows: .18 };
-    const edge = { hip: point(-.68, 1.03), ankles: [v(-HALF_STANCE, .32, -.50), lowFeet[1]], lean: .10, arms: -.38, elbows: .38 };
-    const contact = planted({ hip: point(ground - .04, edge.hip.y - G * .22 ** 2 / 2), ankles: groundFeet, lean: .16, arms: .18, elbows: .65 }, groundFeet, -.09);
-    const dropVelocity = v(0, 0, (contact.hip.z - edge.hip.z) / .22);
+    const standing = { hip: point(start, dropHeight + STAND), ankles: highFeet, lean: .025, arms: .06, elbows: .18 };
+    const edge = { hip: point(-.68, 1.26), ankles: [v(-HALF_STANCE, .50, -.50), highFeet[1]], lean: .10, arms: -.38, elbows: .38 };
+    const contact = planted({ hip: point(ground - .04, edge.hip.y - G * .32 ** 2 / 2), ankles: groundFeet, lean: .16, arms: .18, elbows: .65 }, groundFeet, -.09);
+    const dropVelocity = v(0, 0, (contact.hip.z - edge.hip.z) / .32);
     const load = { hip: point(contact.hip.z + dropVelocity.z * .045, .69), ankles: groundFeet, lean: .29, arms: .58, elbows: .74 };
     const launch = planted({ hip: point(ground + .10, 1.005), ankles: groundFeet, lean: .12, arms: 1.95, elbows: .36 }, groundFeet, -.48);
-    const touchdown = planted({ hip: point(target - .09, HEIGHT + .75), ankles: targetFeet, lean: .23, arms: .60, elbows: .72 }, targetFeet, -.12);
+    const touchdown = planted({ hip: point(target - .09, targetHeight + .75), ankles: targetFeet, lean: .23, arms: .60, elbows: .72 }, targetFeet, -.12);
     const velocity = launchVelocity(launch, touchdown, .52), incoming = add(velocity, v(0, -G * .52, 0));
-    const compressed = absorb(touchdown, targetFeet, incoming, 1, .20);
-    const top = { hip: point(target, HEIGHT + STAND), ankles: targetFeet, lean: .02, arms: .05, elbows: .24 };
-    const downLeft = { hip: point(exit + .02, .90), ankles: [exitFeet[0], targetFeet[1]], lean: .13, arms: .10, elbows: .3 };
+    const compressed = absorb(touchdown, targetFeet, incoming, 1, .20, targetHeight);
+    const top = { hip: point(target, targetHeight + STAND), ankles: targetFeet, lean: .02, arms: .05, elbows: .24 };
+    const downLeft = { hip: point(exit + .07, .90), ankles: [exitFeet[0], targetFeet[1]], lean: .13, arms: .10, elbows: .3 };
     const downBoth = { hip: point(exit, .91), ankles: exitFeet, lean: .05, arms: .06, elbows: .3 };
     const backLeft = { hip: point((exit + returnFloor) / 2, .86), ankles: [returnFeet[0], exitFeet[1]], lean: .08, arms: .08, elbows: .3 };
     const backBoth = { hip: point(returnFloor, .91), ankles: returnFeet, lean: .04, arms: .06, elbows: .3 };
-    const upLeft = { hip: point((returnFloor + start) / 2, .86), ankles: [lowFeet[0], returnFeet[1]], lean: .11, arms: .09, elbows: .3 };
-    const recovery = [top, downLeft, downBoth, backLeft, backBoth, upLeft, standing], times = [2.02, 2.62, 3.15, 3.51, 3.87, 4.32, 4.82];
+    const recovery = [top, downLeft, downBoth, backLeft, backBoth], times = [2.13, 2.70, 3.20, 3.60, 4.00];
+    const reverseFeet = (feet) => [feet[1], feet[0]];
+    const facingGround = { ...backBoth, ankles: reverseFeet(returnFeet), heading: Math.PI };
+    const facingTop = { ...standing, ankles: reverseFeet(highFeet), heading: Math.PI };
+    const upLeft = { hip: point(-.69, .88), ankles: [highFeet[1], returnFeet[0]], lean: .11, arms: .09, elbows: .3, heading: Math.PI };
+    // Four small quarter-turn steps keep one shoe planted at a time. This avoids
+    // attempting a backwards high step with the knee driven through the box.
+    const turnAround = (base, from, q) => {
+        const step = Math.min(3, Math.floor(q * 4)), local = q * 4 - step, moving = step % 2;
+        const headings = [from + Math.PI / 2 * Math.floor((step + 1) / 2), from + Math.PI / 2 * Math.floor(step / 2)];
+        headings[moving] += Math.PI / 2 * smooth(local);
+        const feet = headings.map((heading, index) => add(point(base.hip.z, base.ankles[index].y), v((index ? 1 : -1) * HALF_STANCE * Math.cos(heading), index === moving ? .07 * Math.sin(Math.PI * local) : 0, -(index ? 1 : -1) * HALF_STANCE * Math.sin(heading))));
+        return { ...base, hip: add(base.hip, v(0, -.05 * Math.sin(Math.PI * q) ** 2, 0)), ankles: feet, heading: (headings[0] + headings[1]) / 2, footHeadings: headings };
+    };
     return phase => {
-        const time = (phase >= 1 ? 0 : Math.max(0, phase)) * 5;
+        const time = (phase >= 1 ? 0 : Math.max(0, phase)) * 7.5;
         let frame;
         if (time < .43) {
             const q = time / .43;
@@ -234,37 +262,44 @@ function dropSequence() {
             frame.hip = hermitePoint(standing.hip, edge.hip, v(0, 0, 0), dropVelocity, q, .43);
             frame.roll = .03 * Math.sin(Math.PI * q);
         }
-        else if (time < .65) {
-            const q = at(time, .43, .65), elapsed = q * .22, hip = add(edge.hip, mul(dropVelocity, elapsed));
+        else if (time < .75) {
+            const q = at(time, .43, .75), elapsed = q * .32, hip = add(edge.hip, mul(dropVelocity, elapsed));
             hip.y -= G * elapsed * elapsed / 2;
             const ankles = edge.ankles.map((foot, index) => {
-                const ankle = blend(foot, contact.ankles[index], q);
-                ankle.y += (index === 0 ? .035 : .16) * Math.sin(Math.PI * q);
+                const ankle = blend(foot, contact.ankles[index], index === 1 ? 1 - (1 - q) ** 3.5 : smooth(q));
+                const legDrop = lerp(edge.hip.y - foot.y, contact.hip.y - contact.ankles[index].y, smooth(q));
+                ankle.y = hip.y - legDrop + .045 * Math.sin(Math.PI * q);
                 return ankle;
             });
             frame = { ...interpolate(edge, contact, q), hip, ankles };
         }
-        else if (time < .74) {
-            const q = at(time, .65, .74);
+        else if (time < .85) {
+            const q = at(time, .75, .85);
             frame = interpolate(contact, load, q);
-            frame.hip.y = hermite(contact.hip.y, load.hip.y, -G * .22, 0, q, .09);
-            frame.hip.z = hermite(contact.hip.z, load.hip.z, dropVelocity.z, 0, q, .09);
+            frame.hip.y = hermite(contact.hip.y, load.hip.y, -G * .32, 0, q, .10);
+            frame.hip.z = hermite(contact.hip.z, load.hip.z, dropVelocity.z, 0, q, .10);
             frame = planted(frame, groundFeet, -.09 * (1 - smooth(q)));
         }
-        else if (time < .88) {
-            const q = at(time, .74, .88);
+        else if (time < .99) {
+            const q = at(time, .85, .99);
             frame = interpolate(load, launch, q);
             frame.hip = hermitePoint(load.hip, launch.hip, v(0, 0, 0), velocity, q, .14);
             frame = planted(frame, groundFeet, -.48 * smooth(at(q, .38, 1)));
         }
-        else if (time < 1.40)
-            frame = flight(launch, touchdown, at(time, .88, 1.40), .52);
-        else if (time < 1.60)
-            frame = absorb(touchdown, targetFeet, incoming, at(time, 1.40, 1.60), .20);
-        else if (time < 2.02)
-            frame = interpolate(compressed, top, at(time, 1.60, 2.02));
-        else if (time < 4.82)
+        else if (time < 1.51)
+            frame = flight(launch, touchdown, at(time, .99, 1.51), .52);
+        else if (time < 1.71)
+            frame = absorb(touchdown, targetFeet, incoming, at(time, 1.51, 1.71), .20, targetHeight);
+        else if (time < 2.13)
+            frame = interpolate(compressed, top, at(time, 1.71, 2.13));
+        else if (time < 4.00)
             frame = walk(recovery, times, time);
+        else if (time < 5.00)
+            frame = turnAround(backBoth, 0, at(time, 4.00, 5.00));
+        else if (time < 6.30)
+            frame = walk([facingGround, upLeft, facingTop], [5.00, 5.65, 6.30], time, true);
+        else if (time < 7.30)
+            frame = turnAround(standing, Math.PI, at(time, 6.30, 7.30));
         else
             frame = standing;
         return skeleton(frame, boxes, { yaw: -55, pitch: 10, viewBox: "-40 -25 440 390" });
@@ -272,12 +307,12 @@ function dropSequence() {
 }
 export const depthBoxJumpStudy = {
     id: "depth-box-jump", label: "Drop-to-Box Jump", chinese: "落下反弹跳箱",
-    subtitle: "迈出低台、前脚掌触地立即反弹，落箱吸收冲击后连贯迈步返回",
-    durationMs: 5000,
+    subtitle: "从较高平台迈下、触地立即反弹到较低跳箱，落箱缓冲后迈步返回",
+    durationMs: 7500,
     keyframes: [
-        { phase: 0, label: "低台站位" }, { phase: .43 / 5, label: "迈出低台" },
-        { phase: .65 / 5, label: "前脚掌触地" }, { phase: .88 / 5, label: "蹬地反弹" },
-        { phase: 1.10 / 5, label: "腾空收腿" }, { phase: 1.40 / 5, label: "前脚掌落箱" },
-        { phase: 1.60 / 5, label: "落跟缓冲" }, { phase: 2.02 / 5, label: "箱上站起" },
+        { phase: 0, label: "高台站位" }, { phase: .43 / 7.5, label: "迈出高台" },
+        { phase: .75 / 7.5, label: "前脚掌触地" }, { phase: .99 / 7.5, label: "蹬地反弹" },
+        { phase: 1.21 / 7.5, label: "腾空收腿" }, { phase: 1.51 / 7.5, label: "前脚掌落低箱" },
+        { phase: 1.71 / 7.5, label: "落跟缓冲" }, { phase: 2.13 / 7.5, label: "低箱站起" },
     ], pose: dropSequence(),
 };

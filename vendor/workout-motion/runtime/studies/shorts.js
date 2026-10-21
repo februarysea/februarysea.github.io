@@ -1,4 +1,5 @@
 import { add, blend, cross, dot, mul, sub, unit } from "./rig.js";
+import { torsoFrameAt } from "./torso-curve.js";
 /** Sample a physical ring; renderers can select its visible arc by camera depth. */
 export function garmentRingPoint(ring, angle) {
     return add(ring.center, add(mul(ring.side, Math.cos(angle) * ring.rx), mul(ring.front, Math.sin(angle) * ring.rz)));
@@ -20,14 +21,15 @@ export function garmentGeometry(pose) {
     const j = pose.joints;
     const hips = blend(j.leftHip, j.rightHip, .5);
     const shoulders = blend(j.leftShoulder, j.rightShoulder, .5);
-    const up = unit(sub(shoulders, hips));
-    const side = unit(sub(j.rightHip, j.leftHip));
-    const front = unit(cross(side, up));
+    const pelvisFrame = pose.torsoCurve ? torsoFrameAt(pose, 0) : undefined;
+    const up = pelvisFrame?.up ?? unit(sub(shoulders, hips));
+    const side = pelvisFrame?.side ?? unit(sub(j.rightHip, j.leftHip));
+    const front = pelvisFrame?.front ?? unit(cross(side, up));
     const down = unit(add(unit(sub(j.leftKnee, j.leftHip)), unit(sub(j.rightKnee, j.rightHip))));
     // A deep hinge needs fabric to bridge the trunk and nearly upright thighs.
     // A squat folds the thighs toward the trunk instead; preserve that garment,
     // along with the supported bench pose. Both hinge gates vary smoothly.
-    const hingeAmount = !pose.bench ? Math.max(0, Math.min(1, (.85 - up.y) / .50)) : 0;
+    const hingeAmount = !pose.bench && !pose.torsoCurve ? Math.max(0, Math.min(1, (.85 - up.y) / .50)) : 0;
     const uprightLegAmount = Math.max(0, Math.min(1, (-down.y - .40) / .30));
     const hinge = hingeAmount * hingeAmount * (3 - 2 * hingeAmount)
         * uprightLegAmount * uprightLegAmount * (3 - 2 * uprightLegAmount);
@@ -75,9 +77,17 @@ export function garmentGeometry(pose) {
     const ring = (center, rx, rz, influence = 0) => ({
         center, rx, rz, side, front: fabricFrame(influence),
     });
+    const waistRing = (height, rx, rz) => {
+        if (pose.shorts?.anchoredWaist)
+            return { center: add(hips, mul(up, height)), rx, rz, side, front };
+        if (!pose.torsoCurve)
+            return ring(add(hips, mul(up, height)), rx, rz, .28);
+        const frame = torsoFrameAt(pose, height / .49);
+        return { center: frame.center, side: frame.side, front: frame.front, rx, rz };
+    };
     const waistband = [
-        ring(add(hips, mul(up, .084)), .160, .100 - .010 * hinge, .28),
-        ring(add(hips, mul(up, .059)), .169, .107 - .011 * hinge, .28),
+        waistRing(.084, .160, .100 - (pose.shorts?.anchoredWaist ? 0 : .010 * hinge)),
+        waistRing(.059, .169, .107 - (pose.shorts?.anchoredWaist ? 0 : .011 * hinge)),
     ];
     return {
         hingeBlend: hinge,
@@ -86,7 +96,13 @@ export function garmentGeometry(pose) {
         // join the hip roots to the upper thighs without an inflated rear cap.
         pelvis: [waistband[0], waistband[1],
             ring(hips, .193 - .019 * hinge, .116 - .018 * hinge, .62),
-            ring(add(hips, mul(down, .025 + .025 * hinge)), .181 - .009 * hinge, .106 - .007 * hinge, .85)],
+            ring(add(hips, mul(down, .025 + .025 * hinge)), .181 - .009 * hinge, .106 - .007 * hinge, .85),
+            ...(pose.shorts?.continuousYoke ? (() => {
+                // One continuous seat joins the two proximal sleeves during a hinge.
+                const roots = legs.map(leg => leg.rings[2]), center = blend(roots[0].center, roots[1].center, .5);
+                return [{ center, side, front: unit(cross(side, mul(down, -1))),
+                        rx: Math.max(...roots.map(r => Math.abs(dot(sub(r.center, center), side)) + r.rx)), rz: .106 }];
+            })() : [])],
         legs,
         crotch,
     };

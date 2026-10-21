@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Offline, pinned import. No package lifecycle scripts or dependency installation.
+// Compile an exact Git snapshot. No package lifecycle scripts or dependency installation.
 // Usage: node scripts/sync-workout-motion.mjs --source /path/to/workout-motion --revision <40-character-commit>
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -12,7 +12,6 @@ const websiteRoot = fileURLToPath(new URL('../', import.meta.url));
 const upstreamUrl = 'https://github.com/februarysea/workout-motion';
 const legalFiles = ['LICENSE', 'NOTICE', 'COMMERCIAL-LICENSE.md'];
 const metadataFiles = ['package.json', 'tsconfig.json', ...legalFiles, 'README.md', 'README.zh-CN.md'];
-const trainingIds = ['bench-press', 'overhead-press', 'landmine-press', 'pull-up', 'hang-clean', 'squat', 'romanian-deadlift'];
 const sha256 = (data) => createHash('sha256').update(data).digest('hex');
 
 function parseArguments() {
@@ -103,10 +102,17 @@ async function main() {
     execFileSync(process.execPath, [join(websiteRoot, 'node_modules/typescript/bin/tsc'), '--project', join(temporary, 'tsconfig.json'), '--outDir', runtime], { cwd: temporary, stdio: 'inherit' });
 
     const { exerciseIds, getExercise, renderSvg } = await import(pathToFileURL(join(runtime, 'h2.js')).href);
-    if (exerciseIds.length !== 29 || trainingIds.some((id) => !getExercise(id))) {
-      throw new Error('Expected 29 H2 exercises including all seven training motions. Review the catalog before updating.');
+    const aliases = JSON.parse(await readFile(join(websiteRoot, 'config/exercise-motion-aliases.json'), 'utf8'));
+    const previous = await import(pathToFileURL(join(websiteRoot, 'vendor/workout-motion/runtime/h2.js')).href);
+    const requiredIds = new Set([...previous.exerciseIds, ...Object.values(aliases)]);
+    if (!exerciseIds.length || new Set(exerciseIds).size !== exerciseIds.length || [...requiredIds].some((id) => !getExercise(id))) {
+      throw new Error('The updated catalog must retain existing motions and configured alias targets.');
     }
-    for (const id of trainingIds) {
+    for (const id of exerciseIds) {
+      const exercise = getExercise(id);
+      if (!exercise || exercise.id !== id || !exercise.label || !exercise.chinese || !Number.isFinite(exercise.durationMs) || exercise.durationMs <= 0) {
+        throw new Error(`Invalid exercise metadata: ${id}`);
+      }
       if (!renderSvg(id, { phase: 0.35, size: 80 }).startsWith('<svg')) throw new Error(`SVG render failed: ${id}`);
     }
 

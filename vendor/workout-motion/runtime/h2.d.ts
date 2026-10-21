@@ -6,6 +6,7 @@ export interface H2Exercise {
     readonly chinese: string;
     readonly subtitle: string;
     readonly durationMs: number;
+    readonly isometric?: true;
     readonly keyframes?: readonly Readonly<{
         phase: number;
         label: string;

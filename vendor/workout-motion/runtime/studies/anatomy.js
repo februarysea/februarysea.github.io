@@ -1,4 +1,5 @@
 import { add, blend, cross, mul, sub, unit, v } from "./rig.js";
+import { torsoFrameAt, torsoSurfaceLocal } from "./torso-curve.js";
 // The H2 chest has a broad, quiet silhouette. Keeping these cross-sections in
 // step with the torso volume prevents anatomy lines from becoming floating decals.
 const SECTIONS = [
@@ -26,12 +27,15 @@ function section(t) {
 export function torsoLandmarks(pose) {
     const joints = pose.joints;
     const hips = blend(joints.leftHip, joints.rightHip, .5);
-    const shoulders = blend(joints.leftShoulder, joints.rightShoulder, .5);
-    const axis = unit(sub(shoulders, hips));
-    const side = unit(sub(joints.rightShoulder, joints.leftShoulder));
-    const front = unit(cross(side, axis));
+    const shoulders = pose.torsoShoulders ?? blend(joints.leftShoulder, joints.rightShoulder, .5);
+    const end = pose.torsoCurve ? torsoFrameAt(pose, 1) : undefined;
+    const axis = end?.up ?? unit(sub(shoulders, hips));
+    const side = end?.side ?? unit(sub(joints.rightShoulder, joints.leftShoulder));
+    const front = end?.front ?? unit(cross(side, axis));
     const landmarks = [];
     const surface = ([t, x]) => {
+        if (pose.torsoCurve)
+            return torsoSurfaceLocal(pose, t, x);
         const { width, depth } = section(t);
         const lateral = Math.max(-.94, Math.min(.94, x / width));
         const forward = Math.sqrt(1 - lateral * lateral);
@@ -43,7 +47,8 @@ export function torsoLandmarks(pose) {
     const stroke = (id, coordinates, width = 1.08) => {
         const samples = coordinates.map(surface);
         const normal = unit(samples.reduce((sum, sample) => add(sum, sample.normal), v(0, 0, 0)));
-        landmarks.push({ id, points: samples.map(sample => sample.point), width, normal });
+        landmarks.push({ id, points: samples.map(sample => sample.point), width, normal,
+            ...(pose.torsoCurve ? { normals: samples.map(sample => sample.normal) } : {}) });
     };
     for (const [name, sign] of [["left", -1], ["right", 1]]) {
         const paired = (id, points, width) => stroke(`anatomy-${name}-${id}`, points.map(([t, x]) => [t, x * sign]), width);

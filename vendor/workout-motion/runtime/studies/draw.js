@@ -3,9 +3,12 @@ import { characterPose } from "./character.js";
 import { gripFrame } from "./grip.js";
 import { torsoLandmarks } from "./anatomy.js";
 import { garmentGeometry, garmentRingPoint, garmentRingPoints } from "./shorts.js";
-import { clipLineInside, clipLineOutside, flattenPath } from "./contours.js";
+import { clipLineInside, clipLineOutside, flattenPath, pointInPolygon } from "./contours.js";
 import { shoeGeometry } from "./feet.js";
 import { refineSurfaceDepth } from "./surface-depth.js";
+import { refineContactOcclusion } from "./contact-occlusion.js";
+import { refineLocalOverlap } from "./local-overlap.js";
+import { torsoFrameAt, torsoRadii, torsoSurfaceAt, TORSO_SECTIONS } from "./torso-curve.js";
 function makeRenderer(angle, tiltAngle = 9) {
     const RAD = Math.PI / 180;
     const yaw = angle * RAD, tilt = tiltAngle * RAD;
@@ -55,6 +58,10 @@ function makeRenderer(angle, tiltAngle = 9) {
         }
         return d;
     }
+    function smoothSegment(points, index) {
+        const a = project(points[Math.max(0, index - 1)]), b = project(points[index]), c = project(points[index + 1]), e = project(points[Math.min(points.length - 1, index + 2)]);
+        return `M${xy(b)}C${xy({ x: b.x + (c.x - a.x) / 6, y: b.y + (c.y - a.y) / 6 })} ${xy({ x: c.x - (e.x - b.x) / 6, y: c.y - (e.y - b.y) / 6 })} ${xy(c)}`;
+    }
     function muscleLine(start, end, stops, offsets, surface = false) {
         const a = project(start), b = project(end), dx = b.x - a.x, dy = b.y - a.y;
         const len = Math.hypot(dx, dy) || 1;
@@ -88,11 +95,60 @@ function makeRenderer(angle, tiltAngle = 9) {
         }
         return contour([...left, ...rightEdge.reverse()]);
     }
-    function limb(a, joint, end, radii) {
+    /** Each short band has its own surface depth; a bent chest cannot paint over
+     * the whole pelvis merely because its centre is closer to the camera. */
+    function curvedVolume(pose) {
+        const times = TORSO_SECTIONS.flatMap(([t], i) => i === TORSO_SECTIONS.length - 1 ? [t]
+            : [t, t + (TORSO_SECTIONS[i + 1][0] - t) / 3, t + 2 * (TORSO_SECTIONS[i + 1][0] - t) / 3]);
+        const rings = times.map(t => {
+            const frame = torsoFrameAt(pose, t), radius = torsoRadii(t), center = project(frame.center);
+            const dx = dot(frame.up, right), dy = -dot(frame.up, up), len = Math.hypot(dx, dy) || 1;
+            const offset = sectionSupport(frame.side, frame.front, radius.width, radius.depth, { x: -dy / len, y: dx / len });
+            const normal = { x: -dy / len, y: dx / len };
+            const a = (dot(frame.side, right) * normal.x - dot(frame.side, up) * normal.y) * radius.width;
+            const b = (dot(frame.front, right) * normal.x - dot(frame.front, up) * normal.y) * radius.depth;
+            const h = Math.hypot(a, b) || 1;
+            const support = add(mul(frame.side, radius.width * a / h), mul(frame.front, radius.depth * b / h));
+            return { left: { x: center.x + offset.x, y: center.y + offset.y }, right: { x: center.x - offset.x, y: center.y - offset.y },
+                leftDepth: depth(add(frame.center, support)), rightDepth: depth(sub(frame.center, support)) };
+        });
+        const edge = (name, index, reverse = false) => {
+            const points = rings.map(r => r[name]), a = points[Math.max(0, index - 1)], b = points[index], c = points[index + 1], e = points[Math.min(points.length - 1, index + 2)];
+            if (pose.exactSurfaceContours)
+                return reverse ? `M${xy(c)}L${xy(b)}` : `M${xy(b)}L${xy(c)}`;
+            const first = { x: b.x + (c.x - a.x) / 6, y: b.y + (c.y - a.y) / 6 }, last = { x: c.x - (e.x - b.x) / 6, y: c.y - (e.y - b.y) / 6 };
+            return reverse ? `M${xy(c)}C${xy(last)} ${xy(first)} ${xy(b)}` : `M${xy(b)}C${xy(first)} ${xy(last)} ${xy(c)}`;
+        };
+        const bands = rings.slice(0, -1).map((r, i) => {
+            const left = edge("left", i), back = edge("right", i, true), next = rings[i + 1];
+            const outline = left + back + (i === 0 ? `M${xy(r.left)}L${xy(r.right)}` : "")
+                + (i === rings.length - 2 ? `M${xy(next.left)}L${xy(next.right)}` : "");
+            return { fill: left + back.replace(/^M/, "L") + "Z", outline, left, right: back,
+                leftDepth: (r.leftDepth + next.leftDepth) / 2, rightDepth: (r.rightDepth + next.rightDepth) / 2 };
+        });
+        const patches = times.slice(0, -1).flatMap((t, i) => Array.from({ length: 24 }, (_, j) => {
+            const angle = j * Math.PI / 12, next = (j + 1) * Math.PI / 12;
+            const points = [torsoSurfaceAt(pose, t, angle), torsoSurfaceAt(pose, times[i + 1], angle),
+                torsoSurfaceAt(pose, times[i + 1], next), torsoSurfaceAt(pose, t, next)];
+            const projected = points.map(project);
+            return { id: `torso-surface-${i}-${j}`, shape: polygon(points), projected,
+                bounds: { x0: Math.min(...projected.map(p => p.x)), x1: Math.max(...projected.map(p => p.x)), y0: Math.min(...projected.map(p => p.y)), y1: Math.max(...projected.map(p => p.y)) },
+                depth: points.reduce((sum, p) => sum + depth(p), 0) / 4 };
+        }));
+        return { bands, patches, shape: bands.map(b => b.fill).join("") };
+    }
+    function limb(a, joint, end, radii, coveredThigh = false) {
         const incoming = blend(a, joint, .85), outgoing = blend(joint, end, .18);
         const rounded = (t) => add(add(mul(incoming, (1 - t) ** 2), mul(joint, 2 * (1 - t) * t)), mul(outgoing, t * t));
         const positions = [a, blend(a, joint, .22), blend(a, joint, .58), rounded(.15), rounded(.5),
             rounded(.85), blend(joint, end, .4), blend(joint, end, .76), end];
+        if (coveredThigh) {
+            // The visible thigh begins just inside the cuff at t=.43. A full closed
+            // hip cap can protrude beyond the pelvis during a deep hinge.
+            positions[0] = blend(a, joint, .39);
+            positions[1] = blend(a, joint, .48);
+            radii = [.094, .092, ...radii.slice(2)];
+        }
         const points = positions.map(project);
         const left = [], rightEdge = [];
         for (let i = 0; i < points.length; i++) {
@@ -104,6 +160,28 @@ function makeRenderer(angle, tiltAngle = 9) {
             rightEdge.push({ x: points[i].x - normal.x * r, y: points[i].y - normal.y * r });
         }
         return contour([...left, ...rightEdge.reverse()], .88);
+    }
+    /** The same H2 leg boundary, split at its existing curve knots. No cross-band
+     * seams are inked; each short section carries its own physical surface depth. */
+    function legBands(a, joint, end) {
+        const incoming = blend(a, joint, .85), outgoing = blend(joint, end, .18);
+        const rounded = (t) => add(add(mul(incoming, (1 - t) ** 2), mul(joint, 2 * (1 - t) * t)), mul(outgoing, t * t));
+        const positions = [a, blend(a, joint, .22), blend(a, joint, .58), rounded(.15), rounded(.5), rounded(.85), blend(joint, end, .4), blend(joint, end, .76), end];
+        const radii = [.09, .098, .088, .061, .052, .056, .077, .049, .029], projected = positions.map(project);
+        const edges = [1, -1].map(sign => projected.map((p, i) => {
+            const before = projected[Math.max(0, i - 1)], after = projected[Math.min(8, i + 1)], len = Math.hypot(after.x - before.x, after.y - before.y) || 1;
+            return { x: p.x - (after.y - before.y) / len * radii[i] * SCALE * sign, y: p.y + (after.x - before.x) / len * radii[i] * SCALE * sign };
+        }));
+        const boundary = [...edges[0], ...edges[1].slice().reverse()];
+        const segment = (i) => {
+            const a = boundary[(i + 17) % 18], b = boundary[i], c = boundary[(i + 1) % 18], e = boundary[(i + 2) % 18];
+            return `M${xy(b)}C${xy({ x: b.x + (c.x - a.x) * .88 / 6, y: b.y + (c.y - a.y) * .88 / 6 })} ${xy({ x: c.x - (e.x - b.x) * .88 / 6, y: c.y - (e.y - b.y) * .88 / 6 })} ${xy(c)}`;
+        };
+        return positions.slice(0, -1).map((p, i) => {
+            const left = segment(i), rightEdge = segment(16 - i), radial = (radii[i] + radii[i + 1]) / 2;
+            const along = unit(sub(positions[i + 1], p)), z = depth(midpoint(p, positions[i + 1])) + radial * Math.sqrt(Math.max(0, 1 - dot(along, view) ** 2));
+            return { fill: left + (i === 7 ? segment(8).replace(/^M/, "L") : "") + rightEdge.replace(/^M/, "L") + (i === 0 ? segment(17).replace(/^M/, "L") : "") + "Z", outline: left + rightEdge + (i === 0 ? segment(17) : "") + (i === 7 ? segment(8) : ""), depth: z };
+        });
     }
     /** Separate straight arm sections stay well behaved when one bone faces the camera. */
     function armSection(a, b, stops, radii) {
@@ -132,15 +210,54 @@ function makeRenderer(angle, tiltAngle = 9) {
     return function draw(pose, equipment = true) {
         let parts = [];
         const push = (id, d, z, fill = PAPER, stroke = INK, width = 1.55) => {
+            if (pose.localOcclusion?.rollers && /^(left|right)-(calf|shin)$/.test(id)) {
+                const name = id.startsWith("left") ? "left" : "right", knee = pose.joints[`${name}Knee`], ankle = pose.joints[`${name}Ankle`], axis = unit(sub(ankle, knee));
+                const points = flattenPath(d).flat(), lengths = [0];
+                for (let i = 1; i < points.length; i++)
+                    lengths.push(lengths[i - 1] + Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y));
+                const at = (t) => { const target = t * lengths.at(-1); let i = 1; while (i < lengths.length - 1 && lengths[i] < target)
+                    i++; const f = (target - lengths[i - 1]) / (lengths[i] - lengths[i - 1] || 1); return { x: points[i - 1].x + (points[i].x - points[i - 1].x) * f, y: points[i - 1].y + (points[i].y - points[i - 1].y) * f }; };
+                const start = project(knee), end = project(ankle), dx = end.x - start.x, dy = end.y - start.y;
+                parts.push({ id, d, depth: z, fill: "none", stroke: "none", width });
+                for (let i = 0; i < 24; i++) {
+                    const a = at(i / 24), b = at((i + 1) / 24), t = Math.max(0, Math.min(1, (((a.x + b.x) / 2 - start.x) * dx + ((a.y + b.y) / 2 - start.y) * dy) / (dx * dx + dy * dy || 1)));
+                    const stops = [0, .18, .4, .76, 1], radii = [.061, .056, .077, .049, .029];
+                    let k = 1;
+                    while (k < 4 && stops[k] < t)
+                        k++;
+                    const radius = radii[k - 1] + (radii[k] - radii[k - 1]) * (t - stops[k - 1]) / (stops[k] - stops[k - 1]);
+                    parts.push({ id: `${id}-local-${i}`, d: `M${xy(a)}L${xy(b)}`, depth: depth(blend(knee, ankle, t)) + radius * Math.sqrt(Math.max(0, 1 - dot(axis, view) ** 2)) + .003, fill, stroke, width });
+                }
+                return;
+            }
             parts.push({ id, d, fill, stroke, width, depth: z });
         };
         const j = pose.joints;
-        const hips = midpoint(j.leftHip, j.rightHip), shoulders = midpoint(j.leftShoulder, j.rightShoulder);
-        const axis = unit(sub(shoulders, hips)), side = unit(sub(j.rightShoulder, j.leftShoulder));
-        const front = unit(cross(side, axis));
+        const hips = midpoint(j.leftHip, j.rightHip), shoulders = pose.torsoShoulders ?? midpoint(j.leftShoulder, j.rightShoulder);
+        const endFrame = pose.torsoCurve ? torsoFrameAt(pose, 1) : undefined;
+        const axis = endFrame?.up ?? unit(sub(shoulders, hips)), side = endFrame?.side ?? unit(sub(j.rightShoulder, j.leftShoulder));
+        const front = endFrame?.front ?? unit(cross(side, axis));
         const torsoDepth = depth(blend(hips, shoulders, .55));
         const ring = (t, rx, rz) => ({ center: blend(hips, shoulders, t), rx, rz });
-        const torsoShape = volume([ring(.02, .152, .086), ring(.16, .146, .092), ring(.34, .140, .096), ring(.54, .170, .117), ring(.78, .215, .125), ring(.96, .215, .100), ring(1.04, .142, .077), ring(1.14, .057, .052)], side, front);
+        const curve = pose.torsoCurve ? curvedVolume(pose) : undefined;
+        // A surface ink segment belongs over its own local fill faces. The faces use
+        // one mean z each, so their numerical z must not cut holes in their own ink.
+        // Only intersecting faces participate; this never borrows the whole chest z.
+        const curveInkDepth = (d, physical) => {
+            if (!curve)
+                return physical;
+            let z = physical;
+            const points = flattenPath(d).flat();
+            for (const patch of curve.patches) {
+                if (patch.depth < z)
+                    continue;
+                const b = patch.bounds;
+                if (points.some(p => p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1 && pointInPolygon(p, patch.projected)))
+                    z = patch.depth + .001;
+            }
+            return z;
+        };
+        const torsoShape = curve?.shape ?? volume([ring(.02, .152, .086), ring(.16, .146, .092), ring(.34, .140, .096), ring(.54, .170, .117), ring(.78, .215, .125), ring(.96, .215, .100), ring(1.04, .142, .077), ring(1.14, .057, .052)], side, front);
         const torsoPolygon = flattenPath(torsoShape);
         // A torso-aligned deltoid has a continuous projection, even as a raised upper
         // arm passes vertical. Its visible boundary is the union of chest + arm +
@@ -159,6 +276,16 @@ function makeRenderer(angle, tiltAngle = 9) {
         });
         // Quiet floor reference and grounded contact shadows.
         push("floor", line([v(-.65, 0, .15), v(.65, 0, .15)]), -10, "none", MUTED, .6);
+        if (equipment)
+            for (const guide of pose.motionGuides ?? []) {
+                for (let i = 0; i < 12; i++)
+                    push(`motion-guide-${guide.id}-${i}`, line([blend(guide.from, guide.to, i / 12), blend(guide.from, guide.to, (i + .55) / 12)]), -9, "none", MUTED, .85);
+                const along = unit(sub(guide.to, guide.from));
+                for (const [name, tip, sign] of [["start", guide.from, 1], ["end", guide.to, -1]]) {
+                    const base = add(tip, mul(along, sign * .045));
+                    push(`motion-guide-${guide.id}-${name}`, line([add(base, v(-.035, 0, 0)), tip, add(base, v(.035, 0, 0))]), -9, "none", MUTED, .85);
+                }
+            }
         pose.groundContacts?.forEach((contact, index) => {
             push(`support-floor-${index}`, line([add(contact, v(-.16, 0, 0)), add(contact, v(.16, 0, 0))]), -10, "none", MUTED, .6);
         });
@@ -180,17 +307,41 @@ function makeRenderer(angle, tiltAngle = 9) {
             for (const cable of pose.apparatus?.cables ?? [])
                 rod(`cable-${cable.id}`, cable.a, cable.b, 1.1, MUTED);
             for (const pad of pose.apparatus?.pads ?? []) {
-                const along = unit(pad.axis), across = v(1, 0, 0);
-                let normal = unit(cross(along, across));
-                if (normal.y < 0)
+                const along = unit(pad.axis), across = pad.across ? unit(pad.across) : v(1, 0, 0);
+                let normal = pad.normal ? unit(pad.normal) : unit(cross(along, across));
+                if (!pad.normal && normal.y < 0)
                     normal = mul(normal, -1);
                 const corner = (x, z, lower = false) => add(add(add(pad.center, mul(across, x * pad.width / 2)), mul(along, z * pad.length / 2)), mul(normal, lower ? -pad.thickness : 0));
                 const top = [corner(-1, -1), corner(1, -1), corner(1, 1), corner(-1, 1)], bottom = [corner(-1, -1, true), corner(1, -1, true), corner(1, 1, true), corner(-1, 1, true)];
                 for (let i = 0; i < 4; i++) {
                     const points = [top[i], top[(i + 1) % 4], bottom[(i + 1) % 4], bottom[i]];
-                    push(`pad-${pad.id}-side-${i}`, polygon(points), points.reduce((sum, p) => sum + depth(p), 0) / 4, PAPER, MUTED, 1.1);
+                    push(`pad-${pad.id}-side-${i}`, polygon(points), pad.backdrop ? -8 : points.reduce((sum, p) => sum + depth(p), 0) / 4, PAPER, MUTED, 1.1);
                 }
-                push(`pad-${pad.id}-top`, polygon(top), depth(pad.center) - .008, PAPER, DETAIL, 1.4);
+                push(`pad-${pad.id}-top`, polygon(top), pad.backdrop ? -7.99 : depth(pad.center) - .008, PAPER, DETAIL, 1.4);
+            }
+            for (const roller of pose.apparatus?.rollers ?? []) {
+                const axis = unit(roller.axis), a = add(roller.center, mul(axis, -roller.length / 2)), b = add(roller.center, mul(axis, roller.length / 2));
+                const near = depth(a) > depth(b) ? a : b;
+                const local = pose.localOcclusion?.rollers && roller.id === "ankle-pad";
+                push(`roller-${roller.id}-body`, silhouette([...ring(a, axis, roller.radius), ...ring(b, axis, roller.radius)], .25), depth(roller.center), local ? "none" : PAPER, local ? "none" : DETAIL, 1.25);
+                if (local)
+                    for (let i = 0; i < 16; i++) {
+                        const start = blend(a, b, i / 16), end = blend(a, b, (i + 1) / 16), tangent = mul(unit(cross(axis, view)), roller.radius);
+                        const z = depth(midpoint(start, end)) + roller.radius * Math.sqrt(Math.max(0, 1 - dot(axis, view) ** 2));
+                        push(`roller-${roller.id}-band-${i}`, silhouette([...ring(start, axis, roller.radius), ...ring(end, axis, roller.radius)], .25), z, PAPER, "none");
+                        push(`roller-${roller.id}-edge-${i}`, line([add(start, tangent), add(end, tangent)]) + line([sub(start, tangent), sub(end, tangent)]), z + .0001, "none", DETAIL, 1.25);
+                    }
+                if (local) {
+                    // Only the outer half of the far rim belongs to the silhouette.
+                    // The remaining half is behind the cylinder mantle.
+                    const far = near === a ? b : a, tangent = unit(cross(axis, view)), facing = unit(sub(view, mul(axis, dot(axis, view))));
+                    const rim = (angle) => add(far, add(mul(tangent, Math.cos(angle) * roller.radius), mul(facing, Math.sin(angle) * roller.radius)));
+                    for (let i = 0; i < 8; i++) {
+                        const points = [rim(i * Math.PI / 8), rim((i + .5) * Math.PI / 8), rim((i + 1) * Math.PI / 8)];
+                        push(`roller-${roller.id}-edge-far-${i}`, smoothLine(points), depth(points[1]) + .0001, "none", DETAIL, 1.25);
+                    }
+                }
+                push(`roller-${roller.id}-cap`, contour(ring(near, axis, roller.radius).map(project), .7), depth(near) + .001, PAPER, DETAIL, 1.1);
             }
             for (const dumbbell of pose.dumbbells ?? []) {
                 const axis = unit(dumbbell.axis);
@@ -219,7 +370,7 @@ function makeRenderer(angle, tiltAngle = 9) {
                 const physical = faces.map(face => face.points.reduce((sum, p) => sum + depth(p), 0) / 4);
                 // A top face cannot hide a shoe resting above it merely because the shoe
                 // is on the far half of the box. Keep the supported silhouette in front.
-                const shift = above.length === 2 ? Math.min(0, ...above.map(p => depth(p) - .18 - Math.max(...physical))) : 0;
+                const shift = !pose.supportOcclusion && above.length === 2 ? Math.min(0, ...above.map(p => depth(p) - .18 - Math.max(...physical))) : 0;
                 faces.forEach((face, index) => push(`box-${box.id}-${face.id}`, polygon(face.points), physical[index] + shift, PAPER, index === 0 ? INK : DETAIL, index === 0 ? 1.55 : 1.2));
             }
         if (pose.bench) {
@@ -244,18 +395,27 @@ function makeRenderer(angle, tiltAngle = 9) {
             const shoulder = j[`${name}Shoulder`], elbow = j[`${name}Elbow`], wrist = j[`${name}Wrist`];
             const legZ = depth(blend(hip, knee, .55));
             const edge = INK;
-            push(`${name}-leg`, limb(hip, knee, ankle, [.09, .098, .088, .061, .052, .056, .077, .049, .029]), legZ, SKIN, edge);
+            push(`${name}-leg`, limb(hip, knee, ankle, [.09, .098, .088, .061, .052, .056, .077, .049, .029], pose.localOcclusion?.hips), legZ, pose.localOcclusion?.rollers ? "none" : SKIN, pose.localOcclusion?.rollers ? "none" : edge);
+            if (pose.localOcclusion?.rollers)
+                legBands(hip, knee, ankle).forEach((band, i) => {
+                    push(`${name}-leg-band-${i}`, band.fill, band.depth, SKIN, "none");
+                    push(`${name}-leg-edge-${i}`, band.outline, band.depth + .0001, "none", edge);
+                });
             push(`${name}-quadriceps`, muscleLine(hip, knee, [.31, .48, .68, .84, .91], [sign * .018, sign * .033, sign * .038, sign * .020, 0]), legZ + .001, "none", DETAIL, 1.08);
             push(`${name}-quadriceps-inner`, muscleLine(hip, knee, [.36, .60, .82, .92, .94], [-sign * .012, -sign * .030, -sign * .034, -sign * .017, -sign * .003]), legZ + .0012, "none", DETAIL, 1.03);
             push(`${name}-calf`, muscleLine(knee, ankle, [.13, .32, .49, .74, .88], [-sign * .01, -sign * .035, -sign * .031, -sign * .012, 0]), legZ + .002, "none", DETAIL, 1.03);
             push(`${name}-shin`, muscleLine(knee, ankle, [.18, .42, .68, .84], [sign * .024, sign * .031, sign * .017, sign * .008]), legZ + .0022, "none", DETAIL, .96);
-            const { point: fp, across: footSide, footLength, points: shoe } = shoeGeometry(pose, name);
+            const { point: fp, across: footSide, forward: footForward, footLength, points: shoe } = shoeGeometry(pose, name);
             // One uninterrupted shoe envelope. The near sole is a single line, so no
             // hidden far sole can cross the upper in the front / side character views.
             const soleSide = dot(footSide, view) >= 0 ? 1 : -1;
-            push(`${name}-shoe`, silhouette(shoe, .42), depth(ankle) + .025, PAPER, edge, 1.4);
-            push(`${name}-sole`, smoothLine([fp(-.058, soleSide * .042, .031), fp(.07, soleSide * .052, .031), fp(footLength + .018, soleSide * .041, .030)]), depth(ankle) + .03, "none", DETAIL, .95);
-            push(`${name}-laces`, line([fp(.046, -.028, .093), fp(.046, .028, .093)]), depth(ankle) + .031, "none", DETAIL, .8);
+            const shoePath = silhouette(shoe, pose.exactSurfaceContours ? 0 : .42);
+            push(`${name}-shoe`, shoePath, depth(ankle) + .025, PAPER, edge, 1.4);
+            const solePath = smoothLine([fp(-.058, soleSide * .042, .031), fp(.07, soleSide * .052, .031), fp(footLength + .018, soleSide * .041, .030)]);
+            push(`${name}-sole`, pose.surfaceFeet ? clipLineInside(solePath, flattenPath(shoePath)) : solePath, depth(ankle) + .03, "none", DETAIL, .95);
+            const shoeNormal = unit(cross(footForward, footSide)), roofNormal = unit(add(shoeNormal, mul(footForward, (.108 - .066) / .085)));
+            const lacePath = pose.surfaceFeet ? (dot(roofNormal, view) > 0 ? clipLineInside(line([fp(.046, -.028, .108 - (.108 - .066) * .046 / .085), fp(.046, .028, .108 - (.108 - .066) * .046 / .085)]), flattenPath(shoePath)) : "M0,0") : line([fp(.046, -.028, .093), fp(.046, .028, .093)]);
+            push(`${name}-laces`, lacePath, depth(ankle) + .031, "none", DETAIL, .8);
             const upperDepth = depth(midpoint(shoulder, elbow));
             const upperZ = upperDepth;
             const forearmDepth = depth(midpoint(elbow, wrist));
@@ -291,9 +451,9 @@ function makeRenderer(angle, tiltAngle = 9) {
             push(`${name}-elbow-crease`, crease, elbowZ + .0004, "none", DETAIL, .95);
         }
         const garment = garmentGeometry(pose);
-        const yoke = silhouette(garment.pelvis.flatMap(ring => garmentRingPoints(ring)), .35);
-        const sleeves = garment.legs.map(leg => ({ leg, d: silhouette(leg.rings.flatMap(ring => garmentRingPoints(ring)), .3) }));
-        const garmentFront = Math.max(torsoDepth + .025, ...garment.pelvis.flatMap(ring => garmentRingPoints(ring)).map(depth));
+        const yoke = silhouette(garment.pelvis.flatMap(ring => garmentRingPoints(ring)), pose.exactSurfaceContours ? 0 : .35);
+        const sleeves = garment.legs.map(leg => ({ leg, d: silhouette(leg.rings.flatMap(ring => garmentRingPoints(ring)), pose.exactSurfaceContours ? 0 : .3) }));
+        const garmentFront = Math.max(pose.torsoCurve ? -Infinity : torsoDepth + .025, ...garment.pelvis.flatMap(ring => garmentRingPoints(ring)).map(depth));
         // Sleeve cross-sections follow each femur; hide all joining seams inside the
         // pelvis yoke rather than drawing one rigid, torso-aligned shorts silhouette.
         const yokePolygon = flattenPath(yoke);
@@ -303,7 +463,7 @@ function makeRenderer(angle, tiltAngle = 9) {
             // and adding the thigh offset counts the near-side displacement twice,
             // so an inflated cuff layer can erase a physically nearer forearm.
             // Use the authored sleeve envelope for these free-arm poses instead.
-            const z = pose.boxes?.length
+            const z = pose.torsoCurve || pose.boxes?.length
                 ? Math.max(...leg.rings.flatMap(ring => garmentRingPoints(ring)).map(depth))
                 : sleeveDepth + (Math.min(garmentFront + .005, sleeveDepth) - sleeveDepth) * garment.hingeBlend;
             push(`${leg.name}-shorts-leg`, d, z, PAPER, "none");
@@ -330,25 +490,41 @@ function makeRenderer(angle, tiltAngle = 9) {
             y: hipPoint.y + (point.y - hipPoint.y) * garment.hingeBlend,
         }))) : [];
         push("shorts-yoke-outline", clipLineOutside(yoke, [...garmentTorsoMask, ...sleeves.flatMap(({ d }) => flattenPath(d))]), garmentFront + .011, "none", INK, 1.4);
-        push("torso", torsoShape, torsoDepth, SKIN, "none");
-        push("torso-outline", clipLineOutside(torsoShape, shoulderJoints.map(joint => joint.polygon)), torsoDepth + .001, "none", INK, 1.55);
+        push("torso", torsoShape, torsoDepth, curve ? "none" : SKIN, "none");
+        if (curve) {
+            curve.patches.forEach(patch => push(patch.id, patch.shape, patch.depth, SKIN, "none"));
+            curve.bands.forEach((band, i) => {
+                push(i === 0 ? "torso-outline" : `torso-outline-${i}`, clipLineOutside(band.left, shoulderJoints.map(joint => joint.polygon)), band.leftDepth + .001, "none", INK, 1.55);
+                push(`torso-outline-right-${i}`, clipLineOutside(band.right, shoulderJoints.map(joint => joint.polygon)), band.rightDepth + .001, "none", INK, 1.55);
+            });
+        }
+        else
+            push("torso-outline", clipLineOutside(torsoShape, shoulderJoints.map(joint => joint.polygon)), torsoDepth + .001, "none", INK, 1.55);
         // Surface landmarks of the rib cage, pectorals and abdomen. These follow the
         // torso frame in lying, bent and standing poses, instead of a shirt decal.
         torsoLandmarks(pose).forEach((mark, index) => {
             const visible = dot(mark.normal, view) > .08;
-            push(mark.id, smoothLine(mark.points), torsoDepth + .012 + index * .0001, "none", visible ? DETAIL : "none", mark.width);
+            if (curve)
+                for (let i = 0; i < mark.points.length - 1; i++) {
+                    const segment = [mark.points[i], mark.points[i + 1]];
+                    const segmentVisible = mark.normals ? dot(unit(add(mark.normals[i], mark.normals[i + 1])), view) > .08 : visible;
+                    const d = smoothSegment(mark.points, i), z = curveInkDepth(d, depth(midpoint(...segment)) + .002);
+                    push(i === 0 ? mark.id : `${mark.id}-segment-${i}`, d, z, "none", segmentVisible ? DETAIL : "none", mark.width);
+                }
+            else
+                push(mark.id, smoothLine(mark.points), torsoDepth + .012 + index * .0001, "none", visible ? DETAIL : "none", mark.width);
         });
         const waist = garment.waistband[1];
         const waistNear = Math.atan2(dot(waist.front, view) * waist.rz, dot(waist.side, view) * waist.rx);
         push("waistband", smoothLine(Array.from({ length: 17 }, (_, i) => garmentRingPoint(waist, waistNear - Math.PI / 2 + i * Math.PI / 16))), garmentFront + .013, "none", DETAIL, .9);
         // Neck and head share the torso frame, so lying and standing figures match.
         const neckBase = add(shoulders, mul(axis, -.008));
-        push("neck", volume([{ center: neckBase, rx: .06, rz: .055 }, { center: j.neck, rx: .047, rz: .046 }, { center: add(j.head, mul(axis, -.083)), rx: .05, rz: .048 }], side, front), torsoDepth - .001, SKIN);
-        const headAxis = unit(sub(j.head, j.neck)), headFront = unit(cross(side, headAxis));
-        const hp = (x, y, z) => add(add(add(j.head, mul(side, x)), mul(headAxis, y)), mul(headFront, z));
+        push("neck", volume([{ center: neckBase, rx: .06, rz: .055 }, { center: j.neck, rx: .047, rz: .046 }, { center: add(j.head, mul(axis, -.083)), rx: .05, rz: .048 }], side, front), curve ? depth(midpoint(neckBase, j.neck)) : torsoDepth - .001, SKIN);
+        const headAxis = unit(sub(j.head, j.neck)), headSide = curve ? unit(sub(side, mul(headAxis, dot(side, headAxis)))) : side, headFront = unit(cross(headSide, headAxis));
+        const hp = (x, y, z) => add(add(add(j.head, mul(headSide, x)), mul(headAxis, y)), mul(headFront, z));
         const headRings = [[-.113, .034, .043], [-.076, .059, .069], [-.012, .078, .090], [.084, .077, .087], [.127, .068, .074]];
         const skull = headRings.flatMap(([height, rx, rz]) => Array.from({ length: 12 }, (_, i) => hp(Math.cos(i * Math.PI / 6) * rx, height, Math.sin(i * Math.PI / 6) * rz)));
-        push("head", silhouette(skull), depth(j.head) + .012, SKIN, INK, 1.5);
+        push("head", silhouette(skull, pose.exactSurfaceContours ? 0 : .18), depth(j.head) + .012, SKIN, INK, 1.5);
         // H2's cropped hair, angular jaw and restrained brow/nose survive projection;
         // hair is an empty outline with no coloured cap or realistic facial shading.
         const faceVisible = dot(headFront, view) > .06;
@@ -427,7 +603,7 @@ function makeRenderer(angle, tiltAngle = 9) {
                 const wristStart = add(wrist, mul(frame.reach, -.016));
                 surface.push(add(wristStart, mul(lateral, -.024)), add(wristStart, mul(lateral, .024)));
                 const handDepth = Math.max(...surface.map(depth)) + .004;
-                push(`${name}-hand`, silhouette(surface, .22), handDepth, SKIN, INK, 1.12);
+                push(`${name}-hand`, silhouette(surface, pose.exactSurfaceContours ? 0 : .22), handDepth, SKIN, INK, 1.12);
                 const thumbSign = name === "left" ? 1 : -1;
                 push(`${name}-thumb`, smoothLine([at(thumbSign * .030, -.022, .009), at(thumbSign * .058, .006, .003), at(thumbSign * .050, .029, -.002)]), handDepth + .001, "none", INK, 1.05);
                 for (let finger = 0; finger < 3; finger++)
@@ -519,8 +695,10 @@ function makeRenderer(angle, tiltAngle = 9) {
             }
             push(`${name}-wrist-crease`, smoothLine([gp(-.022, -.059, face * .023), gp(0, -.057, face * .024), gp(.022, -.059, face * .023)]), gripDepth + .004, "none", MUTED, .65);
         }
-        if (pose.occlusion === "surface")
+        if (pose.occlusion)
             parts = refineSurfaceDepth(pose, parts);
+        if (pose.supportOcclusion)
+            parts = refineContactOcclusion(pose, parts);
         if (pose.anatomy?.surfaceArms) {
             for (const name of ["left", "right"]) {
                 const upper = flattenPath(parts.find(p => p.id === `${name}-upper-arm`).d);
@@ -534,6 +712,8 @@ function makeRenderer(angle, tiltAngle = 9) {
                 tendon.d = clipLineOutside(clipLineInside(tendon.d, forearm), hand);
             }
         }
+        if (pose.localOcclusion)
+            parts = refineLocalOverlap(pose, parts);
         return parts.sort((a, b) => a.depth - b.depth);
     };
 }

@@ -14,13 +14,32 @@ import { landmineStudy } from "./studies/landmine.js";
 import { cleanStudy } from "./studies/clean.js";
 import { powerCleanStudy } from "./studies/power-clean.js";
 import { boxJumpStudy, depthBoxJumpStudy, lateralBoxJumpStudy } from "./studies/box-jumps.js";
+import { pushExpansionStudies } from "./studies/expansion-push.js";
+import { pullExpansionStudies } from "./studies/expansion-pull.js";
+import { lowerExpansionStudies } from "./studies/expansion-lower.js";
+import { lowerMachineStudies } from "./studies/machines-lower.js";
+import { upperMachineStudies } from "./studies/machines-upper.js";
+import { smithMachineStudies } from "./studies/machines-smith.js";
+import { accessoryMachineStudies } from "./studies/machines-accessory.js";
+import { upperCableStudies } from "./studies/cables-upper.js";
+import { lowerCableStudies } from "./studies/cables-lower.js";
+import { coreCableStudies } from "./studies/cables-core.js";
+import { upperBodyweightStudies } from "./studies/bodyweight-upper.js";
+import { lowerBodyweightStudies } from "./studies/bodyweight-lower.js";
+import { floorBodyweightStudies } from "./studies/bodyweight-floor.js";
+import { stabilityCoreStudies } from "./studies/core-stability.js";
 import { drawStudy, drawCharacter, pathsMarkup } from "./studies/draw.js";
-/** B05 review catalog: 29 motions; visual review status is maintained in review/app.js. */
+/** Runtime catalog of 92 H2 motions. */
 export const benchmarkStudies = [benchStudy, squatStudy, overheadStudy];
 export const batchAStudies = [bentOverRowStudy, barbellCurlStudy, frontSquatStudy];
 export const batchBStudies = [lowBarSquatStudy, reverseLungeStudy, gluteBridgeStudy, hipThrustStudy, singleArmDumbbellRowStudy, inclineDumbbellPressStudy, dumbbellShoulderPressStudy, hammerCurlStudy, lateralRaiseStudy, seatedCableRowStudy, latPulldownStudy, tricepsPushdownStudy, dipStudy];
 export const deadliftStudies = [conventionalDeadliftStudy, sumoDeadliftStudy];
-export const reviewStudies = [...deadliftStudies, ...batchBStudies, ...batchAStudies, ...benchmarkStudies, romanianStudy, pullupStudy, landmineStudy, cleanStudy, powerCleanStudy, boxJumpStudy, depthBoxJumpStudy, lateralBoxJumpStudy];
+export const expansionStudies = [...pushExpansionStudies, ...pullExpansionStudies, ...lowerExpansionStudies];
+export const machineStudies = [...lowerMachineStudies, ...upperMachineStudies, ...smithMachineStudies, ...accessoryMachineStudies];
+export const cableStudies = [...upperCableStudies, ...lowerCableStudies, ...coreCableStudies];
+export const bodyweightStudies = [...upperBodyweightStudies, ...lowerBodyweightStudies, ...floorBodyweightStudies];
+export const coreStudies = [...stabilityCoreStudies];
+export const reviewStudies = [...deadliftStudies, ...batchBStudies, ...batchAStudies, ...benchmarkStudies, romanianStudy, pullupStudy, landmineStudy, cleanStudy, powerCleanStudy, boxJumpStudy, depthBoxJumpStudy, lateralBoxJumpStudy, ...expansionStudies, ...machineStudies, ...cableStudies, ...bodyweightStudies, ...coreStudies];
 function find(id) {
     const study = reviewStudies.find(study => study.id === id);
     if (!study)
@@ -91,7 +110,8 @@ export function createStudyPlayer(host, id, options = {}) {
         let cursor = group.firstElementChild;
         for (const part of parts) {
             const path = paths.get(part.id);
-            path.setAttribute("d", part.d);
+            if (path.getAttribute("d") !== part.d)
+                path.setAttribute("d", part.d);
             if (path.getAttribute("stroke") !== part.stroke)
                 path.setAttribute("stroke", part.stroke);
             if (path.getAttribute("fill") !== part.fill)
