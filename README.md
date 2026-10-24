@@ -106,7 +106,7 @@ Pages workflow runs the usage tests and validates this snapshot before building;
 these checks do not read credentials or contact Profile.
 
 Daily dates retain the service's original buckets. The wall shows 52 weeks,
-and Last 30 days ends on the last reported day, including explicit zero values.
+and Last 7 days ends on the last reported day, including explicit zero values.
 Unreported trailing days stay blank. Hovering, tapping, or focusing a day shows
 a compact token count (K/M/B); arrow keys move between days. Narrow screens can
 scroll the wall horizontally, starting at the recent end. The homepage card shares

@@ -23,7 +23,8 @@ test("a delayed daily bucket stays pending and does not extend the trend to zero
   assert.equal(summary.daily.at(-1).totalTokens, null);
   assert.equal(summary.recent.at(-1).date, "2026-10-13");
   assert.equal(summary.recent.at(-1).totalTokens, 40);
-  assert.equal(summary.recent[0].date, "2026-09-14");
+  assert.equal(summary.recent[0].date, "2026-10-07");
+  assert.equal(summary.recent.length, 7);
   const wall = contributionWall(summary.daily);
   assert.equal(wall.cells.find((day) => day.date === "2026-10-14").pending, true);
   assert.equal(wall.cells.find((day) => day.date === "2026-10-13").pending, false);
@@ -41,15 +42,17 @@ test("an explicitly reported zero remains a real zero and advances the date", ()
   assert.match(dayLabel(summary.recent.at(-1)), /0 recorded tokens/);
 });
 
-test("a 30-day window crosses the year correctly and includes only its own usage", () => {
+test("a 7-day window crosses the year correctly and includes both boundaries only once", () => {
   const summary = summarizeUsage(snapshot([
-    { date: "2025-12-02", totalTokens: 500 },
-    { date: "2025-12-03", totalTokens: 20 },
+    { date: "2025-12-25", totalTokens: 500 },
+    { date: "2025-12-26", totalTokens: 20 },
+    { date: "2025-12-31", totalTokens: 10 },
     { date: "2026-01-01", totalTokens: 30 },
   ], "2026-01-02T01:00:00Z"));
-  assert.equal(summary.recent[0].date, "2025-12-03");
+  assert.equal(summary.recent.length, 7);
+  assert.equal(summary.recent[0].date, "2025-12-26");
   assert.equal(summary.recent.at(-1).date, "2026-01-01");
-  assert.equal(summary.periodTokens, 50);
+  assert.equal(summary.periodTokens, 60);
 });
 
 test("an empty service history has an unknown daily total, not a fabricated zero", () => {

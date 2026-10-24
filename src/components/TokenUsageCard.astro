@@ -12,6 +12,8 @@ interface Props {
 
 const { variant = "heatmap", id = "token-usage-card", showRecentWork = false } = Astro.props;
 const summary = summarizeUsage();
+const periodLabel = `Last ${summary.recent.length} days`;
+const barStep = 360 / summary.recent.length;
 const wall = contributionWall(summary.daily);
 const reportedCells = wall.cells.filter((day) => !day.pending);
 const peak = Math.max(1, ...summary.recent.map((day) => day.totalTokens ?? 0));
@@ -24,7 +26,7 @@ const fill = `${line} L360,64 L0,64 Z`;
 const circumference = 2 * Math.PI * 28;
 let segmentOffset = 0;
 const segments = [
-  { label: "Last 30 days", value: summary.periodTokens ?? 0, color: "var(--usage-accent)" },
+  { label: periodLabel, value: summary.periodTokens ?? 0, color: "var(--usage-accent)" },
   { label: "Earlier usage", value: Math.max(0, summary.totalTokens - (summary.periodTokens ?? 0)), color: "var(--usage-level-2)" },
 ].map((segment) => {
   const length = (segment.value / Math.max(1, summary.totalTokens)) * circumference;
@@ -59,7 +61,7 @@ const chartLabel = variant === "heatmap"
         <p class="token-number" title={`${exactTokens(summary.totalTokens)} recorded tokens`}>{compactTokens(summary.totalTokens)}</p>
       </div>
       <div class="token-period" title={summary.dataThrough ? `${summary.recent[0].date} – ${summary.dataThrough}` : "Awaiting daily usage data"}>
-        <p class="token-eyebrow">Last 30 days</p>
+        <p class="token-eyebrow">{periodLabel}</p>
         <p class="token-recent-number">{summary.periodTokens === null ? "—" : compactTokens(summary.periodTokens)}</p>
       </div>
     </div>
@@ -98,7 +100,7 @@ const chartLabel = variant === "heatmap"
           {summary.recent.map((day, index) => {
             const height = day.totalTokens ? Math.max(2, (day.totalTokens / peak) * 56) : 1;
             return <rect class:list={{ "usage-bar": true, "usage-bar-empty": day.totalTokens === 0 }}
-              x={index * 12 + 1} y={64 - height} width="7" height={height} rx="1.5"
+              x={index * barStep + barStep / 12} y={64 - height} width={barStep * 7 / 12} height={height} rx="1.5"
             ><title>{dayLabel(day)}</title></rect>;
           })}
         </svg>

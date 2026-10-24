@@ -35,7 +35,8 @@ export function summarizeUsage(data: UsageSnapshot = snapshot) {
     totalTokens: dataThrough && date <= dataThrough ? records.get(date) ?? 0 : null,
   });
   const daily = Array.from({ length: 365 }, (_, index) => dayAt(shiftDate(asOf, index - 364)));
-  const recent = Array.from({ length: 30 }, (_, index) => dayAt(shiftDate(dataThrough ?? asOf, index - 29)));
+  const recentDays = 7;
+  const recent = Array.from({ length: recentDays }, (_, index) => dayAt(shiftDate(dataThrough ?? asOf, index - recentDays + 1)));
   return {
     totalTokens: data.totalTokens,
     periodTokens: dataThrough ? recent.reduce((sum, day) => sum + (day.totalTokens ?? 0), 0) : null,
