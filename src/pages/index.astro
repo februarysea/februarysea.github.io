@@ -1,6 +1,5 @@
 ---
 import Layout from "../layouts/BasicLayout.astro";
-import FlipCard from "../components/FlipCard.astro";
 import IntroCard from "../components/IntroCard.astro";
 import ContactsCard from "../components/ContactsCard.astro";
 import TokenUsageCard from "../components/TokenUsageCard.astro";
@@ -8,6 +7,8 @@ import TrainingCard from "../components/TrainingCard.astro";
 import LinksCard from "../components/LinksCard.astro";
 import PetsCard from "../components/PetsCard.astro";
 import SiteCreditsCard from "../components/SiteCreditsCard.astro";
+import QuoteCard from "../components/QuoteCard.astro";
+import GalleryCard from "../components/GalleryCard.astro";
 ---
 
 <Layout
@@ -18,29 +19,14 @@ import SiteCreditsCard from "../components/SiteCreditsCard.astro";
     <IntroCard />
     <TrainingCard />
     <TokenUsageCard showRecentWork />
+    <GalleryCard />
     <ContactsCard />
-    <FlipCard
-      label="Be water"
-      frontLabel="Read quote"
-      backLabel="Be water"
-      toggleColor="text-slate-300"
-      color="bg-[#050505]"
-      borderColor="border-slate-500"
-      padding="p-3"
-      class="be-water-card"
-      compact
-    >
-      <div slot="front" class="quote-front">
-        <h2>“Be water”</h2>
-        <p>— Bruce Lee</p>
-      </div>
-      <div slot="back" class="quote-back">
-        <p>“Empty your mind, be formless, shapeless — like water.”</p>
-      </div>
-    </FlipCard>
     <LinksCard />
     <PetsCard />
-    <SiteCreditsCard />
+    <div class="utility-pair">
+      <QuoteCard />
+      <SiteCreditsCard />
+    </div>
   </main>
 </Layout>
 
@@ -64,26 +50,27 @@ import SiteCreditsCard from "../components/SiteCreditsCard.astro";
   }
   .portfolio-home .intro-card { min-height: 300px; }
   .portfolio-home .training-flip-card { min-height: 340px; }
+  .portfolio-home .gallery-card { min-height: 260px; }
+  .portfolio-home .contact-card { min-height: 160px; }
   .portfolio-home .links-card { min-height: 132px; }
   .portfolio-home .pets-card { min-height: 160px; }
-  .portfolio-home .be-water-card { min-height: 110px; }
-  .portfolio-home .site-credits { min-height: 110px; }
+  .portfolio-home .be-water-card { min-height: 160px; }
+  .portfolio-home .site-credits { min-height: 160px; }
+  .utility-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; min-width: 0; }
   .portfolio-home .site-credits .flip-card-footer { margin-top: 2px; }
   .portfolio-home .site-credits .flip-card-toggle { font-size: 10px; padding: 2px 4px; }
-  .quote-front { display: flex; height: 100%; flex-direction: column; justify-content: center; align-items: center; gap: 4px; }
-  .quote-front h2 { margin: 0; color: #f4f5f4; font: italic 23px/1.2 Georgia, serif; }
-  .quote-front p { margin: 0; color: #9ba6a1; font: 11px/1.4 Menlo, Monaco, monospace; }
-  .quote-back { display: flex; align-items: center; justify-content: center; height: 100%; }
-  .quote-back p { margin: 0; color: #b4beca; text-align: center; font: italic 12px/1.5 Georgia, serif; }
   .portfolio-home .flip-card-footer { font-size: 11px; }
   .portfolio-home .be-water-card .flip-card-toggle { font-size: 10px; padding: 2px 4px; }
   @media (min-width: 700px) and (max-width: 1023px) {
     .portfolio-home { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 24px; }
     .portfolio-home .intro-card { grid-column: 1 / -1; }
+    .portfolio-home .training-flip-card { grid-column: 1; grid-row: 2; }
+    .portfolio-home .gallery-card { grid-column: 2; grid-row: 2; }
     .portfolio-home .token-card { grid-column: 1 / -1; grid-row: 3; }
     .portfolio-home .links-card { grid-column: 1; grid-row: 4; }
     .portfolio-home .pets-card { grid-column: 2; grid-row: 4; }
-    .portfolio-home .be-water-card, .portfolio-home .site-credits { grid-row: 5; }
+    .portfolio-home .contact-card { grid-column: 1; grid-row: 5; }
+    .portfolio-home .utility-pair { grid-column: 2; grid-row: 5; }
   }
   @media (min-width: 1024px) {
     .portfolio-home {
@@ -96,20 +83,25 @@ import SiteCreditsCard from "../components/SiteCreditsCard.astro";
     .portfolio-home .intro-card { grid-area: 1 / 1 / 2 / 8; min-height: 0; }
     .portfolio-home .training-flip-card { grid-area: 1 / 8 / 2 / 13; min-height: 0; }
     .portfolio-home .token-card { grid-area: 2 / 1 / 3 / 10; }
-    .portfolio-home .contact-card { grid-area: 2 / 10 / 3 / 13; }
-    .portfolio-home .be-water-card { grid-area: 3 / 1 / 4 / 4; min-height: 0; }
+    .portfolio-home .gallery-card { grid-area: 2 / 10 / 3 / 13; min-height: 0; }
+    .portfolio-home .contact-card { grid-area: 3 / 1 / 4 / 4; min-height: 0; }
     .portfolio-home .links-card { grid-area: 3 / 4 / 4 / 7; min-height: 0; }
     .portfolio-home .pets-card { grid-area: 3 / 7 / 4 / 10; min-height: 0; }
-    .portfolio-home .site-credits { grid-area: 3 / 10 / 4 / 13; min-height: 0; }
+    .portfolio-home .utility-pair { grid-area: 3 / 10 / 4 / 13; }
+    .portfolio-home .utility-pair > * { min-height: 0; }
+    .portfolio-home .utility-pair .flip-card-front,
+    .portfolio-home .utility-pair .flip-card-back { padding: 12px 10px; }
     .portfolio-home .intro-card .flip-card-front, .portfolio-home .intro-card .flip-card-back,
     .portfolio-home .training-flip-card .flip-card-front, .portfolio-home .training-flip-card .flip-card-back { padding: 20px; }
     .portfolio-home .flip-card-footer { margin-top: 8px; }
-    .portfolio-home .be-water-card .flip-card-footer { margin-top: 2px; }
+    .portfolio-home .utility-pair .flip-card-footer { min-height: 20px; margin-top: 4px; }
+    .portfolio-home .utility-pair .flip-card-toggle { padding: 3px 4px; }
   }
   @media (min-width: 1024px) and (pointer: coarse) {
     .portfolio-home {
-      grid-template-rows: minmax(260px, 5fr) minmax(260px, 5fr) minmax(164px, 3fr);
-      min-height: 748px;
+      grid-template-rows: minmax(260px, 5fr) minmax(260px, 5fr) minmax(200px, 3fr);
+      min-height: 784px;
     }
+    .portfolio-home .utility-pair .flip-card-toggle { min-height: 32px; }
   }
 </style>

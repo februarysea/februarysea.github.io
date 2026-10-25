@@ -18,7 +18,7 @@ const organizations = [
       {friends.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer">{link.name} <span aria-hidden="true">↗</span></a>)}
     </nav>
     <div class="links-art"><LinkOutbound kind="friends" /></div>
-    <button type="button" data-flip-to="back" aria-label="Show organizations" hidden>Organizations <span aria-hidden="true">↻</span></button>
+    <button type="button" data-flip-to="back" aria-label="Show organizations" title="Show organizations" hidden><span aria-hidden="true">↻</span></button>
   </div>
   <div slot="back" class="links-face">
     <h2>Organizations</h2>
@@ -26,14 +26,15 @@ const organizations = [
       {organizations.map((link) => <a href={link.href} target="_blank" rel="noopener noreferrer">{link.name} <span aria-hidden="true">↗</span></a>)}
     </nav>
     <div class="links-art"><LinkOutbound kind="organizations" /></div>
-    <button type="button" data-flip-to="front" aria-label="Show friends" hidden>Friends <span aria-hidden="true">↻</span></button>
+    <button type="button" data-flip-to="front" aria-label="Show friends" title="Show friends" hidden><span aria-hidden="true">↻</span></button>
   </div>
 </FlipCard>
 
 <style>
   .links-face { display: grid; grid-template-columns: minmax(0, 1fr) clamp(88px, 29%, 152px); grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "heading art" "links art" "toggle toggle"; gap: 4px 12px; height: 100%; padding: 10px 16px; min-width: 0; }
   h2 { grid-area: heading; margin: 0; color: #d6ad82; font-size: 11px; font-weight: 700; line-height: 1.5; }
-  button { grid-area: toggle; display: inline-flex; justify-self: end; align-self: end; align-items: center; gap: 7px; padding: 3px 0 3px 5px; border: 0; border-radius: 3px; background: transparent; color: #d6ad82; font: inherit; font-size: 11px; line-height: 1.5; white-space: nowrap; cursor: pointer; }
+  button { grid-area: toggle; display: inline-flex; justify-self: end; align-self: end; align-items: center; justify-content: center; min-width: 24px; padding: 3px 4px; border: 0; border-radius: 3px; background: transparent; color: #d6ad82; font: inherit; cursor: pointer; }
+  button span { font-size: 14px; line-height: 1; }
   button[hidden] { display: none; }
   a { color: #eee5dd; font-size: 12px; line-height: 1.5; text-decoration: none; }
   a:hover, button:hover { color: #ffe0bd; }

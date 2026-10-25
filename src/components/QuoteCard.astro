@@ -1,0 +1,27 @@
+---
+import FlipCard from "./FlipCard.astro";
+---
+
+<FlipCard label="Be water" frontLabel="Read quote" backLabel="Be water" toggleColor="text-slate-300" color="bg-[#050505]" borderColor="border-slate-500" padding="p-3" class="be-water-card" compact>
+  <div slot="front" class="quote-front">
+    <h2>“Be water”</h2>
+    <p>— Bruce Lee</p>
+  </div>
+  <div slot="back" class="quote-back">
+    <p>“Empty your mind, be formless, shapeless — like water.”</p>
+  </div>
+</FlipCard>
+
+<style>
+  .quote-front { display: flex; height: 100%; flex-direction: column; justify-content: center; align-items: center; gap: 4px; }
+  h2 { margin: 0; color: #f4f5f4; font: italic 20px/1.2 Georgia, serif; text-align: center; }
+  .quote-front p { margin: 0; color: #9ba6a1; font: 11px/1.4 Menlo, Monaco, monospace; }
+  .quote-back { display: flex; align-items: center; justify-content: center; height: 100%; }
+  .quote-back p { margin: 0; color: #b4beca; text-align: center; font: italic 12px/1.5 Georgia, serif; }
+  @media (min-width: 1024px) {
+    .quote-front { gap: 6px; }
+    h2 { font-size: 18px; }
+    .quote-front p { font-size: 9px; }
+    .quote-back p { font-size: 12px; line-height: 1.5; }
+  }
+</style>

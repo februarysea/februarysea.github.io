@@ -36,8 +36,8 @@ const {
       {!customControls && (!hideFrontToggle || Astro.slots.has("footer-front")) && (
         <div class="flip-card-footer">
           <div class="flip-card-footer-note"><slot name="footer-front" /></div>
-          {!hideFrontToggle && <button type="button" data-flip-to="back" class={`flip-card-toggle ${toggleColor}`} aria-label={`${label}: ${frontLabel}`} hidden>
-            {frontLabel}<span aria-hidden="true">↻</span>
+          {!hideFrontToggle && <button type="button" data-flip-to="back" class={`flip-card-toggle ${toggleColor}`} aria-label={`${label}: ${frontLabel}`} title={frontLabel} hidden>
+            <span aria-hidden="true">↻</span>
           </button>}
         </div>
       )}
@@ -48,8 +48,8 @@ const {
       <div class="flip-card-content"><slot name="back" /></div>
       {!customControls && <div class="flip-card-footer">
         <div class="flip-card-footer-note"><slot name="footer-back" /></div>
-        <button type="button" data-flip-to="front" class={`flip-card-toggle ${toggleColor}`} aria-label={`${label}: ${backLabel}`} hidden>
-          {backLabel}<span aria-hidden="true">↻</span>
+        <button type="button" data-flip-to="front" class={`flip-card-toggle ${toggleColor}`} aria-label={`${label}: ${backLabel}`} title={backLabel} hidden>
+          <span aria-hidden="true">↻</span>
         </button>
       </div>}
     </div>
@@ -88,10 +88,12 @@ const {
     gap: 8px;
     flex: none;
     margin-left: auto;
+    min-width: 24px;
     padding: 5px 4px;
     border-radius: 4px;
     cursor: pointer;
   }
+  .flip-card-toggle span { font-size: 14px; line-height: 1; }
   .flip-card-toggle:hover { color: #fff; }
   .flip-card-toggle:focus-visible {
     outline: 1px solid currentColor;

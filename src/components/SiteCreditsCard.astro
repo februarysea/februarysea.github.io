@@ -8,18 +8,26 @@ import FlipCard from "./FlipCard.astro";
     <strong>Chunhou Ji</strong>
   </div>
   <div slot="back" class="credit-face">
-    <h2>Theme · Bento Portfolio</h2>
+    <h2>Theme</h2>
+    <strong class="theme-name">Bento Portfolio</strong>
     <p class="credit-by">by <a href="https://github.com/Ladvace/astro-bento-portfolio" target="_blank" rel="noopener noreferrer" aria-label="Theme source: Bento Portfolio by Gianmarco Cavallo">Gianmarco Cavallo <span aria-hidden="true">↗</span></a></p>
   </div>
 </FlipCard>
 
 <style>
-  .credit-face { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; height: 100%; }
+  .credit-face { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 6px; height: 100%; min-width: 0; overflow-wrap: anywhere; }
   h2 { margin: 0; color: #9ba6a1; font-size: 11px; font-weight: 400; line-height: 1.5; }
   strong { color: #f4f5f4; font-size: 14px; font-weight: 500; line-height: 1.5; }
+  .theme-name { font-size: 12px; }
   .credit-by { margin: 0; color: #9ba6a1; font-size: 11px; line-height: 1.5; }
   a { color: #f4f5f4; font-size: 11px; line-height: 1.5; text-decoration: none; }
   a span { color: #9ba6a1; }
   a:hover { color: #c6e4d5; }
   a:focus-visible { outline: 1px solid #9ba6a1; outline-offset: 4px; }
+  @media (min-width: 1024px) {
+    h2 { font-size: 10px; line-height: 1.4; }
+    strong { font-size: 12px; line-height: 1.4; }
+    .theme-name { font-size: 11px; }
+    .credit-by, a { font-size: 10px; line-height: 1.4; }
+  }
 </style>
