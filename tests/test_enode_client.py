@@ -124,11 +124,12 @@ class EnodeClientTests(unittest.TestCase):
 
     def test_http_failures_do_not_retry_or_replace_session(self):
         previous = (self.private / "session.json").read_bytes()
-        for status in (314, 401):
+        for status in (314, 401, 403, 429, 503):
             with self.subTest(status=status):
                 with mock.patch.object(enode.subprocess, "run", side_effect=self.curl_response(status)) as run:
-                    with self.assertRaisesRegex(enode.EnodeError, f"HTTP {status}"):
+                    with self.assertRaisesRegex(enode.EnodeError, f"HTTP {status}") as result:
                         enode.request("/synthetic-endpoint")
+                    self.assertEqual(result.exception.reauth_required, status == 401)
                     run.assert_called_once()
                 self.assertEqual((self.private / "session.json").read_bytes(), previous)
                 self.assert_request_files_cleaned()
@@ -136,8 +137,9 @@ class EnodeClientTests(unittest.TestCase):
     def test_expired_token_stops_before_network(self):
         enode.save("session.json", {"token": fake_token(exp=1)})
         with mock.patch.object(enode.subprocess, "run") as run:
-            with self.assertRaises(enode.EnodeError):
+            with self.assertRaises(enode.EnodeError) as result:
                 enode.request("/synthetic-endpoint")
+            self.assertTrue(result.exception.reauth_required)
             run.assert_not_called()
 
     def test_malformed_or_empty_json_is_rejected_by_default(self):

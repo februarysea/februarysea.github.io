@@ -13,9 +13,13 @@ on:
         type: boolean
         default: true
       sync_codex:
-        description: Refresh the dedicated Codex logins and fetch combined token usage
+        description: Refresh the primary Codex login and extend the archived usage history
         type: boolean
         default: true
+      sync_p7:
+        description: Fetch P7 observations (requires p7-auth Secrets; disabled until verified)
+        type: boolean
+        default: false
       dry_run:
         description: Validate and build only; do not deploy or save the checkpoint
         type: boolean
@@ -39,6 +43,7 @@ concurrency:
 
 jobs:
   sync:
+    name: Training sync
     if: github.ref == 'refs/heads/master' && (vars.ENODE_SYNC_ENABLED == 'true' || inputs.sync_enode == true)
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -51,7 +56,9 @@ jobs:
           persist-credentials: false
 
       - name: Test sync and disclosure checks
-        run: python3 -m unittest discover -s tests -p 'test_enode*.py'
+        run: |
+          python3 -m unittest discover -s tests -p 'test_enode*.py'
+          python3 -m unittest discover -s scripts -p 'test_sync_status.py'
 
       - name: Load last successfully deployed state
         id: state
@@ -63,6 +70,7 @@ jobs:
       # No package installation or site build runs in the credential-bearing job.
       # Secrets are individual values, available only to this step.
       - name: Fetch and validate incremental training data
+        id: collect
         env:
           ENODE_SESSION_TOKEN: ${{ secrets.ENODE_SESSION_TOKEN }}
           ENODE_API_KEY: ${{ secrets.ENODE_API_KEY }}
@@ -92,6 +100,7 @@ jobs:
           retention-days: 7
 
   sync-codex:
+    name: Codex Token sync
     if: >-
       github.repository == 'februarysea/februarysea.github.io' &&
       github.ref == 'refs/heads/master' &&
@@ -106,7 +115,9 @@ jobs:
           persist-credentials: false
 
       - name: Test collection, renewal, and disclosure checks
-        run: python3 -m unittest discover -s scripts -p 'test_codex*.py'
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_codex*.py'
+          python3 -m unittest discover -s scripts -p 'test_sync_status.py'
 
       - name: Install verified official Codex client
         shell: bash
@@ -128,15 +139,18 @@ jobs:
           APP_PRIVATE_KEY: ${{ secrets.CODEX_APP_PRIVATE_KEY }}
         run: python3 scripts/codex_github.py auth
 
-      - name: Renew logins, save them, and combine statistics
+      - name: Renew primary login and extend archived statistics
+        id: collect
         env:
           CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}
           CODEX_ACCOUNT_ID: ${{ secrets.CODEX_ACCOUNT_ID }}
-          CODEX_SECONDARY_AUTH_JSON: ${{ secrets.CODEX_SECONDARY_AUTH_JSON }}
-          CODEX_SECONDARY_ACCOUNT_ID: ${{ secrets.CODEX_SECONDARY_ACCOUNT_ID }}
-          CODEX_ACCOUNT_COUNT: ${{ vars.CODEX_ACCOUNT_COUNT || '1' }}
+          CODEX_ACCOUNT_COUNT: '1'
           GH_TOKEN: ${{ steps.auth_token.outputs.token }}
-        run: python3 scripts/collect_codex_usage.py --output "$RUNNER_TEMP/codex-output/codex-profile.json"
+        run: >-
+          python3 scripts/collect_codex_usage.py
+          --archive config/codex-usage-archive.json
+          --previous src/data/codex-profile.json
+          --output "$RUNNER_TEMP/codex-output/codex-profile.json"
 
       - name: Upload only validated public statistics
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -152,13 +166,67 @@ jobs:
           GH_TOKEN: ${{ steps.auth_token.outputs.token }}
         run: python3 scripts/codex_github.py revoke
 
+  sync-p7:
+    name: Pets P7 sync
+    if: >-
+      github.repository == 'februarysea/februarysea.github.io' &&
+      github.ref == 'refs/heads/master' &&
+      (vars.P7_SYNC_ENABLED == 'true' || inputs.sync_p7 == true)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: p7-auth
+    outputs:
+      state_revision: ${{ steps.state.outputs.state_revision }}
+    steps:
+      - name: Checkout trusted source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Test filtering, authentication, and disclosure checks
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_p7*.py'
+          python3 -m unittest discover -s scripts -p 'test_sync_status.py'
+
+      - name: Load last successfully deployed P7 state
+        id: state
+        run: >-
+          python3 scripts/p7_state_store.py load
+          --bootstrap config/p7-sync-bootstrap.json
+          --output "$RUNNER_TEMP/p7-previous.json"
+
+      # Reuse the verified session; no unverified refresh or login endpoint.
+      # A confirmed expiry fails this job with a sign-in summary/annotation.
+      # GitHub failure email requires the account's Actions Email setting.
+      - name: Read and filter P7 history
+        id: collect
+        env:
+          P7_APP_PROFILE_JSON: ${{ secrets.P7_APP_PROFILE_JSON }}
+          P7_SESSION_JSON: ${{ secrets.P7_SESSION_JSON }}
+          P7_DEVICE_ID: ${{ secrets.P7_DEVICE_ID }}
+        run: >-
+          python3 scripts/p7_sync.py sync
+          --state "$RUNNER_TEMP/p7-previous.json"
+          --output-dir "$RUNNER_TEMP/p7-output"
+
+      - name: Upload allowlisted P7 statistics only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: p7-sync
+          path: |
+            ${{ runner.temp }}/p7-output/p7-summary.json
+            ${{ runner.temp }}/p7-output/sync-state.json
+          if-no-files-found: error
+          retention-days: 7
+
   build:
-    needs: [sync, sync-codex]
+    needs: [sync, sync-codex, sync-p7]
     if: >-
       always() && !cancelled() && github.ref == 'refs/heads/master' &&
       (needs.sync.result == 'success' || needs.sync.result == 'skipped') &&
       (needs.sync-codex.result == 'success' || needs.sync-codex.result == 'skipped') &&
-      (github.event_name != 'schedule' || vars.ENODE_SYNC_ENABLED == 'true' || vars.CODEX_SYNC_ENABLED == 'true')
+      (needs.sync-p7.result == 'success' || needs.sync-p7.result == 'skipped') &&
+      (github.event_name != 'schedule' || vars.ENODE_SYNC_ENABLED == 'true' || vars.CODEX_SYNC_ENABLED == 'true' || vars.P7_SYNC_ENABLED == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -203,6 +271,22 @@ jobs:
         with:
           version: 9
 
+      - name: Download validated P7 statistics
+        if: needs.sync-p7.result == 'success'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: p7-sync
+          path: ${{ runner.temp }}/p7-output
+
+      - name: Apply validated P7 statistics
+        if: needs.sync-p7.result == 'success'
+        run: |
+          python3 scripts/p7_sync.py validate \
+            --state "$RUNNER_TEMP/p7-output/sync-state.json" \
+            --public "$RUNNER_TEMP/p7-output/p7-summary.json" \
+            --previous src/data/p7-summary.json
+          cp "$RUNNER_TEMP/p7-output/p7-summary.json" src/data/p7-summary.json
+
       - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -240,6 +324,10 @@ jobs:
           node --test tests/training.test.mjs tests/exercise-motion.test.mjs
           pnpm run usage:test
           pnpm run usage:validate
+          python3 -m unittest discover -s scripts -p 'test_p7*.py'
+          python3 -m unittest discover -s scripts -p 'test_sync_status.py'
+          python3 scripts/p7_sync.py validate --public src/data/p7-summary.json
+          node --test scripts/test-pet-weight.mjs
           pnpm run build
 
       - name: Upload Pages artifact
@@ -248,7 +336,7 @@ jobs:
           path: ./dist
 
   deploy:
-    needs: [sync, sync-codex, build]
+    needs: [sync, sync-codex, sync-p7, build]
     # always() also permits normal deploys while the rollout flag skips sync.
     if: always() && !cancelled() && needs.build.result == 'success' && inputs.dry_run != true
     runs-on: ubuntu-latest
@@ -312,3 +400,33 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/persist_codex_usage.py "$RUNNER_TEMP/codex-output/codex-profile.json"
+
+  persist-p7:
+    needs: [sync-p7, deploy]
+    if: always() && !cancelled() && needs.sync-p7.result == 'success' && needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Download successfully deployed P7 data
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: p7-sync
+          path: ${{ runner.temp }}/p7-output
+
+      - name: Save checkpoint on p7-data branch
+        env:
+          EXPECTED_REVISION: ${{ needs.sync-p7.outputs.state_revision }}
+        run: >-
+          python3 scripts/p7_state_store.py persist
+          --directory "$RUNNER_TEMP/p7-output"
+          --expected-revision "$EXPECTED_REVISION"
+
+      - name: Save deployed P7 statistics on master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/persist_p7_summary.py "$RUNNER_TEMP/p7-output/p7-summary.json"

@@ -27,7 +27,8 @@ def timestamp(value):
 
 
 def validate_snapshot(snapshot):
-    if not isinstance(snapshot, dict) or set(snapshot) != {"version", "source", "generatedAt", "totalTokens", "daily"}:
+    required = {"version", "source", "generatedAt", "totalTokens", "daily"}
+    if not isinstance(snapshot, dict) or set(snapshot) not in (required, required | {"archivedThrough"}):
         raise ValueError("Unexpected or missing snapshot fields.")
     if type(snapshot["version"]) is not int or snapshot["version"] != 1 or snapshot["source"] != "codex-profile-service":
         raise ValueError("Invalid snapshot version or source.")
@@ -52,6 +53,12 @@ def validate_snapshot(snapshot):
         daily_total += token_count(day["totalTokens"])
     if daily_total > total:
         raise ValueError("Daily usage exceeds the lifetime total.")
+    if "archivedThrough" in snapshot:
+        through = snapshot["archivedThrough"]
+        if not isinstance(through, str) or date.fromisoformat(through).isoformat() != through:
+            raise ValueError("Invalid archive cutoff date.")
+        if through not in {row["date"] for row in snapshot["daily"]}:
+            raise ValueError("Missing archived cutoff bucket.")
     return snapshot
 
 
@@ -62,8 +69,50 @@ def validate_update(previous, current):
         raise ValueError("Refusing an older snapshot.")
     if previous["daily"] and (not current["daily"] or current["daily"][-1]["date"] < previous["daily"][-1]["date"]):
         raise ValueError("Refusing missing or older daily coverage.")
+    if "archivedThrough" in previous:
+        cutoff = previous["archivedThrough"]
+        if current.get("archivedThrough") != cutoff:
+            raise ValueError("Refusing to remove or change the archived usage cutoff.")
+        if ([row for row in previous["daily"] if row["date"] <= cutoff] !=
+                [row for row in current["daily"] if row["date"] <= cutoff]):
+            raise ValueError("Refusing to rewrite archived account history.")
     # The service may correct counts; do not invent a monotonic lifetime total.
     return current
+
+
+def extend_archive(archive, primary, previous):
+    """Keep the old combined prefix; add only primary-account days after it.
+
+    The old collector did not retain per-account snapshots. Never guess the
+    retired account's contribution or add the active account's lifetime twice.
+    The archive marker distinguishes migrated history from older live aggregates.
+    """
+    for item in (archive, primary, previous):
+        validate_snapshot(item)
+    if not archive["daily"] or "archivedThrough" in archive or "archivedThrough" in primary:
+        raise ValueError("Expected a raw archive and one live account snapshot.")
+    cutoff = archive["daily"][-1]["date"]
+    if timestamp(primary["generatedAt"]) < timestamp(archive["generatedAt"]):
+        raise ValueError("Live usage predates the archive.")
+    future = {}
+    if "archivedThrough" in previous:
+        if previous["archivedThrough"] != cutoff or [r for r in previous["daily"] if r["date"] <= cutoff] != archive["daily"]:
+            raise ValueError("Published archive does not match the fixed baseline.")
+        future = {r["date"]: r["totalTokens"] for r in previous["daily"] if r["date"] > cutoff}
+        if previous["totalTokens"] != archive["totalTokens"] + sum(future.values()):
+            raise ValueError("Archived lifetime total is inconsistent.")
+        if future and (not primary["daily"] or primary["daily"][-1]["date"] < max(future)):
+            raise ValueError("Live account coverage regressed.")
+    # Replace repeated dates instead of accumulating them on every run. Keep
+    # older primary-only days when they roll out of the service's read window.
+    future.update({r["date"]: r["totalTokens"] for r in primary["daily"] if r["date"] > cutoff})
+    result = {**archive, "generatedAt": primary["generatedAt"], "archivedThrough": cutoff,
+              "totalTokens": token_count(archive["totalTokens"] + sum(future.values())),
+              "daily": [*archive["daily"], *({"date": day, "totalTokens": value} for day, value in sorted(future.items()))]}
+    validate_snapshot(result)
+    if "archivedThrough" in previous:
+        validate_update(previous, result)
+    return result
 
 
 def main():

@@ -30,9 +30,10 @@ BASE = "https://api.enode.ai/api"
 
 
 class EnodeError(Exception):
-    def __init__(self, message, *, retryable=False):
+    def __init__(self, message, *, retryable=False, reauth_required=False):
         super().__init__(message)
         self.retryable = retryable
+        self.reauth_required = reauth_required
 
 
 def session_token():
@@ -133,7 +134,7 @@ def request(path, method="GET", body=None, basic=None, auth=True, require_json=T
         token = session_token()
         claims = token_claims(token)
         if claims.get("exp", float("inf")) <= dt.datetime.now().timestamp():
-            raise EnodeError("Saved token has expired; sign in to One, open its history, then import-app-session again.")
+            raise EnodeError("Saved token has expired; sign in to One, open its history, then import-app-session again.", reauth_required=True)
         headers["Authorization"] = "Bearer " + token
     if body is not None:
         headers["Content-Type"] = "application/json"
@@ -177,7 +178,8 @@ def request(path, method="GET", body=None, basic=None, auth=True, require_json=T
             elif status in (314, 403):
                 safe["nextStep"] = "Account/client permission mismatch; stop and inspect the private error."
             raise EnodeError(f"HTTP {status}: {json.dumps(safe, ensure_ascii=False)}",
-                             retryable=status == 429 or 500 <= status < 600)
+                             retryable=status == 429 or 500 <= status < 600,
+                             reauth_required=status == 401 and auth and not basic)
         if require_json and payload is None:
             raise EnodeError(f"HTTP {status} did not return valid non-null JSON; existing data retained.")
         return payload

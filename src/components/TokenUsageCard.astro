@@ -58,7 +58,7 @@ const chartLabel = variant === "heatmap"
     <div class="token-metrics">
       <div class="token-total">
         <p class="token-eyebrow">Lifetime tokens</p>
-        <p class="token-number" title={`${exactTokens(summary.totalTokens)} recorded tokens`}>{compactTokens(summary.totalTokens)}</p>
+        <p class="token-number" title={`${exactTokens(summary.totalTokens)} recorded tokens. ${codexUsage.accounting}`}>{compactTokens(summary.totalTokens)}</p>
       </div>
       <div class="token-period" title={summary.dataThrough ? `${summary.recent[0].date} – ${summary.dataThrough}` : "Awaiting daily usage data"}>
         <p class="token-eyebrow">{periodLabel}</p>

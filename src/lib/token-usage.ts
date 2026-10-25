@@ -6,6 +6,7 @@ export const codexUsage = {
   generatedAt: snapshot.generatedAt,
   timezone,
   source: "Codex Profile",
+  accounting: "Archived combined usage through 2026-10-24; only the primary account contributes new usage from 2026-10-25.",
 };
 export const compactTokens = (value: number) =>
   new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 2 }).format(value);

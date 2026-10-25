@@ -23,6 +23,7 @@ from zoneinfo import ZoneInfo
 import enode
 from enode_export import ExportError, identifier, load_catalog, number
 from enode_public import build_public
+from sync_status import report_failure
 
 DAY = 86400000
 ZONE = ZoneInfo("Asia/Shanghai")
@@ -318,6 +319,7 @@ def main():
         atomic_json(args.output_dir / "training.json", public)
         print(json.dumps(report))
     except (ExportError, enode.EnodeError, OSError, ValueError, KeyError, TypeError) as error:
+        report_failure("enode", reauth=isinstance(error, enode.EnodeError) and error.reauth_required)
         message = str(error) if isinstance(error, (ExportError, enode.EnodeError)) else type(error).__name__
         parser.exit(1, "Enode sync failed: " + message + "\n")
 

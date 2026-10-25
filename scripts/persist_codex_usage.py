@@ -21,7 +21,8 @@ def publish(snapshot, token, api=request):
             raise ValueError("Unexpected website snapshot response.")
         previous = json.loads(base64.b64decode(previous_file["content"]))
         validate_update(previous, snapshot)
-        if previous["daily"] == snapshot["daily"] and previous["totalTokens"] == snapshot["totalTokens"]:
+        if (previous["daily"] == snapshot["daily"] and previous["totalTokens"] == snapshot["totalTokens"]
+                and previous.get("archivedThrough") == snapshot.get("archivedThrough")):
             return None
         try:
             result = api(ENDPOINT, token, method="PUT", payload={
