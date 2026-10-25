@@ -6,14 +6,11 @@ import FlipCard from "./FlipCard.astro";
 import CatWeightTrend from "./CatWeightTrend.astro";
 import { getPetAge } from "../lib/pet-age";
 import { petWeights } from "../data/pet-weights";
-import p7 from "../data/p7-summary.json";
 
 const tangyuanBirthday = "2025-05-20";
 const doubaoBirthday = "2023-05-20";
 const tangyuanAge = getPetAge(tangyuanBirthday);
 const doubaoAge = getPetAge(doubaoBirthday);
-const activityTitle = (cat: "tangyuan" | "doubao") =>
-  `P7 · ${p7.window.from}–${p7.window.to}: ${p7.cats[cat].visits7d} accepted visits. Median duration ${p7.cats[cat].medianDurationSeconds7d}s. Identification inferred from weight. ${p7.quality.excluded} outlying readings excluded. Updated ${p7.updatedAt}.`;
 ---
 
 <FlipCard label="Pets" frontLabel="Doubao" backLabel="Tangyuan" toggleColor="text-[#d7a7bb]" color="bg-[#050505]" borderColor="border-[#886374]" padding="p-3" class="pets-card" compact>
@@ -49,8 +46,6 @@ const activityTitle = (cat: "tangyuan" | "doubao") =>
       <Image class="pet-avatar" src={doubaoAvatar} alt="Doubao, a tabby and Maine Coon mix, in pixel art" width={72} densities={[1, 2, 3]} format="webp" quality={90} loading="lazy" />
     </div>
   </div>
-  <span slot="footer-front" class="pet-activity" title={activityTitle("tangyuan")}>{p7.cats.tangyuan.visits7d} visits · 7d</span>
-  <span slot="footer-back" class="pet-activity" title={activityTitle("doubao")}>{p7.cats.doubao.visits7d} visits · 7d</span>
 </FlipCard>
 
 <script>
@@ -82,5 +77,4 @@ const activityTitle = (cat: "tangyuan" | "doubao") =>
   .pet-details p { margin: 0; }
   .pet-breed { color: #d4c3cb; }
   .pet-personality { color: #aa939e; }
-  .pet-activity { color: #aa939e; font-size: 9px; line-height: 1.3; white-space: nowrap; }
 </style>

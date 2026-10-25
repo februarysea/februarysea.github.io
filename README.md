@@ -170,8 +170,8 @@ and [GitHub environment Secrets](https://docs.github.com/en/actions/concepts/sec
 
 The pet card uses `src/data/p7-summary.json`. Each graph shows daily medians of
 accepted observations; its headline shows the latest accepted individual weight.
-The footer counts accepted visits during the seven calendar days ending at the
-snapshot date. Missing days are left unfilled. Cat identity is **inferred from
+Visit counts and median durations remain in the data snapshot for later analysis;
+they are not shown on the card. Missing days are left unfilled. Cat identity is **inferred from
 weight**, not supplied by the device, and the original owner-provided breeds and
 birthdays remain unchanged.
 
@@ -217,6 +217,13 @@ Only `sync-state.json` and `p7-summary.json` are uploaded; no credentials, raw A
 responses, precise visit timestamps or rejection-audit files enter artifacts.
 After deployment, the public summary is also saved on `master`, matching the
 Codex statistics flow. Dry runs never save checkpoints or public snapshots.
+
+The durable archive is `sync-state.json` on the `p7-data` branch, alongside
+the daily summaries in `p7-summary.json`. Archived observations have no automatic expiry; the
+seven-day Actions artifact retention applies only to temporary transfer files.
+The fetch window covers the latest seven calendar days, so a longer interruption
+can leave gaps. Persistence currently requires the whole deployment to succeed;
+an unrelated Training or Codex failure also delays saving new P7 observations.
 
 ```bash
 python3 -m unittest discover -s scripts -p 'test_p7*.py'
