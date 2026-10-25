@@ -1,0 +1,36 @@
+---
+import FlipCard from "./FlipCard.astro";
+import CatPlaceholder from "./CatPlaceholder.astro";
+---
+
+<FlipCard label="Pets" frontLabel="Cat 02" backLabel="Cat 01" toggleColor="text-[#d7a7bb]" color="bg-[#050505]" borderColor="border-[#886374]" padding="p-3" class="pets-card" compact>
+  <div slot="front" class="pet-face">
+    <h2>Pets</h2>
+    <div class="pet-body">
+      <div class="pet-identity">
+        <h3>Cat 01</h3>
+        <p>Photo coming soon</p>
+      </div>
+      <CatPlaceholder />
+    </div>
+  </div>
+  <div slot="back" class="pet-face">
+    <h2>Pets</h2>
+    <div class="pet-body">
+      <div class="pet-identity">
+        <h3>Cat 02</h3>
+        <p>Photo coming soon</p>
+      </div>
+      <CatPlaceholder />
+    </div>
+  </div>
+</FlipCard>
+
+<style>
+  .pet-face { display: flex; flex-direction: column; gap: 8px; height: 100%; min-width: 0; }
+  h2 { margin: 0; color: #d7a7bb; font-size: 11px; font-weight: 700; line-height: 1.5; }
+  .pet-body { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 12px; min-height: 0; }
+  .pet-identity { min-width: 0; }
+  h3 { margin: 0; color: #f2e8ed; font-size: 16px; font-weight: 500; line-height: 1.4; }
+  p { margin: 5px 0 0; color: #aa939e; font-size: 10px; line-height: 1.5; }
+</style>

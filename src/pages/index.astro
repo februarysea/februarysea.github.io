@@ -6,6 +6,7 @@ import ContactsCard from "../components/ContactsCard.astro";
 import TokenUsageCard from "../components/TokenUsageCard.astro";
 import TrainingCard from "../components/TrainingCard.astro";
 import LinksCard from "../components/LinksCard.astro";
+import PetsCard from "../components/PetsCard.astro";
 import SiteCreditsCard from "../components/SiteCreditsCard.astro";
 ---
 
@@ -38,6 +39,7 @@ import SiteCreditsCard from "../components/SiteCreditsCard.astro";
       </div>
     </FlipCard>
     <LinksCard />
+    <PetsCard />
     <SiteCreditsCard />
   </main>
 </Layout>
@@ -63,6 +65,7 @@ import SiteCreditsCard from "../components/SiteCreditsCard.astro";
   .portfolio-home .intro-card { min-height: 300px; }
   .portfolio-home .training-flip-card { min-height: 340px; }
   .portfolio-home .links-card { min-height: 132px; }
+  .portfolio-home .pets-card { min-height: 160px; }
   .portfolio-home .be-water-card { min-height: 110px; }
   .portfolio-home .site-credits { min-height: 110px; }
   .portfolio-home .site-credits .flip-card-footer { margin-top: 2px; }
@@ -78,15 +81,16 @@ import SiteCreditsCard from "../components/SiteCreditsCard.astro";
     .portfolio-home { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 24px; }
     .portfolio-home .intro-card { grid-column: 1 / -1; }
     .portfolio-home .token-card { grid-column: 1 / -1; grid-row: 3; }
-    .portfolio-home .links-card { grid-column: 1 / -1; grid-row: 5; }
-    .portfolio-home .be-water-card, .portfolio-home .site-credits { grid-row: 4; }
+    .portfolio-home .links-card { grid-column: 1; grid-row: 4; }
+    .portfolio-home .pets-card { grid-column: 2; grid-row: 4; }
+    .portfolio-home .be-water-card, .portfolio-home .site-credits { grid-row: 5; }
   }
   @media (min-width: 1024px) {
     .portfolio-home {
       grid-template-columns: repeat(12, minmax(0, 1fr));
-      grid-template-rows: minmax(260px, 5fr) minmax(260px, 5fr) minmax(100px, 2fr);
+      grid-template-rows: minmax(260px, 5fr) minmax(260px, 5fr) minmax(160px, 3fr);
       height: min(100svh, 800px);
-      min-height: 684px;
+      min-height: 744px;
       padding: 24px;
     }
     .portfolio-home .intro-card { grid-area: 1 / 1 / 2 / 8; min-height: 0; }
@@ -94,7 +98,8 @@ import SiteCreditsCard from "../components/SiteCreditsCard.astro";
     .portfolio-home .token-card { grid-area: 2 / 1 / 3 / 10; }
     .portfolio-home .contact-card { grid-area: 2 / 10 / 3 / 13; }
     .portfolio-home .be-water-card { grid-area: 3 / 1 / 4 / 4; min-height: 0; }
-    .portfolio-home .links-card { grid-area: 3 / 4 / 4 / 10; min-height: 0; }
+    .portfolio-home .links-card { grid-area: 3 / 4 / 4 / 7; min-height: 0; }
+    .portfolio-home .pets-card { grid-area: 3 / 7 / 4 / 10; min-height: 0; }
     .portfolio-home .site-credits { grid-area: 3 / 10 / 4 / 13; min-height: 0; }
     .portfolio-home .intro-card .flip-card-front, .portfolio-home .intro-card .flip-card-back,
     .portfolio-home .training-flip-card .flip-card-front, .portfolio-home .training-flip-card .flip-card-back { padding: 20px; }
@@ -103,7 +108,7 @@ import SiteCreditsCard from "../components/SiteCreditsCard.astro";
   }
   @media (min-width: 1024px) and (pointer: coarse) {
     .portfolio-home {
-      grid-template-rows: minmax(260px, 5fr) minmax(260px, 5fr) minmax(164px, 2fr);
+      grid-template-rows: minmax(260px, 5fr) minmax(260px, 5fr) minmax(164px, 3fr);
       min-height: 748px;
     }
   }
