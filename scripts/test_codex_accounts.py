@@ -134,10 +134,12 @@ class AccountAggregationTests(unittest.TestCase):
             output.write_text(original)
             stderr = io.StringIO()
             with patch.object(collect, "collect_accounts", side_effect=lambda _: collect_all(env, collector=collector, persist=persist)), \
+                 patch.object(collect, "report_failure", return_value="Synthetic synchronization failure.") as report, \
                  patch("sys.argv", ["collect", "--output", str(output)]), contextlib.redirect_stderr(stderr), \
                  self.assertRaises(SystemExit) as error:
                 collect.main()
             self.assertEqual(error.exception.code, 1)
+            report.assert_called_once_with("codex", reauth=False, account=None)
             self.assertEqual(output.read_text(), original)
             self.assertNotIn("private-upstream-error", stderr.getvalue())
         self.assertEqual(env["CODEX_AUTH_JSON"], auth("rotated", account="account-one"))
