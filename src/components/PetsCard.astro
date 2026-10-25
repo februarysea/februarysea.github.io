@@ -1,36 +1,86 @@
 ---
+import { Image } from "astro:assets";
+import tangyuanAvatar from "../assets/pets/tangyuan-pixel.png";
+import doubaoAvatar from "../assets/pets/doubao-pixel.png";
 import FlipCard from "./FlipCard.astro";
-import CatPlaceholder from "./CatPlaceholder.astro";
+import CatWeightTrend from "./CatWeightTrend.astro";
+import { getPetAge } from "../lib/pet-age";
+import { petWeights } from "../data/pet-weights";
+import p7 from "../data/p7-summary.json";
+
+const tangyuanBirthday = "2025-05-20";
+const doubaoBirthday = "2023-05-20";
+const tangyuanAge = getPetAge(tangyuanBirthday);
+const doubaoAge = getPetAge(doubaoBirthday);
+const activityTitle = (cat: "tangyuan" | "doubao") =>
+  `P7 · ${p7.window.from}–${p7.window.to}: ${p7.cats[cat].visits7d} accepted visits. Median duration ${p7.cats[cat].medianDurationSeconds7d}s. Identification inferred from weight. ${p7.quality.excluded} outlying readings excluded. Updated ${p7.updatedAt}.`;
 ---
 
-<FlipCard label="Pets" frontLabel="Cat 02" backLabel="Cat 01" toggleColor="text-[#d7a7bb]" color="bg-[#050505]" borderColor="border-[#886374]" padding="p-3" class="pets-card" compact>
+<FlipCard label="Pets" frontLabel="Doubao" backLabel="Tangyuan" toggleColor="text-[#d7a7bb]" color="bg-[#050505]" borderColor="border-[#886374]" padding="p-3" class="pets-card" compact>
   <div slot="front" class="pet-face">
-    <h2>Pets</h2>
+    <div class="pet-heading">
+      <h2>Tangyuan</h2>
+      <span class="pet-age" data-pet-birthday={tangyuanBirthday} title={`Born ${tangyuanBirthday}`} aria-label={tangyuanAge.long}>{tangyuanAge.short}</span>
+    </div>
     <div class="pet-body">
-      <div class="pet-identity">
-        <h3>Cat 01</h3>
-        <p>Photo coming soon</p>
+      <div class="pet-stats">
+        <CatWeightTrend catName="Tangyuan" data={petWeights.tangyuan} />
+        <div class="pet-details">
+          <p class="pet-breed">Ragdoll</p>
+          <p class="pet-personality">Mischievous</p>
+        </div>
       </div>
-      <CatPlaceholder />
+      <Image class="pet-avatar" src={tangyuanAvatar} alt="Tangyuan, a Ragdoll cat, in pixel art" width={72} densities={[1, 2, 3]} format="webp" quality={90} loading="lazy" />
     </div>
   </div>
   <div slot="back" class="pet-face">
-    <h2>Pets</h2>
+    <div class="pet-heading">
+      <h2>Doubao</h2>
+      <span class="pet-age" data-pet-birthday={doubaoBirthday} title={`Born ${doubaoBirthday}`} aria-label={doubaoAge.long}>{doubaoAge.short}</span>
+    </div>
     <div class="pet-body">
-      <div class="pet-identity">
-        <h3>Cat 02</h3>
-        <p>Photo coming soon</p>
+      <div class="pet-stats">
+        <CatWeightTrend catName="Doubao" data={petWeights.doubao} />
+        <div class="pet-details">
+          <p class="pet-breed" title="Tabby and Maine Coon mix">Maine Coon mix</p>
+          <p class="pet-personality">Affectionate</p>
+        </div>
       </div>
-      <CatPlaceholder />
+      <Image class="pet-avatar" src={doubaoAvatar} alt="Doubao, a tabby and Maine Coon mix, in pixel art" width={72} densities={[1, 2, 3]} format="webp" quality={90} loading="lazy" />
     </div>
   </div>
+  <span slot="footer-front" class="pet-activity" title={activityTitle("tangyuan")}>{p7.cats.tangyuan.visits7d} visits · 7d</span>
+  <span slot="footer-back" class="pet-activity" title={activityTitle("doubao")}>{p7.cats.doubao.visits7d} visits · 7d</span>
 </FlipCard>
+
+<script>
+  import { getPetAge } from "../lib/pet-age";
+
+  function updatePetAges() {
+    document.querySelectorAll<HTMLElement>("[data-pet-birthday]").forEach((element) => {
+      const birthday = element.dataset.petBirthday;
+      if (!birthday) return;
+      const age = getPetAge(birthday);
+      element.textContent = age.short;
+      element.setAttribute("aria-label", age.long);
+    });
+  }
+
+  updatePetAges();
+  document.addEventListener("astro:page-load", updatePetAges);
+</script>
 
 <style>
   .pet-face { display: flex; flex-direction: column; gap: 8px; height: 100%; min-width: 0; }
+  .pet-heading { display: flex; align-items: baseline; gap: 8px; }
   h2 { margin: 0; color: #d7a7bb; font-size: 11px; font-weight: 700; line-height: 1.5; }
-  .pet-body { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 12px; min-height: 0; }
-  .pet-identity { min-width: 0; }
-  h3 { margin: 0; color: #f2e8ed; font-size: 16px; font-weight: 500; line-height: 1.4; }
-  p { margin: 5px 0 0; color: #aa939e; font-size: 10px; line-height: 1.5; }
+  .pet-age { color: #aa939e; font-size: 9px; line-height: 1.5; }
+  .pet-body { display: grid; grid-template-columns: minmax(0, 1fr) 72px; flex: 1; align-items: center; gap: 14px; min-height: 0; }
+  .pet-stats { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .pet-avatar { display: block; width: 72px; height: 72px; object-fit: contain; }
+  .pet-details { display: flex; flex-wrap: wrap; column-gap: 8px; font-size: 9px; line-height: 11px; }
+  .pet-details p { margin: 0; }
+  .pet-breed { color: #d4c3cb; }
+  .pet-personality { color: #aa939e; }
+  .pet-activity { color: #aa939e; font-size: 9px; line-height: 1.3; white-space: nowrap; }
 </style>

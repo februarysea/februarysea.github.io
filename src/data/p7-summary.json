@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "source": "P7",
+  "updatedAt": "2026-10-25T05:14:00.106000+00:00",
+  "window": {
+    "from": "2026-10-19",
+    "to": "2026-10-25"
+  },
+  "quality": {
+    "total": 32,
+    "kept": 29,
+    "excluded": 3,
+    "outsideRange": 3,
+    "madOutliers": 0
+  },
+  "cats": {
+    "tangyuan": {
+      "assignment": "weight-estimate",
+      "daily": [
+        {
+          "date": "2026-10-19",
+          "kg": 6.4495,
+          "samples": 2
+        },
+        {
+          "date": "2026-10-20",
+          "kg": 6.375,
+          "samples": 2
+        },
+        {
+          "date": "2026-10-21",
+          "kg": 6.157,
+          "samples": 1
+        },
+        {
+          "date": "2026-10-22",
+          "kg": 6.398,
+          "samples": 2
+        },
+        {
+          "date": "2026-10-23",
+          "kg": 6.341,
+          "samples": 1
+        },
+        {
+          "date": "2026-10-24",
+          "kg": 6.344,
+          "samples": 3
+        },
+        {
+          "date": "2026-10-25",
+          "kg": 6.475,
+          "samples": 1
+        }
+      ],
+      "latestMeasurement": {
+        "date": "2026-10-25",
+        "kg": 6.475
+      },
+      "visits7d": 12,
+      "medianDurationSeconds7d": 129.5
+    },
+    "doubao": {
+      "assignment": "weight-estimate",
+      "daily": [
+        {
+          "date": "2026-10-19",
+          "kg": 4.879,
+          "samples": 3
+        },
+        {
+          "date": "2026-10-20",
+          "kg": 4.748,
+          "samples": 3
+        },
+        {
+          "date": "2026-10-21",
+          "kg": 4.892,
+          "samples": 2
+        },
+        {
+          "date": "2026-10-22",
+          "kg": 5.044,
+          "samples": 1
+        },
+        {
+          "date": "2026-10-23",
+          "kg": 4.8555,
+          "samples": 2
+        },
+        {
+          "date": "2026-10-24",
+          "kg": 4.848,
+          "samples": 4
+        },
+        {
+          "date": "2026-10-25",
+          "kg": 4.9205,
+          "samples": 2
+        }
+      ],
+      "latestMeasurement": {
+        "date": "2026-10-25",
+        "kg": 4.863
+      },
+      "visits7d": 17,
+      "medianDurationSeconds7d": 38
+    }
+  }
+}

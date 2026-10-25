@@ -10,11 +10,36 @@ import threading
 import time
 from datetime import datetime, timezone
 
-from codex_usage import timestamp, token_count, validate_snapshot
+from codex_usage import extend_archive, timestamp, token_count, validate_snapshot
 from codex_github import AUTH_ENVIRONMENT, WEBSITE_REPO, request
+from sync_status import report_failure
 
 
 AUTH_SECRETS = ("CODEX_AUTH_JSON", "CODEX_SECONDARY_AUTH_JSON")
+
+
+class CodexAuthRequired(RuntimeError):
+    def __init__(self, secret_name=None):
+        super().__init__("Codex managed login requires reauthorization.")
+        self.secret_name = secret_name
+
+
+def is_auth_error(error):
+    # Fixed messages from the pinned official client (rust-v0.162.1):
+    # login/src/auth/manager.rs and account_processor/workspace_routing.rs.
+    # Inspect in memory only; never forward arbitrary RPC payloads to Actions.
+    if not isinstance(error, dict) or not isinstance(error.get("message"), str):
+        return False
+    message = error["message"]
+    known = (
+        "Your access token could not be refreshed because your refresh token has expired. Please log out and sign in again.",
+        "Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again.",
+        "Your access token could not be refreshed because your refresh token was revoked. Please log out and sign in again.",
+        "Your access token could not be refreshed. Please log out and sign in again.",
+        "Your access token could not be refreshed because you have since logged out or signed in to another account. Please sign in again.",
+        "workspace routing discovery unauthorized (401)",
+    )
+    return any(value in message for value in known)
 
 
 def validate_auth(raw, expected_account):
@@ -106,6 +131,8 @@ class CodexRPC:
                 continue
             if "error" in message:
                 # Error payloads may contain upstream credentials or account details.
+                if method in ("account/read", "account/usage/read") and is_auth_error(message["error"]):
+                    raise CodexAuthRequired()
                 raise RuntimeError("Codex account request failed: " + method)
             if "result" not in message:
                 raise RuntimeError("Codex returned an invalid response.")
@@ -172,6 +199,8 @@ def collect(raw_auth, account_id, persist, binary="codex", rpc_factory=CodexRPC)
         try:
             with rpc_factory(binary, home) as rpc:
                 account = rpc.call("account/read", {"refreshToken": True})
+                if isinstance(account, dict) and account.get("account") is None and account.get("requiresOpenaiAuth") is True:
+                    raise CodexAuthRequired()
                 if not isinstance(account, dict) or (account.get("account") or {}).get("type") != "chatgpt":
                     raise ValueError("Codex did not load a managed ChatGPT session.")
                 # Persist immediately after refresh, before any usage service request.
@@ -231,24 +260,43 @@ def collect_accounts(environ, *, collector=collect, persist=persist_auth):
     for secret_name, raw, account in accounts:
         def save(value, account_id=account, destination=secret_name):
             persist(value, account_id, github_token, secret_name=destination)
-        snapshots.append(collector(raw, account, save))
+        try:
+            snapshots.append(collector(raw, account, save))
+        except CodexAuthRequired:
+            raise CodexAuthRequired(secret_name) from None
     # A failure in any account prevents a partial aggregate from being exported.
     return combine_snapshots(snapshots)
+
+
+def collect_after_archive(environ, archive, previous, *, collect_live=collect_accounts):
+    validate_snapshot(archive)
+    validate_snapshot(previous)
+    # An old repository variable or leftover second-account Secret cannot
+    # reactivate the retired account. Only the original slot is passed onward.
+    primary_env = {key: environ[key] for key in ("CODEX_AUTH_JSON", "CODEX_ACCOUNT_ID", "GH_TOKEN") if key in environ}
+    primary_env["CODEX_ACCOUNT_COUNT"] = "1"
+    return extend_archive(archive, collect_live(primary_env), previous)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--archive", type=Path)
+    parser.add_argument("--previous", type=Path)
     args = parser.parse_args()
     try:
-        snapshot = collect_accounts(os.environ)
+        if bool(args.archive) != bool(args.previous):
+            raise ValueError("Archive mode requires both the fixed archive and previous public snapshot.")
+        snapshot = collect_after_archive(os.environ, json.loads(args.archive.read_text()), json.loads(args.previous.read_text())) if args.archive else collect_accounts(os.environ)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         temporary = args.output.with_suffix(".json.tmp")
         temporary.write_text(json.dumps(snapshot, indent=2, allow_nan=False) + "\n")
         temporary.replace(args.output)
         print(f"Saved public statistics for {len(snapshot['daily'])} days; managed auth persisted in encrypted environment storage.")
-    except (OSError, ValueError, TypeError, KeyError, RuntimeError, subprocess.SubprocessError):
-        parser.exit(1, "Codex collection failed. Previous website data is unchanged. Check auth, secret write-back, or service availability.\n")
+    except (OSError, ValueError, TypeError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
+        expired = isinstance(error, CodexAuthRequired)
+        message = report_failure("codex", reauth=expired, account=error.secret_name if expired else None)
+        parser.exit(2 if expired else 1, message + "\n")
 
 
 if __name__ == "__main__":

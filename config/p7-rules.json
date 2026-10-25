@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "timezone": "Asia/Shanghai",
+  "maxProfileDeviationKg": 0.6,
+  "madMultiplier": 3,
+  "madFloorKg": 0.25,
+  "madMinimumSamples": 5,
+  "madWindowDays": 14,
+  "profiles": {
+    "tangyuan": { "referenceKg": 6.3 },
+    "doubao": { "referenceKg": 4.85 }
+  }
+}

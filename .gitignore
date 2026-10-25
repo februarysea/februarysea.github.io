@@ -42,6 +42,9 @@ pnpm-debug.log*
 # Private Enode credentials and original training data
 .enode-private/
 
+# P7 source snapshots and local rejection audits
+.p7-private/
+
 # Python bytecode
 __pycache__/
 *.pyc

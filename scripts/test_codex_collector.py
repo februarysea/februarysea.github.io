@@ -138,6 +138,47 @@ class CollectorTests(unittest.TestCase):
             client.call("account/usage/read")
         self.assertNotIn("private-canary", str(raised.exception))
 
+    def test_only_confirmed_auth_failures_request_signin(self):
+        cases = (
+            ("Your access token could not be refreshed because your refresh token has expired. Please log out and sign in again.", True),
+            ("Your access token could not be refreshed because your refresh token was already used. Please log out and sign in again.", True),
+            ("Your access token could not be refreshed because your refresh token was revoked. Please log out and sign in again.", True),
+            ("workspace routing discovery unauthorized (401)", True),
+            ("workspace routing discovery timed out", False),
+            ("failed to persist rotated login", False),
+            ("503 Service unavailable", False),
+        )
+        for message, reauth in cases:
+            client = object.__new__(collect.CodexRPC)
+            client.sequence, client.timeout = 0, 1
+            client.messages, client._send = collect.queue.Queue(), unittest.mock.Mock()
+            client.messages.put({"id": 1, "error": {"message": message + " private-canary"}})
+            with self.assertRaises(RuntimeError) as result:
+                client.call("account/read")
+            self.assertEqual(isinstance(result.exception, collect.CodexAuthRequired), reauth)
+            self.assertNotIn("private-canary", str(result.exception))
+
+    def test_second_account_expiry_is_labelled_without_exposing_identity(self):
+        env = {"CODEX_AUTH_JSON": auth(account="first"), "CODEX_ACCOUNT_ID": "first",
+               "CODEX_SECONDARY_AUTH_JSON": auth(account="second"), "CODEX_SECONDARY_ACCOUNT_ID": "second",
+               "CODEX_ACCOUNT_COUNT": "2", "GH_TOKEN": "synthetic-token"}
+        collector = unittest.mock.Mock(side_effect=[collect.normalize_usage(usage()), collect.CodexAuthRequired()])
+        with self.assertRaises(collect.CodexAuthRequired) as result:
+            collect.collect_accounts(env, collector=collector, persist=unittest.mock.Mock())
+        self.assertEqual(result.exception.secret_name, "CODEX_SECONDARY_AUTH_JSON")
+
+    def test_signed_out_account_requires_reauthorization_and_preserves_managed_auth(self):
+        saved = []
+        class RPC:
+            def __init__(self, binary, home): pass
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def call(self, method, params=None):
+                return {"account": None, "requiresOpenaiAuth": True}
+        with self.assertRaises(collect.CodexAuthRequired):
+            collect.collect(auth(), "selected-account", saved.append, rpc_factory=RPC)
+        self.assertEqual(saved, [auth(), auth()])
+
 
 class PublishTests(unittest.TestCase):
     def previous(self):
