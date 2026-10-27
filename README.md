@@ -128,8 +128,8 @@ the countdown, which stays paused while hovered. Ordinary clicks, including heat
 dates, do not change the timer or leave it paused after exit. Keyboard navigation
 and editing retain focus protection. Reduced motion disables automatic flipping.
 
-Codex shares the existing daily Pages schedule at **00:00 Asia/Shanghai**
-(16:00 UTC; GitHub may queue runs). `CODEX_SYNC_ENABLED=true` enables collection
+Codex shares the existing daily Pages schedule at **12:00 Asia/Shanghai**
+(04:00 UTC; GitHub may queue runs). `CODEX_SYNC_ENABLED=true` enables collection
 on scheduled runs and website updates. Manual runs offer `sync_codex` and
 `dry_run`; a dry run still saves refreshed credentials but does not deploy or
 commit statistics. Existing Enode synchronization remains in the same workflow.

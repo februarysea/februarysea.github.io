@@ -7,7 +7,7 @@ These are observed app endpoints, so an Enode API/client change may need mainten
 
 ## Daily incremental sync
 
-The Pages workflow runs at `0 16 * * *` UTC, midnight in Asia/Shanghai. Scheduled
+The Pages workflow runs at `0 4 * * *` UTC, noon in Asia/Shanghai. Scheduled
 runs can be delayed by GitHub. Set the repository variable `ENODE_SYNC_ENABLED`
 to `true` to enable automatic sync. Before that, scheduled runs are skipped and
 ordinary code pushes continue deploying the checked-in training snapshot.
