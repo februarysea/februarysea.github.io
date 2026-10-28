@@ -49,10 +49,14 @@ const photos = Object.entries(images)
 </section>
 
 {photos.map((photo) => (
-  <dialog id={photo.id} class="gallery-dialog" aria-label={photo.alt}>
+  <dialog id={photo.id} class="gallery-dialog" data-gallery-state="loading" aria-label={photo.alt}>
     <button class="gallery-close" type="button" data-gallery-close aria-label="Close photo" title="Close photo">×</button>
-    <figure>
-      <img src={photo.image.src} width={photo.image.width} height={photo.image.height} alt={photo.alt} loading="lazy" />
+    <figure aria-busy="true">
+      <img data-gallery-src={photo.image.src} width={photo.image.width} height={photo.image.height} alt={photo.alt} loading="eager" decoding="async" />
+      <div class="gallery-image-status">
+        <p data-gallery-status role="status">Loading photo…</p>
+        <button type="button" data-gallery-retry hidden>Retry</button>
+      </div>
     </figure>
   </dialog>
 ))}
@@ -135,11 +139,32 @@ const photos = Object.entries(images)
       if (link.dataset.galleryReady) return;
       const dialog = document.getElementById(link.dataset.galleryOpen ?? "");
       if (!(dialog instanceof HTMLDialogElement)) return;
+      const image = dialog.querySelector<HTMLImageElement>("img[data-gallery-src]");
+      const status = dialog.querySelector<HTMLElement>("[data-gallery-status]");
+      const retry = dialog.querySelector<HTMLButtonElement>("[data-gallery-retry]");
+      if (!image || !status || !retry) return;
+      const setImageState = (state: "loading" | "ready" | "error") => {
+        dialog.dataset.galleryState = state;
+        dialog.querySelector("figure")?.setAttribute("aria-busy", String(state === "loading"));
+        status.textContent = state === "error" ? "Photo could not load." : state === "loading" ? "Loading photo…" : "";
+        retry.hidden = state !== "error";
+      };
+      const loadImage = () => {
+        setImageState("loading");
+        // Hidden dialogs must not depend on the browser's lazy-loading heuristic.
+        // Opening again also retries a failed request after the server reconnects.
+        image.src = image.dataset.gallerySrc!;
+      };
+      image.addEventListener("load", () => setImageState(image.naturalWidth > 0 ? "ready" : "error"));
+      image.addEventListener("error", () => setImageState("error"));
+      retry.addEventListener("click", loadImage);
       link.dataset.galleryReady = "true";
       link.addEventListener("click", (event) => {
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         event.preventDefault();
         dialog.showModal();
+        if (image.complete && image.naturalWidth > 0) setImageState("ready");
+        else loadImage();
       });
       dialog.querySelector("[data-gallery-close]")?.addEventListener("click", () => dialog.close());
       dialog.addEventListener("click", (event) => {
@@ -175,7 +200,12 @@ const photos = Object.entries(images)
   .gallery-dialog { position: fixed; inset: 0; width: min(920px, calc(100vw - 32px)); max-height: calc(100svh - 32px); margin: auto; padding: 16px; overflow: auto; color: #dbe5ea; background: #090d10; border: 1px solid #426071; border-radius: 8px; }
   .gallery-dialog::backdrop { background: #000d; backdrop-filter: blur(6px); }
   .gallery-close { display: grid; place-items: center; width: 32px; height: 32px; margin: 0 0 8px auto; border: 0; background: transparent; color: #b6ccd8; font-size: 24px; cursor: pointer; }
-  figure { margin: 0; }
+  figure { position: relative; margin: 0; min-height: 120px; }
   figure img { display: block; width: 100%; height: auto; max-height: calc(100svh - 108px); object-fit: contain; }
+  .gallery-dialog:not([data-gallery-state="ready"]) figure img { visibility: hidden; }
+  .gallery-image-status { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: #a5bac6; font-size: 12px; }
+  .gallery-dialog[data-gallery-state="ready"] .gallery-image-status { display: none; }
+  [data-gallery-retry] { border: 1px solid #426071; border-radius: 4px; padding: 6px 12px; background: transparent; color: #dbe5ea; cursor: pointer; }
+  [data-gallery-retry][hidden] { display: none; }
   a:focus-visible, button:focus-visible { outline: 1px solid #a5c5d8; outline-offset: 3px; }
 </style>

@@ -2,7 +2,7 @@
 import FlipCard from "./FlipCard.astro";
 import ExerciseIllustration from "./ExerciseIllustration.astro";
 import records from "../data/training.json";
-import { formatTrainingDate, formatSetReps, getTrainingDate, getWorkSessions, getTrainingWindow, getTrainingWindowSummary, getLatestWorkSession, getSessionLifts, type TrainingData } from "../lib/training";
+import { formatTrainingDate, formatSetReps, getTrainingDate, getWorkSessions, getTrainingWindow, getTrainingWindowSummary, getLatestWorkSession, getSessionLifts, getOneRepMaxTrends, oneRepMaxGeometry, type TrainingData } from "../lib/training";
 import { velocityCeiling, velocityGeometry } from "../lib/velocity-chart";
 
 const training: TrainingData = records;
@@ -13,6 +13,10 @@ const recordedDates = new Set(getWorkSessions(training.sessions).map((session) =
 const coverageFrom = training.coverage.from.slice(0, 10);
 const coverageTo = training.coverage.to.slice(0, 10);
 const days = window.dates.map((date) => ({ date, active: recordedDates.has(date), covered: date >= coverageFrom && date <= coverageTo }));
+const trendFrom = "2026-10-20";
+const trends = getOneRepMaxTrends(training.sessions, trendFrom, today);
+const trendCeiling = Math.max(25, Math.ceil(Math.max(0, ...trends.flatMap((trend) => trend.points.map((point) => point.valueKg ?? 0))) / 25) * 25);
+const trendCharts = trends.map((trend) => oneRepMaxGeometry(trend.points, trendFrom, today, trendCeiling));
 const latest = getLatestWorkSession(training.sessions);
 const lifts = getSessionLifts(latest);
 const latestReps = latest?.sets.reduce((total, set) => total + set.repCount, 0) ?? 0;
@@ -34,16 +38,40 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
   frontLabel="Recent session"
   backLabel="Overview"
   toggleColor="text-rose-300"
+  hoverFlip={false}
 >
   <div slot="front" class="training-front">
     <div class="training-heading"><h2>Training</h2><a class="source-label" href="https://enode.ai/pages/enode-one" target="_blank" rel="noopener noreferrer">Enode One</a></div>
-    <div class="period-label"><span>Last 30 days</span><span>{formatShortDate(window.from)} – {formatShortDate(window.to)}</span></div>
-    <div class="overview-metrics">
-      <div><strong>{summary.trainingDays}</strong><span>Training days</span></div>
-      <div><strong>{summary.sets}</strong><span>Working sets</span></div>
+    <div class="strength-trends">
+      <div class="trend-heading">
+        <abbr title="Epley: weight × (1 + reps / 30), using the best working set each day with 2–10 reps; singles use the recorded load. Not adjusted for reps in reserve. This is an estimate from training sets, not a tested maximum.">Estimated 1RM <span>· kg</span></abbr>
+        <span>{formatShortDate(trendFrom)} – {formatShortDate(today)}</span>
+      </div>
+      <div class="strength-grid">
+        {trends.map((trend, index) => (
+          <section class="strength-lift" style={`--trend-color:${trend.color}`} aria-label={`${trend.variant} estimated one-repetition maximum`}>
+            <h3>{trend.label}{trend.variant === "Sumo" && <small>Sumo</small>}</h3>
+            <div class="strength-value" title={trend.latest ? `Latest Epley estimate: ${formatShortDate(trend.latest.date)}` : "No eligible working sets"}>{trend.latest ? trend.latest.valueKg.toFixed(1) : "—"}<small>kg</small></div>
+            <svg class="strength-chart" viewBox="0 0 128 60" role="img" aria-label={`${trend.variant}: ${trend.count} Epley estimates from working-set load and reps; scale 0 to ${trendCeiling} kg, ${trendFrom} to ${today}`}>
+              <line x1="4" x2="124" y1="11" y2="11" class="chart-guide" />
+              <line x1="4" x2="124" y1="32" y2="32" class="chart-guide" />
+              <line x1="4" x2="124" y1="53" y2="53" class="chart-guide" />
+              {trendCharts[index].segments.map((points) => <polyline points={points} class="strength-line" />)}
+              {trendCharts[index].points.map((point) => (
+                <g class="strength-point" tabindex="0" role="img" aria-label={`${formatShortDate(point.date)}: ${point.valueKg.toFixed(1)} kg`}>
+                  <title>{formatShortDate(point.date)} · {point.valueKg.toFixed(1)} kg (Epley e1RM)</title>
+                  <circle cx={point.x} cy={point.y} r="6" fill="transparent" />
+                  <circle cx={point.x} cy={point.y} r="2.2" class="point-dot" />
+                </g>
+              ))}
+              {!trend.count && <text x="64" y="33" text-anchor="middle" class="chart-empty">No estimate</text>}
+            </svg>
+          </section>
+        ))}
+      </div>
     </div>
-    <p class="overview-detail">{summary.reps} reps <span>·</span> {summary.exerciseCount} exercises</p>
     <div class="activity-block">
+      <div class="period-label" title={`${formatShortDate(window.from)} – ${formatShortDate(window.to)}`}><span>Last 30 days</span><span><strong>{summary.trainingDays}</strong> training days</span></div>
       <div class="training-activity" role="img" aria-label={`Last 30 days: ${summary.trainingDays} training days; ${days.filter((day) => !day.covered).length} days outside the synced range`}>
         {days.map((day) => (
           <span class:list={["activity-day", { active: day.active, unsynced: !day.covered }]} title={`${day.date}: ${day.active ? "working sets recorded" : day.covered ? "no recorded training" : "not synced"}`}></span>
@@ -96,11 +124,26 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
   .source-label:hover, .source-label:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
   .period-label { display: flex; justify-content: space-between; gap: 12px; color: #9b949b; font-size: 11px; }
   .period-label span:first-child { color: #d6cbd2; }
-  .overview-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .overview-metrics strong { display: block; font: 600 34px/1.1 sans-serif; letter-spacing: -1px; }
-  .overview-metrics span { display: block; color: #a099a0; font-size: 11px; margin-top: 5px; }
-  .overview-detail { color: #d0c5cd; font-size: 12px; }
-  .overview-detail span, .session-summary span { padding: 0 6px; color: #74636c; }
+  .period-label { margin-bottom: 8px; }
+  .period-label strong { color: #f4f2ed; font-weight: 600; }
+  .session-summary span { padding: 0 6px; color: #74636c; }
+  .strength-trends { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .trend-heading { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 9px; color: #948690; }
+  .trend-heading abbr { color: #c8b8c2; text-decoration: none; cursor: help; }
+  .trend-heading abbr span { color: #948690; }
+  .strength-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .strength-lift { min-width: 0; }
+  .strength-lift h3 { display: flex; flex-wrap: wrap; gap: 4px; align-items: baseline; color: #d7c9d2; font-size: 11px; line-height: 15px; }
+  .strength-lift h3 small { color: #8d808a; font-size: 8px; }
+  .strength-value { color: var(--trend-color); font-size: 24px; line-height: 1.25; letter-spacing: -1px; margin-top: 4px; }
+  .strength-value small { color: #8d808a; font-size: 9px; letter-spacing: 0; margin-left: 4px; }
+  .strength-chart { display: block; width: 100%; height: auto; max-height: 60px; overflow: visible; margin-top: 3px; }
+  .chart-guide { stroke: #292128; stroke-width: .7; stroke-dasharray: 2 4; }
+  .strength-line { fill: none; stroke: var(--trend-color); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .point-dot { fill: var(--trend-color); stroke: #050505; stroke-width: 1; }
+  .strength-point:focus { outline: none; }
+  .strength-point:focus-visible .point-dot, .strength-point:hover .point-dot { stroke: #fff; stroke-width: 2; }
+  .chart-empty { fill: #8d808a; font-size: 9px; }
   .training-activity { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 3px; }
   .activity-day { display: block; aspect-ratio: 1; border-radius: 2px; background: #151316; border: 1px solid #383239; }
   .activity-day.active { background: #fb8fa3; border-color: #fb8fa3; }
@@ -139,13 +182,20 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
     .lift-count { font-size: 8px; }
     .lift-load { font-size: 11px; }
     .activity-legend { gap: 8px; }
+    .strength-grid { gap: 8px; }
+    .strength-value { font-size: 21px; }
   }
   @media (min-width: 1024px) {
-    .training-front { gap: 7px; }
+    .training-front { gap: 5px; }
     .training-heading h2 { font-size: 18px; }
-    .overview-metrics strong { font-size: 32px; }
-    .overview-detail { font-size: 11px; }
+    .strength-trends { gap: 4px; }
+    .strength-value { font-size: 22px; margin-top: 2px; }
+    .strength-chart { max-height: 48px; }
+    .period-label { font-size: 10px; margin-bottom: 6px; }
     .activity-legend { margin-top: 5px; }
     .artwork-credit { font-size: 10px; }
+  }
+  @media (min-width: 700px) and (max-width: 1023px) {
+    .strength-value { font-size: 22px; }
   }
 </style>

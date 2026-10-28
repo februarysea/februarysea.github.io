@@ -17,6 +17,9 @@ const {
   getLatestWorkSession,
   getSessionLifts,
   formatSetReps,
+  estimateOneRepMax,
+  getOneRepMaxTrends,
+  oneRepMaxGeometry,
 } = await import(
   `data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`
 );
@@ -51,6 +54,52 @@ test("missing load is flagged and a month without training has zero totals", () 
 
 const workSet = (id, overrides = {}) => ({
   id, exercise: "Squat", weightKg: 80, repCount: 5, work: true, reps: [], ...overrides,
+});
+
+test("Epley estimates exclude warm-ups, invalid loads and high-rep sets", () => {
+  assert.equal(estimateOneRepMax(workSet("a", { weightKg: 60, repCount: 5 })), 70);
+  assert.equal(estimateOneRepMax(workSet("a", { weightKg: 100, repCount: 1 })), 100);
+  assert.ok(Math.abs(estimateOneRepMax(workSet("a", { weightKg: 95 })) - 110.8333333333) < 1e-8);
+  for (const overrides of [
+    { work: false }, { work: null }, { weightKg: null }, { weightKg: 0 }, { weightKg: -1 },
+    { weightKg: NaN }, { weightKg: Infinity }, { repCount: 0 }, { repCount: 11 },
+    { repCount: 2.5 }, { repCount: NaN }, { repCount: Infinity },
+  ]) assert.equal(estimateOneRepMax(workSet("invalid", overrides)), null);
+});
+
+test("curves use each day's best set since October 20, independent of the 30-day calendar", () => {
+  const sessions = [
+    { id: "old", date: "2026-10-01", sets: [workSet("old", { weightKg: 200 })] },
+    { id: "a", date: "2026-10-20", sets: [workSet("a", { weightKg: 100, repCount: 3 })], oneRepMax: [{ exercise: "Squat", valueKg: 500 }] },
+    { id: "b", date: "2026-10-20", sets: [workSet("b", { weightKg: 90 }), workSet("warmup", { weightKg: 200, work: false })] },
+    { id: "c", date: "2026-10-22", sets: [workSet("c", { weightKg: null })] },
+    { id: "d", date: "2026-10-26", sets: [workSet("d", { weightKg: 95 })] },
+    { id: "variants", date: "2026-10-26", sets: [workSet("rdl", { exercise: "Romanian Deadlift", weightKg: 170 }), workSet("sumo", { exercise: "Sumo Deadlift", weightKg: 60 }), workSet("front", { exercise: "Front Squat", weightKg: 150 })] },
+    { id: "future", date: "2026-10-29", sets: [workSet("future", { weightKg: 300 })] },
+  ];
+  const [squat, bench, deadlift] = getOneRepMaxTrends(sessions, "2026-10-20", "2026-10-28");
+  assert.deepEqual(squat.points.map(p => p.date), ["2026-10-20", "2026-10-22", "2026-10-26"]);
+  assert.ok(Math.abs(squat.points[0].valueKg - 110) < 1e-10);
+  assert.equal(squat.points[1].valueKg, null);
+  assert.ok(Math.abs(squat.latest.valueKg - 110.8333333333) < 1e-8);
+  assert.equal(bench.latest, null);
+  assert.equal(deadlift.latest.valueKg, 70);
+  assert.equal(deadlift.count, 1);
+  assert.equal(getTrainingWindowSummary(sessions, getTrainingWindow("2026-10-28")).trainingDays, 4);
+  assert.equal(sessions[0].sets[0].weightKg, 200);
+});
+
+test("strength charts use calendar spacing, a common kg scale and break at missing estimates", () => {
+  const plot = oneRepMaxGeometry([
+    { date: "2026-10-01", valueKg: 100 }, { date: "2026-10-02", valueKg: 110 },
+    { date: "2026-10-03", valueKg: null }, { date: "2026-10-06", valueKg: 120 },
+  ], "2026-10-01", "2026-10-07", 150);
+  assert.equal(plot.segments.length, 1);
+  assert.equal(plot.points.length, 3);
+  assert.equal(plot.points[2].x - plot.points[0].x, 5 * (plot.points[1].x - plot.points[0].x));
+  const single = oneRepMaxGeometry([{ date: "2026-10-01", valueKg: 100 }], "2026-10-01", "2026-10-07", 150);
+  assert.equal(single.segments.length, 0);
+  assert.equal(single.points[0].y, plot.points[0].y);
 });
 
 test("set description shows reps per set rather than summed repetitions", () => {

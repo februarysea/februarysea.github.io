@@ -14,6 +14,7 @@ interface Props {
   compact?: boolean;
   hideFrontToggle?: boolean;
   customControls?: boolean;
+  hoverFlip?: boolean;
 }
 
 const {
@@ -21,12 +22,12 @@ const {
   borderColor = "border-darkslate-100", class: className,
   label = "Card", frontLabel = "Details", backLabel = "Overview",
   toggleColor = "text-gray-400", compact = false, hideFrontToggle = false,
-  customControls = false,
+  customControls = false, hoverFlip = true,
 } = Astro.props;
 ---
 
 <!-- Grid stretch fills desktop rows; a global h-full would override mobile heights. -->
-<div data-flip-card data-manual-face="front" class:list={[
+<div data-flip-card data-flip-hover={String(hoverFlip)} data-manual-face="front" class:list={[
   `flip-card-container group perspective-1000 w-full ${colSpan || "md:col-span-1"} ${rowSpan || "md:row-span-1"} ${className || "min-h-[180px] lg:min-h-0"}`,
   { "flip-card-compact": compact, "flip-card-edge": padding === "p-0" },
 ]}>

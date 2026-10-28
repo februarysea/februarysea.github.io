@@ -19,6 +19,59 @@ export interface TrainingSession {
   sets: TrainingSet[];
 }
 
+export interface OneRepMaxPoint { date: string; valueKg: number | null; }
+
+/** Rep-based Epley estimate; unrecorded reps in reserve are not inferred. */
+export function estimateOneRepMax(set: TrainingSet): number | null {
+  if (set.work !== true || typeof set.weightKg !== "number" || !Number.isFinite(set.weightKg) || set.weightKg <= 0
+    || !Number.isInteger(set.repCount) || set.repCount < 1 || set.repCount > 10) return null;
+  return set.repCount === 1 ? set.weightKg : set.weightKg * (1 + set.repCount / 30);
+}
+
+/** Daily best eligible working set, with lift variants kept separate. */
+export function getOneRepMaxTrends(sessions: TrainingSession[], from: string, through: string) {
+  const lifts = [
+    { exercise: "Squat", label: "Squat", variant: "Back squat", color: "#fda4af" },
+    { exercise: "Bench Press", label: "Bench", variant: "Bench press", color: "#ddbedf" },
+    { exercise: "Sumo Deadlift", label: "Deadlift", variant: "Sumo", color: "#c5c4e8" },
+  ];
+  return lifts.map((lift) => {
+    const dates = new Map<string, number | null>();
+    for (const session of sessions) {
+      if (session.date < from || session.date > through) continue;
+      for (const set of session.sets) {
+        if (set.exercise !== lift.exercise || set.work !== true) continue;
+        if (!dates.has(session.date)) dates.set(session.date, null);
+        const estimate = estimateOneRepMax(set);
+        if (estimate !== null) dates.set(session.date, Math.max(dates.get(session.date) ?? 0, estimate));
+      }
+    }
+    const points: OneRepMaxPoint[] = [...dates].sort(([a], [b]) => a.localeCompare(b)).map(([date, valueKg]) => ({ date, valueKg }));
+    const measured = points.filter((point): point is OneRepMaxPoint & { valueKg: number } => point.valueKg !== null);
+    return { ...lift, points, latest: measured.at(-1) ?? null, count: measured.length };
+  });
+}
+
+/** Shared calendar spacing and zero-based kg scale; gaps stay unfilled. */
+export function oneRepMaxGeometry(points: OneRepMaxPoint[], from: string, to: string, ceiling: number, width = 128, height = 60) {
+  const start = Date.parse(`${from}T00:00:00Z`);
+  const span = Math.max(86400000, Date.parse(`${to}T00:00:00Z`) - start);
+  const measured: { date: string; valueKg: number; x: number; y: number }[] = [];
+  const segments: string[] = [];
+  let segment: string[] = [];
+  const flush = () => { if (segment.length > 1) segments.push(segment.join(" ")); segment = []; };
+  for (const point of points) {
+    if (point.date < from || point.date > to) continue;
+    if (point.valueKg === null || !Number.isFinite(point.valueKg) || point.valueKg <= 0) { flush(); continue; }
+    const x = 4 + (Date.parse(`${point.date}T00:00:00Z`) - start) / span * (width - 8);
+    const y = height - 7 - point.valueKg / Math.max(1, ceiling) * (height - 18);
+    measured.push({ ...point, valueKg: point.valueKg, x, y });
+    segment.push(`${x.toFixed(2)},${y.toFixed(2)}`);
+  }
+  flush();
+  return { points: measured, segments };
+}
+
 export interface TrainingData {
   schemaVersion: number;
   timezone: string;

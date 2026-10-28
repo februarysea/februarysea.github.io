@@ -34,6 +34,19 @@ The bootstrap covers the exact original snapshot interval, starting
 grows with subsequent runs. The website still displays its rolling 30-day view.
 The history ledger is retained independently of that display window.
 
+The Training front shows Squat, Bench Press and Sumo Deadlift e1RM curves from
+October 20, 2026. Estimates use the best eligible working set each day with
+Epley (`kg * (1 + reps / 30)`) for 2–10 reps; singles use the recorded load.
+Warm-ups, unknown work classifications, invalid/nonpositive loads and invalid
+or >10 repetition counts are excluded. Native Enode `rm1` values are not used;
+unrecorded reps in reserve are not inferred. These are training-set estimates,
+not tested maxima, and lighter sessions can give lower estimates. Lift variants
+are not mixed. The charts share a calendar axis and zero-based kg scale.
+The original square activity calendar and legend remain below the curves,
+counting the full rolling 30 days independently of the curve start date.
+Hover pauses the Training card without flipping it, allowing chart inspection;
+the corner button and idle automatic flip still work.
+
 A missing record is kept until a second successful list check at least 20 hours
 later. An unexpectedly empty list or bulk disappearance stops the run for review.
 Transient transport, rate-limit and server failures get at most three attempts;

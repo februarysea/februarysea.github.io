@@ -123,13 +123,15 @@ function initFlipCards() {
     function leaveHover() {
       if (!pointerInside) return;
       pointerInside = false;
-      flipTo(currentFace === "front" ? "back" : "front");
+      if (container.dataset.flipHover === "false") refresh();
+      else flipTo(currentFace === "front" ? "back" : "front");
     }
 
     container.addEventListener("pointerenter", (event) => {
       if (event.pointerType === "touch" || pointerInside || !isWithinCard(event)) return;
       pointerInside = true;
-      flipTo(currentFace === "front" ? "back" : "front");
+      if (container.dataset.flipHover === "false") refresh();
+      else flipTo(currentFace === "front" ? "back" : "front");
     }, { signal: events.signal });
     container.addEventListener("pointerleave", (event) => {
       // 3D faces can change hit-testing without the pointer leaving the card.
