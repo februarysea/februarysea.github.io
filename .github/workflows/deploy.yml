@@ -4,8 +4,8 @@ on:
   push:
     branches: [master]
   schedule:
-    # 04:00 UTC = 12:00 Asia/Shanghai. GitHub may queue scheduled runs.
-    - cron: '0 4 * * *'
+    # 16:00 UTC = 00:00 Asia/Shanghai the next day. GitHub may queue scheduled runs.
+    - cron: '0 16 * * *'
   workflow_dispatch:
     inputs:
       sync_enode:
