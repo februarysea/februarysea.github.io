@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "source": "P7",
-  "updatedAt": "2026-10-28T10:16:33.763000+00:00",
+  "updatedAt": "2026-10-29T20:46:15.226000+00:00",
   "window": {
-    "from": "2026-10-22",
-    "to": "2026-10-28"
+    "from": "2026-10-24",
+    "to": "2026-10-30"
   },
   "quality": {
-    "total": 36,
-    "kept": 32,
-    "excluded": 4,
-    "outsideRange": 4,
+    "total": 37,
+    "kept": 34,
+    "excluded": 3,
+    "outsideRange": 3,
     "madOutliers": 0
   },
   "cats": {
@@ -64,16 +64,21 @@
         },
         {
           "date": "2026-10-28",
-          "kg": 6.327,
-          "samples": 1
+          "kg": 6.2995,
+          "samples": 2
+        },
+        {
+          "date": "2026-10-29",
+          "kg": 6.432,
+          "samples": 3
         }
       ],
       "latestMeasurement": {
-        "date": "2026-10-28",
-        "kg": 6.327
+        "date": "2026-10-29",
+        "kg": 6.432
       },
-      "visits7d": 14,
-      "medianDurationSeconds7d": 144.0
+      "visits7d": 15,
+      "medianDurationSeconds7d": 142
     },
     "doubao": {
       "assignment": "weight-estimate",
@@ -125,16 +130,21 @@
         },
         {
           "date": "2026-10-28",
-          "kg": 5.188,
-          "samples": 1
+          "kg": 5.071,
+          "samples": 2
+        },
+        {
+          "date": "2026-10-29",
+          "kg": 4.94,
+          "samples": 3
         }
       ],
       "latestMeasurement": {
-        "date": "2026-10-28",
-        "kg": 5.188
+        "date": "2026-10-29",
+        "kg": 4.637
       },
-      "visits7d": 18,
-      "medianDurationSeconds7d": 37.5
+      "visits7d": 19,
+      "medianDurationSeconds7d": 38
     }
   }
 }
