@@ -22,6 +22,12 @@ ZONE = ZoneInfo("Asia/Shanghai")
 CATS = ("tangyuan", "doubao")
 HASH = re.compile(r"^[a-f0-9]{64}$")
 TEXT_REPORT = re.compile(r"Weight:(\d+)g,WC_time:(\d+)s,Total:(\d+),(\d+)h,(\d+)m")
+PAIRING_ERRORS = frozenset((
+    "P7 visit is missing its matching representation.",
+    "P7 representations disagree.",
+    "Conflicting duplicate P7 datapoint.",
+    "Ambiguous P7 representation match.",
+))
 
 
 class P7DataError(ValueError):
@@ -103,21 +109,37 @@ def decode_snapshot(snapshot, device_hash):
         check(dp in (107, 109) and isinstance(row.get("value"), str), "Unexpected P7 datapoint.")
         check(dp not in pairs[stamp] or pairs[stamp][dp] == row["value"], "Conflicting duplicate P7 datapoint.")
         pairs[stamp][dp] = row["value"]
-    events, order = {}, defaultdict(int)
-    for stamp, pair in sorted(pairs.items()):
-        check(set(pair) == {107, 109}, "P7 visit is missing its matching representation.")
-        match = TEXT_REPORT.fullmatch(pair[107])
-        check(match is not None, "Unknown P7 text record format.")
-        grams, seconds, _, hour, minute = map(int, match.groups())
-        check(0 <= hour < 24 and 0 <= minute < 60, "Invalid P7 visit time.")
-        binary = base64.b64decode(pair[109], validate=True)
-        check(len(binary) == 10, "Unknown P7 binary record format.")
-        decoded = (int.from_bytes(binary[:4], "big"), int.from_bytes(binary[4:8], "big"), binary[8], binary[9])
-        check(decoded == (seconds, grams, hour, minute), "P7 representations disagree.")
+    text_reports, binary_reports = {}, {}
+    for stamp, pair in pairs.items():
+        if 107 in pair:
+            match = TEXT_REPORT.fullmatch(pair[107])
+            check(match is not None, "Unknown P7 text record format.")
+            grams, seconds, _, hour, minute = map(int, match.groups())
+            check(0 <= hour < 24 and 0 <= minute < 60, "Invalid P7 visit time.")
+            text_reports[stamp] = (seconds, grams, hour, minute)
+        if 109 in pair:
+            binary = base64.b64decode(pair[109], validate=True)
+            check(len(binary) == 10, "Unknown P7 binary record format.")
+            binary_reports[stamp] = (int.from_bytes(binary[:4], "big"), int.from_bytes(binary[4:8], "big"), binary[8], binary[9])
+        if set(pair) == {107, 109}:
+            check(text_reports[stamp] == binary_reports[stamp], "P7 representations disagree.")
+
+    events, order, matched = {}, defaultdict(int), set()
+    for stamp, measurement in sorted(text_reports.items()):
+        # The two reports for one visit can be recorded one second apart.
+        # Require equal decoded contents and a unique, one-to-one match.
+        candidates = [candidate for candidate in (stamp - 1, stamp, stamp + 1)
+                      if binary_reports.get(candidate) == measurement]
+        check(candidates, "P7 visit is missing its matching representation.")
+        check(len(candidates) == 1 and candidates[0] not in matched, "Ambiguous P7 representation match.")
+        matched.add(candidates[0])
+        seconds, grams, _, _ = measurement
+        # DP107 remains the identity/date anchor, preserving existing archives.
         day = dt.datetime.fromtimestamp(stamp, ZONE).date().isoformat()
         key = hashlib.sha256(f"{device_hash}:{stamp}:{grams}:{seconds}".encode()).hexdigest()
         events[key] = {"date": day, "kg": grams / 1000, "seconds": seconds, "order": order[day]}
         order[day] += 1
+    check(len(matched) == len(binary_reports), "P7 visit is missing its matching representation.")
     return validate_state({"schemaVersion": 1, "deviceHash": device_hash, "updatedAt": fetched.isoformat(), "events": events})
 
 
@@ -290,7 +312,10 @@ def main():
         from p7_client import P7AuthExpired
         expired = isinstance(error, P7AuthExpired)
         message = report_failure("p7", reauth=expired)
-        # Exception bodies can contain vendor responses or identifiers; do not print them.
+        # Only these fixed parser diagnostics are safe for public Actions logs.
+        # Never print arbitrary exception bodies, vendor responses or identifiers.
+        if isinstance(error, P7DataError) and str(error) in PAIRING_ERRORS:
+            message += "\nP7 data validation: " + str(error)
         parser.exit(2 if expired else 1, message + "\n")
 
 

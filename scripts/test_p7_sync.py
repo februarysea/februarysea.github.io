@@ -49,6 +49,43 @@ class HistoryTests(unittest.TestCase):
         self.assertNotIn("private-canary", json.dumps(result))
         self.assertNotIn("timeStamp", json.dumps(result))
 
+    def test_matching_reports_one_second_apart_keep_the_same_event_identity(self):
+        original = state((6.3,))
+        for skew in (-1, 1):
+            raw = fixture((6.3,))
+            raw["result"]["dps"][1]["timeStamp"] += skew
+            with self.subTest(skew=skew):
+                result = sync.decode_snapshot(raw, DEVICE_HASH)
+                self.assertEqual(result, original)
+                self.assertEqual(sync.merge_state(original, result), original)
+
+    def test_one_second_skew_across_midnight_keeps_the_text_reports_day(self):
+        raw = fixture((6.3,))
+        text, binary = raw["result"]["dps"]
+        stamp = int(dt.datetime.fromisoformat("2026-10-24T23:59:59+08:00").timestamp())
+        text["timeStamp"] = binary["timeStamp"] = stamp
+        original = sync.decode_snapshot(raw, DEVICE_HASH)
+        binary["timeStamp"] += 1
+        result = sync.decode_snapshot(raw, DEVICE_HASH)
+        self.assertEqual(result, original)
+        self.assertEqual(next(iter(result["events"].values()))["date"], "2026-10-24")
+
+    def test_skew_does_not_accept_mismatched_distant_or_ambiguous_reports(self):
+        cases = []
+        raw = fixture((6.3,)); raw["result"]["dps"][1]["timeStamp"] += 2; cases.append(raw)
+        raw = fixture((6.3,)); raw["result"]["dps"][1]["timeStamp"] += 1
+        raw["result"]["dps"][0]["value"] = raw["result"]["dps"][0]["value"].replace("6300", "6200"); cases.append(raw)
+        for index in (0, 1):
+            raw = fixture((6.3,))
+            duplicate = copy.deepcopy(raw["result"]["dps"][index])
+            duplicate["timeStamp"] += 1
+            raw["result"]["dps"].append(duplicate)
+            raw["result"]["total"] += 1
+            cases.append(raw)
+        for index, raw in enumerate(cases):
+            with self.subTest(case=index), self.assertRaises(sync.P7DataError):
+                sync.decode_snapshot(raw, DEVICE_HASH)
+
     def test_incomplete_pagination_missing_pairs_and_conflicts_fail_closed(self):
         cases = []
         raw = fixture(); raw["result"]["hasNext"] = True; cases.append(raw)
@@ -97,7 +134,9 @@ class HistoryTests(unittest.TestCase):
 
     def test_collection_failures_preserve_previous_output_and_report_only_confirmed_expiry(self):
         for error, code, reauth in ((client.P7AuthExpired("private-canary"), 2, True),
-                                    (client.P7TransientError("private-canary"), 1, False)):
+                                    (client.P7TransientError("private-canary"), 1, False),
+                                    (sync.P7DataError("private-canary"), 1, False),
+                                    (sync.P7DataError("P7 visit is missing its matching representation."), 1, False)):
             with tempfile.TemporaryDirectory() as tmp:
                 folder = Path(tmp)
                 good = folder / "p7-summary.json"
@@ -112,6 +151,8 @@ class HistoryTests(unittest.TestCase):
                 self.assertEqual(good.read_text(), "previous-snapshot")
                 self.assertIn(f"reauth_required={str(reauth).lower()}", (folder / "outputs").read_text())
                 self.assertNotIn("private-canary", stderr.getvalue() + (folder / "summary").read_text())
+                if str(error) in sync.PAIRING_ERRORS:
+                    self.assertIn("P7 data validation: " + str(error), stderr.getvalue())
 
 
 class ClientTests(unittest.TestCase):

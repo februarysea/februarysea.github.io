@@ -221,11 +221,9 @@ jobs:
 
   build:
     needs: [sync, sync-codex, sync-p7]
+    # A failed collector keeps its previous data without blocking other updates.
     if: >-
       always() && !cancelled() && github.ref == 'refs/heads/master' &&
-      (needs.sync.result == 'success' || needs.sync.result == 'skipped') &&
-      (needs.sync-codex.result == 'success' || needs.sync-codex.result == 'skipped') &&
-      (needs.sync-p7.result == 'success' || needs.sync-p7.result == 'skipped') &&
       (github.event_name != 'schedule' || vars.ENODE_SYNC_ENABLED == 'true' || vars.CODEX_SYNC_ENABLED == 'true' || vars.P7_SYNC_ENABLED == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -237,6 +235,23 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+
+      # Codex and P7 snapshots are saved on master after deployment. Training's
+      # latest published snapshot lives on enode-data, so restore it separately.
+      - name: Restore previous training data when sync is unavailable
+        id: previous_training
+        if: needs.sync.result != 'success'
+        continue-on-error: true
+        timeout-minutes: 2
+        run: >-
+          python3 scripts/enode_state_store.py load
+          --bootstrap config/enode-sync-bootstrap.json
+          --output "$RUNNER_TEMP/enode-fallback.json"
+          --public src/data/training.json
+
+      - name: Keep checked-in training data if archive is unavailable
+        if: steps.previous_training.outcome == 'failure'
+        run: echo "::warning::Training archive unavailable; using the checked-in training snapshot. Other modules will still deploy."
 
       - name: Download validated training data
         if: needs.sync.result == 'success'
@@ -324,6 +339,7 @@ jobs:
           node --test tests/training.test.mjs tests/exercise-motion.test.mjs
           pnpm run usage:test
           pnpm run usage:validate
+          python3 -m unittest discover -s tests -p 'test_enode_state_store.py'
           python3 -m unittest discover -s scripts -p 'test_p7*.py'
           python3 -m unittest discover -s scripts -p 'test_sync_status.py'
           python3 scripts/p7_sync.py validate --public src/data/p7-summary.json
@@ -337,7 +353,7 @@ jobs:
 
   deploy:
     needs: [sync, sync-codex, sync-p7, build]
-    # always() also permits normal deploys while the rollout flag skips sync.
+    # Deploy a successful build even when an individual collector failed/skipped.
     if: always() && !cancelled() && needs.build.result == 'success' && inputs.dry_run != true
     runs-on: ubuntu-latest
     timeout-minutes: 10

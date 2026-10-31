@@ -72,6 +72,55 @@ class StateStoreTests(unittest.TestCase):
             store.persist(self.folder, first)
         self.assertEqual(store.remote_head(), second)
 
+    def test_restore_public_data_uses_deployed_checkpoint_instead_of_bootstrap(self):
+        bootstrap = self.root / "bootstrap.json"
+        atomic_json(bootstrap, self.state)
+        public = self.root / "training.json"
+        atomic_json(public, public_from_state(self.state))
+        self.state["checkedThroughMs"] += 1000
+        next(iter(self.state["sessions"].values()))["sets"][0]["weightKg"] = 110
+        self.save()
+        store.persist(self.folder, "none")
+        revision = store.remote_head()
+
+        result = subprocess.run([
+            sys.executable, str(Path(store.__file__).resolve()), "load",
+            "--bootstrap", str(bootstrap), "--output", str(self.root / "loaded.json"),
+            "--public", str(public),
+        ], text=True, capture_output=True)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(public.read_text()), public_from_state(self.state))
+        self.assertEqual(store.remote_head(), revision)
+
+    def test_missing_archive_keeps_checked_in_public_data(self):
+        public = self.root / "training.json"
+        self.state["checkedThroughMs"] += 1000
+        original = public_from_state(self.state)
+        atomic_json(public, original)
+        store.load(self.folder / "sync-state.json", self.root / "loaded.json", public=public)
+        self.assertEqual(json.loads(public.read_text()), original)
+        self.assertEqual(store.remote_head(), "none")
+
+    def test_unavailable_archive_keeps_checked_in_public_data(self):
+        public = self.root / "training.json"
+        original = public_from_state(self.state)
+        atomic_json(public, original)
+        store.git("remote", "set-url", "origin", str(self.root / "unavailable.git"))
+        with self.assertRaises(ExportError):
+            store.load(self.folder / "sync-state.json", self.root / "loaded.json", public=public)
+        self.assertEqual(json.loads(public.read_text()), original)
+
+    def test_invalid_restore_does_not_replace_public_data(self):
+        public = self.root / "training.json"
+        original = public_from_state(self.state)
+        atomic_json(public, original)
+        self.state["token"] = "synthetic-secret"
+        atomic_json(self.folder / "sync-state.json", self.state)
+        with self.assertRaises(ExportError):
+            store.load(self.folder / "sync-state.json", self.root / "loaded.json", public=public)
+        self.assertEqual(json.loads(public.read_text()), original)
+
     def test_invalid_or_mismatched_public_data_never_creates_branch(self):
         public = public_from_state(self.state)
         public["sessions"] = []

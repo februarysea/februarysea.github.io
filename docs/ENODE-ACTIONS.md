@@ -10,7 +10,8 @@ These are observed app endpoints, so an Enode API/client change may need mainten
 The Pages workflow runs at `0 16 * * *` UTC, midnight in Asia/Shanghai. Scheduled
 runs can be delayed by GitHub. Set the repository variable `ENODE_SYNC_ENABLED`
 to `true` to enable automatic sync. Before that, scheduled runs are skipped and
-ordinary code pushes continue deploying the checked-in training snapshot.
+ordinary code pushes reuse the last deployed training snapshot from `enode-data`,
+or the checked-in snapshot if no archive is available.
 
 Each enabled run does the following:
 
@@ -92,8 +93,11 @@ the secrets: repository/workflow write access must therefore remain trusted.
    deploy and persistence jobs, not just the green build. Later scheduled runs
    and source pushes use the same pipeline and current data branch.
 
-Once enabled, a failed fetch blocks deployment instead of falling back to stale
-source data. Build/deployment failures do not save the new checkpoint. If only
+A failed or skipped Training fetch restores the last successfully deployed
+checkpoint from `enode-data`; successful Codex/P7 updates and website changes
+still deploy. If the archive cannot be read, the build warns and keeps the
+checked-in Training snapshot. A failed Training fetch never saves a new Training
+checkpoint. Build/deployment failures do not save any new checkpoints. If only
 persistence fails after a successful deploy, the website has new data but the old
 checkpoint remains: repair the Git permission/conflict and rerun safely.
 
@@ -111,11 +115,11 @@ checkpoint remains: repair the Git permission/conflict and rerun safely.
 - Intentional bulk deletions: verify in One, then explicitly set
   `accept_deletions=true` for one manual run. It accepts deletions immediately.
 - GitHub disables an inactive scheduled workflow or a run fails: re-enable/rerun
-  it in Actions and inspect GitHub's workflow failure notifications. The website
-  keeps its previous successful deployment.
-- To pause scheduled fetches without reverting public training on a later push,
-  disable the whole workflow in Actions. Unsetting the rollout flag deliberately
-  returns builds to the older checked-in snapshot; it is not a normal pause button.
+  it in Actions and inspect GitHub's workflow failure notifications. A collection
+  failure keeps that module's saved data while other modules can still deploy.
+- Set `ENODE_SYNC_ENABLED=false` to pause automatic Training fetches. Later builds
+  restore the saved `enode-data` snapshot; a manual `sync_enode=true` can still
+  request a fetch. Disable the whole workflow to pause all scheduled updates.
 
 ## Local verification
 

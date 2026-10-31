@@ -30,7 +30,7 @@ def remote_head():
     return sha
 
 
-def load(bootstrap, output):
+def load(bootstrap, output, public=None):
     revision = remote_head()
     if revision == "none":
         state = json.loads(bootstrap.read_text())
@@ -40,6 +40,11 @@ def load(bootstrap, output):
         check(SHA.fullmatch(revision), "Invalid fetched revision.")
         state = json.loads(git("show", revision + ":sync-state.json"))
     atomic_json(output, validate_state(state))
+    # Only a persisted checkpoint represents a previously deployed snapshot.
+    # Without an archive, preserve the checked-in public data rather than
+    # replacing it with the potentially older bootstrap.
+    if public is not None and revision != "none":
+        atomic_json(public, public_from_state(state))
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
             stream.write("state_revision=" + revision + "\n")
@@ -75,13 +80,14 @@ if __name__ == "__main__":
     read = sub.add_parser("load")
     read.add_argument("--bootstrap", type=Path, required=True)
     read.add_argument("--output", type=Path, required=True)
+    read.add_argument("--public", type=Path, help="Restore public training data from a deployed checkpoint, if present")
     write = sub.add_parser("persist")
     write.add_argument("--directory", type=Path, required=True)
     write.add_argument("--expected-revision", required=True)
     args = parser.parse_args()
     try:
         if args.command == "load":
-            load(args.bootstrap, args.output)
+            load(args.bootstrap, args.output, public=args.public)
         else:
             persist(args.directory, args.expected_revision)
     except (ExportError, OSError, ValueError, KeyError, TypeError) as error:

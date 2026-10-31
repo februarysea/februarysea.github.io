@@ -28,6 +28,7 @@ jobs:
         run: |
           pnpm run usage:test
           pnpm run usage:validate
+          python3 -m unittest discover -s tests -p 'test_enode_state_store.py'
           node --test tests/training.test.mjs
           pnpm run eslint
           pnpm run check

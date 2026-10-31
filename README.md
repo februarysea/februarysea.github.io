@@ -98,7 +98,7 @@ renewed and cannot cause collection or login reminders to fail. Build and deploy
 receive that snapshot without any Codex credentials. After a successful deployment, the workflow saves the same
 snapshot on `master` using `GITHUB_TOKEN`, without triggering a second run.
 No additional repository, data branch, or daily Mac process is needed. Failed
-collection leaves the previous website snapshot in place. The workflow fixes the
+collection keeps the previous Codex snapshot while other modules can still deploy. The workflow fixes the
 active account count to one and no longer references second-account Secrets or
 the old `CODEX_ACCOUNT_COUNT` repository variable.
 
@@ -153,7 +153,7 @@ the `master` branch. Pull request checks never access its Secrets.
 
 Environment Secrets are loaded when a job starts, and the Pages workflow's
 concurrency group serializes renewal. Credentials are saved immediately after
-refresh and again when the client exits; failure to save prevents publication.
+refresh and again when the client exits; failure to save prevents publication of new Codex statistics.
 Use a separate `codex login` for the primary account, never its active desktop session.
 The second-account Secrets are no longer referenced; their remote removal is
 separate from this local change and is not needed to retain historical counts.
@@ -211,7 +211,11 @@ Test with manual `sync_p7=true`, `dry_run=true` before setting repository variab
 `P7_SYNC_ENABLED=true`. It shares the existing daily schedule. The collector only
 reads weight/duration history and reuses the authorized session; there is no
 unverified login or refresh endpoint. Complete, matching DP107/109 representations
-are required. Date-level observations are deduplicated and retained in `p7-data`
+are required. Reports may arrive one second apart, but weight, duration and the
+embedded visit time must agree, with exactly one matching report on each side.
+Ambiguous, conflicting or missing reports still fail validation. The text report
+anchors each visit's identity and date to preserve existing archive keys.
+Date-level observations are deduplicated and retained in `p7-data`
 after successful deployment, so a shrinking cloud window does not erase history.
 Only `sync-state.json` and `p7-summary.json` are uploaded; no credentials, raw API
 responses, precise visit timestamps or rejection-audit files enter artifacts.
@@ -222,8 +226,8 @@ The durable archive is `sync-state.json` on the `p7-data` branch, alongside
 the daily summaries in `p7-summary.json`. Archived observations have no automatic expiry; the
 seven-day Actions artifact retention applies only to temporary transfer files.
 The fetch window covers the latest seven calendar days, so a longer interruption
-can leave gaps. Persistence currently requires the whole deployment to succeed;
-an unrelated Training or Codex failure also delays saving new P7 observations.
+can leave gaps. Persistence requires P7 collection and the website deployment to
+succeed; an unrelated Training or Codex collection failure does not block it.
 
 ```bash
 python3 -m unittest discover -s scripts -p 'test_p7*.py'
@@ -237,8 +241,14 @@ Training, the active primary Codex account, and P7 fail their Actions job if
 collection fails. Confirmed authentication failures add a **sign-in required**
 annotation and run summary with the affected module, Codex account slot when
 known, and the Secret to replace. Network, rate-limit, storage and data-validation
-errors are kept separate and do not claim that a login expired. Any collection
-failure blocks deployment and preserves the last published website data.
+errors are kept separate and do not claim that a login expired. Each collector
+is independent: a failed collection skips that module's new artifact and
+checkpoint, while successful modules and website changes still build and deploy.
+Codex and P7 reuse their saved snapshots on `master`. Training restores its last
+deployed checkpoint from `enode-data`; if that archive is unavailable, a warning
+is recorded and the checked-in Training snapshot is kept. Build or deployment
+failures still prevent all new checkpoints from being saved. A collector failure
+keeps the overall run marked failed for notification even if deployment succeeds.
 
 GitHub sends the failure email, so no SMTP credentials or additional reminder
 service is needed. In [GitHub notification settings](https://github.com/settings/notifications),

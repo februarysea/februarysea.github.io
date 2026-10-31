@@ -17,7 +17,7 @@ def report_failure(module, *, reauth=False, account=None):
     }
     title = label + (": sign-in required" if reauth else ": synchronization failed")
     detail = instructions[module] if reauth else "Check the failed step for service, configuration, or validation errors. Login expiry has not been confirmed; do not replace credentials solely because of this failure."
-    message = detail + " Previous published data is preserved. Rerun the workflow after resolving the failure."
+    message = detail + " This module keeps its previous published data; other modules can still deploy. Rerun the workflow after resolving the failure."
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
             stream.write(f"reauth_required={'true' if reauth else 'false'}\n")
