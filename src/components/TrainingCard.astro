@@ -50,7 +50,7 @@ const sparks = lifts.map((lift) => velocityGeometry(lift.setVelocities, 76, 22, 
       <div class="strength-grid">
         {trends.map((trend, index) => (
           <section class="strength-lift" style={`--trend-color:${trend.color}`} aria-label={`${trend.variant} estimated one-repetition maximum`}>
-            <h3>{trend.label}{trend.variant === "Sumo" && <small>Sumo</small>}</h3>
+            <h3>{trend.label}{trend.annotation && <small>{trend.annotation}</small>}</h3>
             <div class="strength-value" title={trend.latest ? `Latest Epley estimate: ${formatShortDate(trend.latest.date)}` : "No eligible working sets"}>{trend.latest ? trend.latest.valueKg.toFixed(1) : "—"}<small>kg</small></div>
             <svg class="strength-chart" viewBox="0 0 128 60" role="img" aria-label={`${trend.variant}: ${trend.count} Epley estimates from working-set load and reps; scale 0 to ${trendCeiling} kg, ${trendFrom} to ${today}`}>
               <line x1="4" x2="124" y1="11" y2="11" class="chart-guide" />

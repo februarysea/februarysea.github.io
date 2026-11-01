@@ -31,9 +31,9 @@ export function estimateOneRepMax(set: TrainingSet): number | null {
 /** Daily best eligible working set, with lift variants kept separate. */
 export function getOneRepMaxTrends(sessions: TrainingSession[], from: string, through: string) {
   const lifts = [
-    { exercise: "Squat", label: "Squat", variant: "Back squat", color: "#fda4af" },
-    { exercise: "Bench Press", label: "Bench", variant: "Bench press", color: "#ddbedf" },
-    { exercise: "Sumo Deadlift", label: "Deadlift", variant: "Sumo", color: "#c5c4e8" },
+    { exercise: "Squat", label: "Squat", variant: "Low-bar squat", annotation: "Low bar", color: "#fda4af" },
+    { exercise: "Bench Press", label: "Bench Press", variant: "Bench press", annotation: "", color: "#ddbedf" },
+    { exercise: "Sumo Deadlift", label: "Deadlift", variant: "Sumo deadlift", annotation: "Sumo", color: "#c5c4e8" },
   ];
   return lifts.map((lift) => {
     const dates = new Map<string, number | null>();

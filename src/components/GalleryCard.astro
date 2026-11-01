@@ -8,8 +8,6 @@ import photoDetails from "../data/gallery.json";
 const images = import.meta.glob<{ default: ImageMetadata }>("../assets/gallery/*.{jpg,jpeg,png,webp,avif,JPG,JPEG,PNG,WEBP,AVIF}", { eager: true });
 const details: Record<string, { alt: string; position?: string }> = photoDetails;
 const photos = Object.entries(images)
-  // Keep landscape and near-square crops (within 10% of square), skipping portrait photos.
-  .filter(([, { default: image }]) => image.width >= image.height * 0.9)
   .sort(([a], [b]) => a.localeCompare(b, "en", { numeric: true }))
   .map(([path, module], index) => {
     const detail = details[path.split("/").pop()!];
