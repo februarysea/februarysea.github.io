@@ -98,7 +98,10 @@ def request(params, key):
             if error.code in (429, 500, 502, 503, 504) and attempt < 2:
                 time.sleep(2 ** (attempt + 1))
                 continue
-            raise RuntimeError(f"OpenAI usage query returned HTTP {error.code}.") from None
+            # Inspect only in memory; emit a fixed field hint, never the raw body.
+            body = error.read(65536).decode("utf-8", errors="replace")
+            hint = next((field for field in ("api.usage.read", "start_time", "end_time", "group_by", "bucket_width") if field in body), "request")
+            raise RuntimeError(f"OpenAI usage query returned HTTP {error.code} ({hint}).") from None
         except (urllib.error.URLError, TimeoutError):
             if attempt < 2:
                 time.sleep(2 ** (attempt + 1))
@@ -201,8 +204,13 @@ def main():
             staged = args.snapshot.with_suffix(".tmp")
             staged.write_text(json.dumps(snapshot, indent=2, allow_nan=False) + "\n")
             staged.replace(args.snapshot)
-    except (OSError, ValueError, TypeError, KeyError, RuntimeError):
-        parser.exit(1, "API usage unavailable; previous data retained. Check the Admin Key, start date, and API access. Other modules can still deploy.\n")
+    except (OSError, ValueError, TypeError, KeyError, RuntimeError) as error:
+        message = str(error)
+        safe = {"API usage coverage is incomplete; previous data retained.", "Unexpected API bucket boundaries.",
+                "Invalid API usage page.", "Duplicate or invalid API bucket.", "Invalid API model name.",
+                "Invalid API pagination cursor.", "OpenAI usage Admin API Key is missing."}
+        detail = message if message in safe or re.fullmatch(r"OpenAI usage query returned HTTP [0-9]{3} \((request|api\.usage\.read|start_time|end_time|group_by|bucket_width)\)\.", message) else "Check the configured date, credentials, and API response schema."
+        parser.exit(1, "API usage unavailable: " + detail + " Previous data retained; other modules can still deploy.\n")
     print(f"Validated {len(snapshot['daily'])} public API usage days.")
 
 
