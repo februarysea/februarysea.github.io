@@ -1,0 +1,28 @@
+name: Check OpenAI usage access
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    if: github.repository == 'februarysea/februarysea.github.io' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: python3 -m unittest discover -s scripts -p 'test_openai*.py'
+      - name: Read and validate API history
+        env:
+          OPENAI_USAGE_ADMIN_KEY: ${{ secrets.OPENAI_USAGE_ADMIN_KEY }}
+          OPENAI_USAGE_START_DATE: ${{ vars.OPENAI_USAGE_START_DATE }}
+        run: >-
+          python3 scripts/openai_usage.py collect
+          --previous src/data/openai-usage.json
+          --snapshot "$RUNNER_TEMP/api-output/openai-usage.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: openai-usage-check
+          path: ${{ runner.temp }}/api-output/openai-usage.json
+          retention-days: 1
