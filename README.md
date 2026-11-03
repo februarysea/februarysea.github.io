@@ -89,8 +89,12 @@ The API collector uses the official
 [organization completions usage endpoint](https://developers.openai.com/api/reference/resources/admin/subresources/organization/subresources/usage/methods/completions),
 grouped by model. It collects organization-wide input, cached input, output,
 and request counts. **Total tokens = input + output**; cached input is already
-part of input. Other usage categories and monetary costs are outside this
-snapshot's scope. API dates include the current UTC day (still updating), kept separate from Codex's
+part of input. Token totals cover this endpoint only. A separate `costs` section uses the
+organization Costs API, grouped by billing line item, with exact decimal USD
+amounts. Costs may include other API services and may lag token usage. They are
+reported usage costs, not subscription charges, payment receipts, or list-price
+estimates. Cost collection refreshes the recent three days; unavailable costs
+retain their previous coverage without blocking token updates. API dates include the current UTC day (still updating), kept separate from Codex's
 service-defined daily buckets.
 
 Configure these in this website repository's Actions settings:

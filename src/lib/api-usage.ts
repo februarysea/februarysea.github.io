@@ -49,3 +49,21 @@ export function summarizeApiUsage(data: ApiUsageSnapshot = snapshot) {
 }
 
 export const apiUsage = summarizeApiUsage();
+
+// Cost records come from the Costs API, not a token-rate multiplication.
+type CostSnapshot = { generatedAt: string; startDate: string; throughDate: string;
+  currency: string; daily: { date: string; items: { lineItem: string; usd: string }[] }[] };
+const costs = (snapshot as ApiUsageSnapshot & { costs?: CostSnapshot }).costs;
+const costItems = new Map<string, number>();
+for (const day of costs?.daily ?? []) {
+  for (const item of day.items) costItems.set(item.lineItem, (costItems.get(item.lineItem) ?? 0) + Number(item.usd));
+}
+export const apiCosts = {
+  available: Boolean(costs), throughDate: costs?.throughDate ?? null,
+  generatedAt: costs?.generatedAt ?? null,
+  totalUsd: costs ? [...costItems.values()].reduce((sum, n) => sum + n, 0) : null,
+  items: [...costItems].map(([lineItem, usd]) => ({ lineItem, usd })).sort((a,b) => b.usd-a.usd),
+};
+export const usd = (value: number | null) => value === null ? "—" : new Intl.NumberFormat("en-US", {
+  style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2,
+}).format(value);

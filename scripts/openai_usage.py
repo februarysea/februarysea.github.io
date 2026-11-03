@@ -31,16 +31,19 @@ def day(value):
 
 
 def validate_snapshot(snapshot):
-    if not isinstance(snapshot, dict) or set(snapshot) != FIELDS:
+    if not isinstance(snapshot, dict) or set(snapshot) not in (FIELDS, FIELDS | {"costs"}):
         raise ValueError("Unexpected public API usage fields.")
     if type(snapshot["version"]) is not int or snapshot["version"] != 1 or snapshot["source"] != SOURCE:
         raise ValueError("Invalid API usage source or version.")
     if not isinstance(snapshot["daily"], list):
         raise ValueError("Invalid API daily data.")
     if snapshot["generatedAt"] is None:
-        if snapshot["startDate"] is not None or snapshot["throughDate"] is not None or snapshot["daily"]:
+        if snapshot["startDate"] is not None or snapshot["throughDate"] is not None or snapshot["daily"] or "costs" in snapshot:
             raise ValueError("Unconnected API data must be empty.")
         return snapshot
+    if "costs" in snapshot:
+        from openai_costs import validate_costs
+        validate_costs(snapshot["costs"])
     generated = timestamp(snapshot["generatedAt"]).astimezone(timezone.utc)
     start, through = day(snapshot["startDate"]), day(snapshot["throughDate"])
     if not start <= through <= generated.date():
@@ -80,12 +83,18 @@ def validate_update(previous, current):
                 current["startDate"] != previous["startDate"] or
                 current["throughDate"] < previous["throughDate"]):
             raise ValueError("Refusing to replace API history with older or different coverage.")
+    if previous.get("costs"):
+        old, new = previous["costs"], current.get("costs")
+        if (not new or new["startDate"] != old["startDate"] or new["throughDate"] < old["throughDate"]
+                or timestamp(new["generatedAt"]) < timestamp(old["generatedAt"])):
+            raise ValueError("Refusing older cost coverage.")
     return current
 
 
-def request(params, key):
+def request(params, key, *, costs=False):
     # Fixed destination, no redirects, and no upstream body in diagnostic output.
-    req = urllib.request.Request(ENDPOINT + "?" + urllib.parse.urlencode(params, doseq=True),
+    endpoint = "https://api.openai.com/v1/organization/costs" if costs else ENDPOINT
+    req = urllib.request.Request(endpoint + "?" + urllib.parse.urlencode(params, doseq=True),
                                  headers={"Authorization": "Bearer " + key, "Accept": "application/json"})
     for attempt in range(3):
         try:
@@ -187,6 +196,8 @@ def collect(previous, start_date, key, *, now=None, api=request, full=False):
                 "startDate": start_date, "throughDate": (end - timedelta(days=1)).isoformat(),
                 "daily": [r for r in previous["daily"] if r["date"] < refresh.isoformat()] +
                          [records[d] for d in sorted(records)]}
+    if previous.get("costs"):
+        snapshot["costs"] = previous["costs"]
     return validate_update(previous, snapshot)
 
 
@@ -208,6 +219,16 @@ def main():
                 raise ValueError("A previous API snapshot is required.")
             previous = json.loads(args.previous.read_text())
             snapshot = collect(previous, args.start_date, os.environ.get("OPENAI_USAGE_ADMIN_KEY"), full=args.full)
+            from openai_costs import collect_costs
+            try:
+                snapshot["costs"] = collect_costs(previous.get("costs"), args.start_date,
+                                                  os.environ.get("OPENAI_USAGE_ADMIN_KEY"),
+                                                  now=timestamp(snapshot["generatedAt"]))
+            except (OSError, ValueError, TypeError, KeyError, RuntimeError):
+                if previous.get("costs"):
+                    snapshot["costs"] = previous["costs"]
+                print("::warning::API costs unavailable; retaining previous cost coverage. Token statistics can still update.")
+            validate_snapshot(snapshot)
             args.snapshot.parent.mkdir(parents=True, exist_ok=True)
             staged = args.snapshot.with_suffix(".tmp")
             staged.write_text(json.dumps(snapshot, indent=2, allow_nan=False) + "\n")

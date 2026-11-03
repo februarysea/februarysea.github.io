@@ -1,5 +1,5 @@
 ---
-import { apiUsage } from "../lib/api-usage";
+import { apiUsage, apiCosts, usd } from "../lib/api-usage";
 import { summarizeUsage, compactTokens, exactTokens } from "../lib/token-usage";
 const codex = summarizeUsage();
 const count = (value: number | null) => value === null ? "—" : compactTokens(value);
@@ -38,6 +38,7 @@ const count = (value: number | null) => value === null ? "—" : compactTokens(v
           <p class="total" title={apiUsage.totalTokens === null ? "Awaiting API usage data" : exactTokens(apiUsage.totalTokens)}>{count(apiUsage.totalTokens)} <span>tokens</span></p>
           <dl>
             <div><dt>Last 7 days</dt><dd>{count(apiUsage.recentTokens)}</dd></div>
+            <div><dt>Reported API cost · USD</dt><dd>{usd(apiCosts.totalUsd)}</dd></div>
             <div><dt>Through · UTC</dt><dd>{apiUsage.throughDate ?? "Awaiting data"}</dd></div>
           </dl>
           <p class="note">{apiUsage.connected ? `Recorded from ${apiUsage.startDate}. UTC days; today’s counts may still increase.` : "API usage will appear after its first successful sync."}</p>
@@ -64,9 +65,22 @@ const count = (value: number | null) => value === null ? "—" : compactTokens(v
         <p class="note">¹ Cached input is already included in input tokens and is counted once. Covers the OpenAI completions usage endpoint; image counts, audio duration, tool charges, and other billing units are not included.</p>
       </section>
 
+      <section class="breakdown" aria-labelledby="cost-title">
+        <div class="breakdown-heading"><h2 id="cost-title">API costs</h2><span class="badge">OpenAI reported · USD</span></div>
+        <p class="total">{usd(apiCosts.totalUsd)}</p>
+        {apiCosts.available ? <>
+          <p class="note">Costs through {apiCosts.throughDate} UTC. Billing records can arrive later than token usage and may be revised.</p>
+          <details><summary>Billing line items</summary><div class="table-scroll"><table>
+            <thead><tr><th scope="col">Line item</th><th scope="col">USD</th></tr></thead>
+            <tbody>{apiCosts.items.map(item => <tr><th scope="row">{item.lineItem}</th><td title={`USD ${item.usd}`}>{usd(item.usd)}</td></tr>)}</tbody>
+          </table></div></details>
+        </> : <p class="empty">Awaiting reported costs. Missing billing data does not mean zero spending.</p>}
+        <p class="note">Organization-wide API costs, including any other billed services. This is reported usage cost, not a payment receipt or a token-price estimate. Codex subscription fees are separate.</p>
+      </section>
+
       <section class="accounting" aria-labelledby="accounting-title">
         <h2 id="accounting-title">About the numbers</h2>
-        <p>Codex account history currently provides daily totals without a complete model breakdown. Those tokens remain unclassified; no model shares are estimated.</p>
+        <p>Codex account history currently provides daily totals without a complete model breakdown. Those tokens remain unclassified; no model shares are estimated. A monetary cost is unavailable for this Codex history; subscription-included usage is not treated as an additional API charge.</p>
         <p>Codex and API totals are shown separately. Their histories and daily reporting boundaries differ. API usage inside a coding client belongs in the API source and should not be added again from local session logs.</p>
         <p>Each source keeps its last successful snapshot if a sync is unavailable. The dates above show the actual coverage, not the date you opened this page.</p>
       </section>
@@ -108,6 +122,8 @@ const count = (value: number | null) => value === null ? "—" : compactTokens(v
   td:last-child, th:last-child { padding-right: 0; }
   .model-total { color: #8fffe4; }
   .model-bar { display: block; width: var(--share); height: 2px; background: #00e5d4; margin-top: 9px; opacity: .65; }
+  details { margin-top: 18px; }
+  summary { cursor: pointer; color: #b5fff5; font-size: 12px; }
   .empty { color: #a7b9b2; font-size: 12px; line-height: 1.8; padding: 28px 0 12px; }
   .accounting { padding: 12px 0 0; max-width: 820px; }
   .accounting p { color: #91a6a0; font-size: 11px; line-height: 1.9; margin: 16px 0 0; }
