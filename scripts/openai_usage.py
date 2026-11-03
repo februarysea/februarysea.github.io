@@ -224,10 +224,15 @@ def main():
                 snapshot["costs"] = collect_costs(previous.get("costs"), args.start_date,
                                                   os.environ.get("OPENAI_USAGE_ADMIN_KEY"),
                                                   now=timestamp(snapshot["generatedAt"]))
-            except (OSError, ValueError, TypeError, KeyError, RuntimeError):
+            except (OSError, ValueError, TypeError, KeyError, RuntimeError) as error:
                 if previous.get("costs"):
                     snapshot["costs"] = previous["costs"]
-                print("::warning::API costs unavailable; retaining previous cost coverage. Token statistics can still update.")
+                safe_cost_errors = {"Invalid costs response.", "Invalid cost bucket.", "Unexpected cost result.",
+                    "Invalid cost item name.", "Invalid cost day.", "Missing cost coverage.", "Cost coverage incomplete.",
+                    "Invalid cost amount.", "Invalid cost query configuration."}
+                message = str(error)
+                detail = message if message in safe_cost_errors else ("HTTP " + match.group(1) if (match := re.fullmatch(r"OpenAI usage query returned HTTP ([0-9]{3}) \(.*\)\.", message)) else "Invalid cost data.")
+                print("::warning::API costs unavailable: " + detail + " Previous cost coverage retained; tokens can still update.")
             validate_snapshot(snapshot)
             args.snapshot.parent.mkdir(parents=True, exist_ok=True)
             staged = args.snapshot.with_suffix(".tmp")
