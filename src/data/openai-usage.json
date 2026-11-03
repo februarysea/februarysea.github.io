@@ -1,8 +1,28 @@
 {
   "version": 1,
   "source": "openai-organization-completions",
-  "generatedAt": null,
-  "startDate": null,
-  "throughDate": null,
-  "daily": []
+  "generatedAt": "2026-11-03T06:43:19.622605+00:00",
+  "startDate": "2026-11-03",
+  "throughDate": "2026-11-03",
+  "daily": [
+    {
+      "date": "2026-11-03",
+      "models": [
+        {
+          "model": "gpt-6-astra",
+          "inputTokens": 40227059,
+          "cachedInputTokens": 37586082,
+          "outputTokens": 158994,
+          "requests": 308
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "inputTokens": 27266482,
+          "cachedInputTokens": 24204746,
+          "outputTokens": 168107,
+          "requests": 212
+        }
+      ]
+    }
+  ]
 }
