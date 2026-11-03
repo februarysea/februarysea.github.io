@@ -126,7 +126,7 @@ def collect(previous, start_date, key, *, now=None, api=request, full=False):
         refresh = max(start, day(previous["throughDate"]) - timedelta(days=30))
     begin_ts = int(datetime.combine(refresh, datetime.min.time(), timezone.utc).timestamp())
     end_ts = int(datetime.combine(end, datetime.min.time(), timezone.utc).timestamp())
-    params = {"start_time": begin_ts, "end_time": end_ts, "bucket_width": "1d",
+    params = {"start_time": begin_ts, "end_time": min(begin_ts + 31 * 86400, end_ts), "bucket_width": "1d",
               "group_by": ["model"], "limit": 31}
     records, cursors = {}, set()
     for _ in range(500):
@@ -139,7 +139,7 @@ def collect(previous, start_date, key, *, now=None, api=request, full=False):
                 raise ValueError("Invalid API usage bucket.")
             first, last = bucket.get("start_time"), bucket.get("end_time")
             if (type(first) is not int or type(last) is not int or first % 86400 or
-                    last != first + 86400 or not begin_ts <= first < last <= end_ts):
+                    last != first + 86400 or not params["start_time"] <= first < last <= params["end_time"]):
                 raise ValueError("Unexpected API bucket boundaries.")
             date_key = datetime.fromtimestamp(first, timezone.utc).date().isoformat()
             if date_key in records or not isinstance(bucket.get("results"), list):
@@ -164,7 +164,13 @@ def collect(previous, start_date, key, *, now=None, api=request, full=False):
                     target[field] = token_count(target[field] + counts[field])
             records[date_key] = {"date": date_key, "models": [models[m] for m in sorted(models)]}
         if not page["has_more"]:
-            break
+            if params["end_time"] >= end_ts:
+                break
+            params["start_time"] = params["end_time"]
+            params["end_time"] = min(params["start_time"] + 31 * 86400, end_ts)
+            params.pop("page", None)
+            cursors.clear()
+            continue
         cursor = page.get("next_page")
         if not isinstance(cursor, str) or not cursor or len(cursor) > 4096 or cursor in cursors:
             raise ValueError("Invalid API pagination cursor.")

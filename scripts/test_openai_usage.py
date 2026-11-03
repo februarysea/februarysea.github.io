@@ -113,16 +113,18 @@ class CollectionTests(unittest.TestCase):
         from datetime import timedelta
         start = datetime(2026, 9, 1, tzinfo=timezone.utc)
         all_buckets = [bucket((start + timedelta(days=i)).date().isoformat(), []) for i in range(63)]
-        prior = collect(EMPTY, "2026-09-01", "key", now=NOW, api=lambda *_: page(*all_buckets))
+        prior = collect(EMPTY, "2026-09-01", "key", now=NOW, api=lambda params, _: page(*(b for b in all_buckets if params["start_time"] <= b["start_time"] < params["end_time"])))
         calls = []
         def api(params, _):
             calls.append(params)
-            return page(*(b for b in all_buckets if b["start_time"] >= params["start_time"]))
+            return page(*(b for b in all_buckets if params["start_time"] <= b["start_time"] < params["end_time"]))
         current = collect(prior, "2026-09-01", "key", now=NOW, api=api)
         self.assertEqual(current, prior)
         self.assertEqual(datetime.fromtimestamp(calls[-1]["start_time"], timezone.utc).date().isoformat(), "2026-10-03")
+        calls.clear()
         collect(prior, "2026-09-01", "key", now=NOW, api=api, full=True)
-        self.assertEqual(calls[-1]["start_time"], int(start.timestamp()))
+        self.assertEqual(calls[0]["start_time"], int(start.timestamp()))
+        self.assertTrue(all(c["end_time"] - c["start_time"] <= 31 * 86400 for c in calls))
 
     def test_failure_preserves_output_and_does_not_leak_key(self):
         with tempfile.TemporaryDirectory() as directory:
