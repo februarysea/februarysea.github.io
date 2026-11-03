@@ -1,6 +1,6 @@
 """Collect public model totals from the OpenAI organization Usage API.
 
-Only completed UTC days from the completions usage endpoint are included.
+UTC daily buckets include the current, still-changing day.
 Cached input is a subset of input, never an additional contribution to totals.
 """
 import argparse
@@ -43,8 +43,8 @@ def validate_snapshot(snapshot):
         return snapshot
     generated = timestamp(snapshot["generatedAt"]).astimezone(timezone.utc)
     start, through = day(snapshot["startDate"]), day(snapshot["throughDate"])
-    if not start <= through < generated.date():
-        raise ValueError("Expected completed UTC usage days.")
+    if not start <= through <= generated.date():
+        raise ValueError("Expected usage through the capture date or earlier.")
     expected = start
     total = 0
     for row in snapshot["daily"]:
@@ -115,19 +115,19 @@ def collect(previous, start_date, key, *, now=None, api=request, full=False):
     validate_snapshot(previous)
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     start = day(start_date)
-    end = now.date()  # Never label a partial day as complete.
+    end_ts = int(now.timestamp())
+    end = datetime.fromtimestamp(end_ts - 1, timezone.utc).date() + timedelta(days=1)
     if start >= end:
-        raise ValueError("API history must start before today UTC.")
+        raise ValueError("API history must start before the query end.")
     if previous["startDate"] is not None and previous["startDate"] != start_date:
         raise ValueError("Changing API coverage requires an explicit history migration.")
     if not isinstance(key, str) or not key.strip():
         raise ValueError("OpenAI usage Admin API Key is missing.")
     refresh = start
     if previous["throughDate"] and not full:
-        # Re-read the most recent 31 saved days for delayed usage and corrections.
-        refresh = max(start, day(previous["throughDate"]) - timedelta(days=30))
+        # Re-read the most recent 3 saved days for delayed usage and corrections.
+        refresh = max(start, day(previous["throughDate"]) - timedelta(days=2))
     begin_ts = int(datetime.combine(refresh, datetime.min.time(), timezone.utc).timestamp())
-    end_ts = int(datetime.combine(end, datetime.min.time(), timezone.utc).timestamp())
     params = {"start_time": begin_ts, "end_time": min(begin_ts + 31 * 86400, end_ts), "bucket_width": "1d",
               "group_by": ["model"], "limit": 31}
     records, cursors = {}, set()
@@ -141,7 +141,7 @@ def collect(previous, start_date, key, *, now=None, api=request, full=False):
                 raise ValueError("Invalid API usage bucket.")
             first, last = bucket.get("start_time"), bucket.get("end_time")
             if (type(first) is not int or type(last) is not int or first % 86400 or
-                    last != first + 86400 or not params["start_time"] <= first < last <= params["end_time"]):
+                    last not in (first + 86400, params["end_time"]) or not params["start_time"] <= first < params["end_time"] or last <= first):
                 raise ValueError("Unexpected API bucket boundaries.")
             date_key = datetime.fromtimestamp(first, timezone.utc).date().isoformat()
             if date_key in records or not isinstance(bucket.get("results"), list):

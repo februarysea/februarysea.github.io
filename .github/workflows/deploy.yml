@@ -187,7 +187,7 @@ jobs:
         run: python3 -m unittest discover -s scripts -p 'test_openai*.py'
 
       # Query-only credentials are confined to this step. No site dependencies run here.
-      - name: Collect completed UTC days by model
+      - name: Collect UTC daily usage by model
         env:
           OPENAI_USAGE_ADMIN_KEY: ${{ secrets.OPENAI_USAGE_ADMIN_KEY }}
           OPENAI_USAGE_START_DATE: ${{ vars.OPENAI_USAGE_START_DATE }}

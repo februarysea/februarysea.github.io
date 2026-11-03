@@ -40,7 +40,7 @@ const count = (value: number | null) => value === null ? "—" : compactTokens(v
             <div><dt>Last 7 days</dt><dd>{count(apiUsage.recentTokens)}</dd></div>
             <div><dt>Through · UTC</dt><dd>{apiUsage.throughDate ?? "Awaiting data"}</dd></div>
           </dl>
-          <p class="note">{apiUsage.connected ? `Recorded from ${apiUsage.startDate}. Completed UTC days only.` : "API usage will appear after its first successful sync."}</p>
+          <p class="note">{apiUsage.connected ? `Recorded from ${apiUsage.startDate}. UTC days; today’s counts may still increase.` : "API usage will appear after its first successful sync."}</p>
         </section>
       </div>
 

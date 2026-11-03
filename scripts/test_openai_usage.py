@@ -15,7 +15,7 @@ from persist_openai_usage import publish
 
 EMPTY = {"version": 1, "source": "openai-organization-completions", "generatedAt": None,
          "startDate": None, "throughDate": None, "daily": []}
-NOW = datetime(2026, 11, 3, 12, tzinfo=timezone.utc)
+NOW = datetime(2026, 11, 3, 0, tzinfo=timezone.utc)
 
 
 def bucket(day, rows=None):
@@ -53,6 +53,15 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(model["cachedInputTokens"], 80)
         self.assertEqual(result["daily"][1]["models"], [])
         self.assertNotIn("private", json.dumps(result))
+
+    def test_current_day_is_included_with_partial_bucket(self):
+        now = NOW.replace(hour=12)
+        today = bucket("2026-11-03")
+        today["end_time"] = int(now.timestamp())
+        result = collect(EMPTY, "2026-11-03", "key", now=now,
+                         api=lambda *_: page(today))
+        self.assertEqual(result["throughDate"], "2026-11-03")
+        self.assertEqual(result["daily"][0]["models"][0]["inputTokens"], 100)
 
     def test_repeated_collection_replaces_instead_of_accumulating(self):
         prior = sample()
@@ -120,7 +129,7 @@ class CollectionTests(unittest.TestCase):
             return page(*(b for b in all_buckets if params["start_time"] <= b["start_time"] < params["end_time"]))
         current = collect(prior, "2026-09-01", "key", now=NOW, api=api)
         self.assertEqual(current, prior)
-        self.assertEqual(datetime.fromtimestamp(calls[-1]["start_time"], timezone.utc).date().isoformat(), "2026-10-03")
+        self.assertEqual(datetime.fromtimestamp(calls[-1]["start_time"], timezone.utc).date().isoformat(), "2026-10-31")
         calls.clear()
         collect(prior, "2026-09-01", "key", now=NOW, api=api, full=True)
         self.assertEqual(calls[0]["start_time"], int(start.timestamp()))
@@ -153,7 +162,7 @@ class SnapshotTests(unittest.TestCase):
 
     def test_no_coverage_regression_or_unknown_zero(self):
         self.assertEqual(validate_snapshot(copy.deepcopy(EMPTY)), EMPTY)
-        for update in [EMPTY, {**sample(), "generatedAt": "2026-11-02T00:00:00Z"},
+        for update in [EMPTY, {**sample(), "generatedAt": "2026-11-01T00:00:00Z"},
                        {**sample(), "daily": []}, {**sample(), "startDate": "2026-10-01"}]:
             with self.assertRaises(ValueError):
                 validate_update(sample(), update)

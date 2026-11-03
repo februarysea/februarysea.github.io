@@ -90,7 +90,7 @@ The API collector uses the official
 grouped by model. It collects organization-wide input, cached input, output,
 and request counts. **Total tokens = input + output**; cached input is already
 part of input. Other usage categories and monetary costs are outside this
-snapshot's scope. API dates are completed UTC days, kept separate from Codex's
+snapshot's scope. API dates include the current UTC day (still updating), kept separate from Codex's
 service-defined daily buckets.
 
 Configure these in this website repository's Actions settings:
@@ -98,7 +98,7 @@ Configure these in this website repository's Actions settings:
 | Type | Name | Value |
 | --- | --- | --- |
 | Secret | `OPENAI_USAGE_ADMIN_KEY` | An Admin API Key with usage read permission |
-| Variable | `OPENAI_USAGE_START_DATE` | First day to collect, `YYYY-MM-DD`, before today UTC |
+| Variable | `OPENAI_USAGE_START_DATE` | First day to collect, `YYYY-MM-DD`, today UTC or earlier |
 | Variable | `OPENAI_USAGE_SYNC_ENABLED` | Set `true` after choosing the date and configuring the key |
 
 The key is available only to the isolated query step. Build artifacts and the
@@ -111,9 +111,9 @@ replacement for an Admin Key.
 
 `src/data/openai-usage.json` starts unconnected (`null` dates), which the page
 renders as unavailable rather than zero. The first enabled run backfills the
-configured interval with pagination. Later runs re-read the last 31 saved days
+configured interval with pagination. Later runs re-read the last 3 saved days
 and append newer days; repeated dates replace, rather than add to, previous
-counts. Empty results in a returned bucket are zero; missing buckets, partial
+counts. Empty results in a returned bucket are zero; missing buckets, incomplete
 coverage, malformed responses, or expired credentials fail the API job and keep
 the previous snapshot. Other collectors and deployment can still proceed.
 Only a successfully deployed snapshot is persisted to `master`.
@@ -126,7 +126,7 @@ python3 scripts/openai_usage.py collect --full \
   --start-date YYYY-MM-DD --snapshot /tmp/openai-usage.json
 ```
 
-Use `--full` to reconcile corrections older than the routine 31-day refresh
+Use `--full` to reconcile corrections older than the routine 3-day refresh
 window. Changing the starting date requires an explicit history migration.
 Run `pnpm run usage:test` and `pnpm run usage:validate` to check both sources.
 
