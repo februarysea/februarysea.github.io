@@ -101,7 +101,9 @@ def request(params, key):
             # Inspect only in memory; emit a fixed field hint, never the raw body.
             body = error.read(65536).decode("utf-8", errors="replace")
             hint = next((field for field in ("api.usage.read", "start_time", "end_time", "group_by", "bucket_width") if field in body), "request")
-            raise RuntimeError(f"OpenAI usage query returned HTTP {error.code} ({hint}).") from None
+            date_hint = re.search(r"\b20[0-9]{2}-[01][0-9]-[0-3][0-9]\b", body)
+            suffix = "; date=" + date_hint.group() if date_hint else ""
+            raise RuntimeError(f"OpenAI usage query returned HTTP {error.code} ({hint}{suffix}).") from None
         except (urllib.error.URLError, TimeoutError):
             if attempt < 2:
                 time.sleep(2 ** (attempt + 1))
@@ -215,7 +217,7 @@ def main():
         safe = {"API usage coverage is incomplete; previous data retained.", "Unexpected API bucket boundaries.",
                 "Invalid API usage page.", "Duplicate or invalid API bucket.", "Invalid API model name.",
                 "Invalid API pagination cursor.", "OpenAI usage Admin API Key is missing."}
-        detail = message if message in safe or re.fullmatch(r"OpenAI usage query returned HTTP [0-9]{3} \((request|api\.usage\.read|start_time|end_time|group_by|bucket_width)\)\.", message) else "Check the configured date, credentials, and API response schema."
+        detail = message if message in safe or re.fullmatch(r"OpenAI usage query returned HTTP [0-9]{3} \((request|api\.usage\.read|start_time|end_time|group_by|bucket_width)(; date=20[0-9]{2}-[01][0-9]-[0-3][0-9])?\)\.", message) else "Check the configured date, credentials, and API response schema."
         parser.exit(1, "API usage unavailable: " + detail + " Previous data retained; other modules can still deploy.\n")
     print(f"Validated {len(snapshot['daily'])} public API usage days.")
 
