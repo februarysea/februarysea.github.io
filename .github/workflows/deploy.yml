@@ -16,6 +16,10 @@ on:
         description: Refresh the primary Codex login and extend the archived usage history
         type: boolean
         default: true
+      sync_api:
+        description: Fetch OpenAI API usage by model (requires Admin Key and start date)
+        type: boolean
+        default: false
       sync_p7:
         description: Fetch P7 observations (requires p7-auth Secrets; disabled until verified)
         type: boolean
@@ -166,6 +170,39 @@ jobs:
           GH_TOKEN: ${{ steps.auth_token.outputs.token }}
         run: python3 scripts/codex_github.py revoke
 
+  sync-api:
+    name: OpenAI API Token sync
+    if: >-
+      github.repository == 'februarysea/februarysea.github.io' &&
+      github.ref == 'refs/heads/master' &&
+      (vars.OPENAI_USAGE_SYNC_ENABLED == 'true' || inputs.sync_api == true)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Test API usage collection and disclosure checks
+        run: python3 -m unittest discover -s scripts -p 'test_openai*.py'
+
+      # Query-only credentials are confined to this step. No site dependencies run here.
+      - name: Collect completed UTC days by model
+        env:
+          OPENAI_USAGE_ADMIN_KEY: ${{ secrets.OPENAI_USAGE_ADMIN_KEY }}
+          OPENAI_USAGE_START_DATE: ${{ vars.OPENAI_USAGE_START_DATE }}
+        run: >-
+          python3 scripts/openai_usage.py collect
+          --previous src/data/openai-usage.json
+          --snapshot "$RUNNER_TEMP/api-output/openai-usage.json"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: openai-usage
+          path: ${{ runner.temp }}/api-output/openai-usage.json
+          if-no-files-found: error
+          retention-days: 7
+
   sync-p7:
     name: Pets P7 sync
     if: >-
@@ -220,11 +257,11 @@ jobs:
           retention-days: 7
 
   build:
-    needs: [sync, sync-codex, sync-p7]
+    needs: [sync, sync-codex, sync-p7, sync-api]
     # A failed collector keeps its previous data without blocking other updates.
     if: >-
       always() && !cancelled() && github.ref == 'refs/heads/master' &&
-      (github.event_name != 'schedule' || vars.ENODE_SYNC_ENABLED == 'true' || vars.CODEX_SYNC_ENABLED == 'true' || vars.P7_SYNC_ENABLED == 'true')
+      (github.event_name != 'schedule' || vars.ENODE_SYNC_ENABLED == 'true' || vars.CODEX_SYNC_ENABLED == 'true' || vars.P7_SYNC_ENABLED == 'true' || vars.OPENAI_USAGE_SYNC_ENABLED == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -280,6 +317,19 @@ jobs:
         run: |
           python3 scripts/codex_usage.py "$RUNNER_TEMP/codex-output/codex-profile.json" --previous src/data/codex-profile.json
           cp "$RUNNER_TEMP/codex-output/codex-profile.json" src/data/codex-profile.json
+
+      - name: Download validated OpenAI API statistics
+        if: needs.sync-api.result == 'success'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: openai-usage
+          path: ${{ runner.temp }}/api-output
+
+      - name: Apply validated OpenAI API statistics
+        if: needs.sync-api.result == 'success'
+        run: |
+          python3 scripts/openai_usage.py validate --snapshot "$RUNNER_TEMP/api-output/openai-usage.json" --previous src/data/openai-usage.json
+          cp "$RUNNER_TEMP/api-output/openai-usage.json" src/data/openai-usage.json
 
       - name: Install pnpm
         uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
@@ -352,7 +402,7 @@ jobs:
           path: ./dist
 
   deploy:
-    needs: [sync, sync-codex, sync-p7, build]
+    needs: [sync, sync-codex, sync-p7, sync-api, build]
     # Deploy a successful build even when an individual collector failed/skipped.
     if: always() && !cancelled() && needs.build.result == 'success' && inputs.dry_run != true
     runs-on: ubuntu-latest
@@ -446,3 +496,25 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 scripts/persist_p7_summary.py "$RUNNER_TEMP/p7-output/p7-summary.json"
+
+  persist-api:
+    needs: [sync-api, deploy]
+    if: always() && !cancelled() && needs.sync-api.result == 'success' && needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: openai-usage
+          path: ${{ runner.temp }}/api-output
+
+      - name: Save deployed API statistics on master
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/persist_openai_usage.py "$RUNNER_TEMP/api-output/openai-usage.json"

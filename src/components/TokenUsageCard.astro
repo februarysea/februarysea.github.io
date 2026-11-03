@@ -3,6 +3,7 @@ import {
   codexUsage, summarizeUsage, compactTokens, exactTokens, usageDate, contributionWall, dayLabel,
 } from "../lib/token-usage";
 import RecentWork from "./RecentWork.astro";
+import { apiUsage } from "../lib/api-usage";
 
 interface Props {
   variant?: "heatmap" | "bars" | "area" | "ring";
@@ -57,7 +58,7 @@ const chartLabel = variant === "heatmap"
     </div>
     <div class="token-metrics">
       <div class="token-total">
-        <p class="token-eyebrow">Lifetime tokens</p>
+        <p class="token-eyebrow">Codex tokens</p>
         <p class="token-number" title={`${exactTokens(summary.totalTokens)} recorded tokens. ${codexUsage.accounting}`}>{compactTokens(summary.totalTokens)}</p>
       </div>
       <div class="token-period" title={summary.dataThrough ? `${summary.recent[0].date} – ${summary.dataThrough}` : "Awaiting daily usage data"}>
@@ -141,6 +142,9 @@ const chartLabel = variant === "heatmap"
     <span class="token-updated" title={`Usage data through ${summary.dataThrough ?? "the latest available day"}. Snapshot fetched ${codexUsage.generatedAt}.`}>
       {summary.dataThrough ? <>As of <time datetime={summary.dataThrough}>{usageDate(summary.dataThrough)}</time></> : "Awaiting daily data"}
     </span>
+    <a class="usage-details" href="/usage/" title="Codex coverage and OpenAI API usage by model">
+      {apiUsage.totalTokens === null ? "Models & API ↗" : `API ${compactTokens(apiUsage.totalTokens)} · Models ↗`}
+    </a>
     {variant === "heatmap" && <span class="wall-legend" aria-label="Lighter teal indicates higher usage.">
       <span class="wall-scale">Less {[0, 1, 2, 3, 4].map((level) => <i class={`heat-${level}`}></i>)} More</span>
     </span>}
@@ -356,6 +360,9 @@ const chartLabel = variant === "heatmap"
   .token-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; padding-top: 10px; border-top: 1px solid #ffffff12; color: var(--usage-muted); font-size: 11px; line-height: 1.5; }
   .token-updated { white-space: nowrap; }
   .token-updated time { color: #d4dfdc; }
+  .usage-details { color: #b5fff5; text-decoration: none; }
+  .usage-details:hover { color: #fff; text-decoration: underline; }
+  .usage-details:focus-visible { outline: 1px solid var(--usage-accent); outline-offset: 3px; }
   .wall-legend, .wall-scale { display: inline-flex; align-items: center; }
   .wall-legend { gap: 12px; margin-left: auto; }
   .wall-scale { gap: 3px; }

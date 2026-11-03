@@ -76,6 +76,62 @@ or
 
 ## Codex token usage
 
+The homepage links to `/usage/` for Codex coverage and **OpenAI API usage by
+model**. Codex and API are separate sources; API-backed coding sessions are not
+also imported from local logs. The preserved Codex history has no model
+dimension. A read-only probe of the installed client returned `threadUsage:
+null`, so this site does not invent a Codex model breakdown from the account
+total or assign a whole conversation to its last selected model.
+
+### OpenAI API model statistics
+
+The API collector uses the official
+[organization completions usage endpoint](https://developers.openai.com/api/reference/resources/admin/subresources/organization/subresources/usage/methods/completions),
+grouped by model. It collects organization-wide input, cached input, output,
+and request counts. **Total tokens = input + output**; cached input is already
+part of input. Other usage categories and monetary costs are outside this
+snapshot's scope. API dates are completed UTC days, kept separate from Codex's
+service-defined daily buckets.
+
+Configure these in this website repository's Actions settings:
+
+| Type | Name | Value |
+| --- | --- | --- |
+| Secret | `OPENAI_USAGE_ADMIN_KEY` | An Admin API Key with usage read permission |
+| Variable | `OPENAI_USAGE_START_DATE` | First day to collect, `YYYY-MM-DD`, before today UTC |
+| Variable | `OPENAI_USAGE_SYNC_ENABLED` | Set `true` after choosing the date and configuring the key |
+
+The key is available only to the isolated query step. Build artifacts and the
+repository receive only allowlisted dates, model names, and numeric counts.
+No account, project, API key identifiers, prompts, or response bodies are saved.
+Use a personal organization: this version collects **all projects** in that
+organization. Do not change organizations without explicitly resetting or
+migrating the saved API history. An ordinary project inference key is not a
+replacement for an Admin Key.
+
+`src/data/openai-usage.json` starts unconnected (`null` dates), which the page
+renders as unavailable rather than zero. The first enabled run backfills the
+configured interval with pagination. Later runs re-read the last 31 saved days
+and append newer days; repeated dates replace, rather than add to, previous
+counts. Empty results in a returned bucket are zero; missing buckets, partial
+coverage, malformed responses, or expired credentials fail the API job and keep
+the previous snapshot. Other collectors and deployment can still proceed.
+Only a successfully deployed snapshot is persisted to `master`.
+
+For a local full-history audit (the key must already be in the environment):
+
+```bash
+python3 scripts/openai_usage.py collect --full \
+  --previous src/data/openai-usage.json \
+  --start-date YYYY-MM-DD --snapshot /tmp/openai-usage.json
+```
+
+Use `--full` to reconcile corrections older than the routine 31-day refresh
+window. Changing the starting date requires an explicit history migration.
+Run `pnpm run usage:test` and `pnpm run usage:validate` to check both sources.
+
+### Codex account history
+
 The homepage's Token usage heatmap preserves the two-account history through
 **2026-10-24** in `config/codex-usage-archive.json`. From **2026-10-25**, only the
 original primary account contributes new daily usage. The reviewed archive keeps

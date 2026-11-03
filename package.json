@@ -10,8 +10,8 @@
     "astro": "astro",
     "eslint": "eslint 'src/**/*.{js,astro}'",
     "check": "astro check",
-    "usage:validate": "python3 scripts/codex_usage.py src/data/codex-profile.json",
-    "usage:test": "python3 -m unittest discover -s scripts -p 'test_codex*.py' && node --test scripts/test-token-usage.mjs"
+    "usage:validate": "python3 scripts/codex_usage.py src/data/codex-profile.json && python3 scripts/openai_usage.py validate --snapshot src/data/openai-usage.json",
+    "usage:test": "python3 -m unittest discover -s scripts -p 'test_codex*.py' && python3 -m unittest discover -s scripts -p 'test_openai*.py' && node --test scripts/test-token-usage.mjs scripts/test-api-usage.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
