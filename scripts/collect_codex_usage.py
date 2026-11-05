@@ -8,7 +8,8 @@ import subprocess
 import tempfile
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
+from functools import partial
 
 from codex_usage import extend_archive, timestamp, token_count, validate_snapshot
 from codex_github import AUTH_ENVIRONMENT, WEBSITE_REPO, request
@@ -185,7 +186,7 @@ def normalize_usage(payload):
                               "daily": [{"date": day, "totalTokens": count} for day, count in sorted(daily.items())]})
 
 
-def collect(raw_auth, account_id, persist, binary="codex", rpc_factory=CodexRPC):
+def collect(raw_auth, account_id, persist, binary="codex", rpc_factory=CodexRPC, *, credit_reader=None):
     mask_auth(validate_auth(raw_auth, account_id))
     # Prove write-back works before allowing refresh-token rotation.
     persist(raw_auth)
@@ -208,13 +209,24 @@ def collect(raw_auth, account_id, persist, binary="codex", rpc_factory=CodexRPC)
                 validate_auth(refreshed, account_id)
                 persist(refreshed)
                 payload = rpc.call("account/usage/read")
+                snapshot = normalize_usage(payload)
+                if credit_reader is not None:
+                    latest = auth_path.read_text()
+                    validate_auth(latest, account_id)
+                    try:
+                        credit_usage = credit_reader(latest)
+                        snapshot = validate_snapshot({**snapshot, "creditUsage": credit_usage})
+                    except Exception:
+                        # Optional internal API: preserve old samples in extend_archive.
+                        # Never print upstream errors or authentication-bearing values.
+                        print("::warning::Codex credit samples unavailable; retaining saved samples and updating token statistics.", flush=True)
         finally:
             # Also cover an additional refresh during the usage request or an upstream error.
             if auth_path.exists():
                 latest = auth_path.read_text()
                 validate_auth(latest, account_id)
                 persist(latest)
-        return normalize_usage(payload)
+        return snapshot
 
 
 def configured_accounts(environ):
@@ -237,6 +249,10 @@ def configured_accounts(environ):
 def combine_snapshots(snapshots):
     if not snapshots:
         raise ValueError("No account statistics were collected.")
+    if len(snapshots) == 1:
+        return validate_snapshot(snapshots[0])
+    if any("creditUsage" in snapshot for snapshot in snapshots):
+        raise ValueError("Primary credit samples cannot be combined across accounts.")
     daily, total = {}, 0
     for snapshot in snapshots:
         validate_snapshot(snapshot)
@@ -268,9 +284,17 @@ def collect_accounts(environ, *, collector=collect, persist=persist_auth):
     return combine_snapshots(snapshots)
 
 
-def collect_after_archive(environ, archive, previous, *, collect_live=collect_accounts):
+def collect_after_archive(environ, archive, previous, *, collect_live=None):
     validate_snapshot(archive)
     validate_snapshot(previous)
+    if not archive["daily"]:
+        raise ValueError("Missing archived usage period.")
+    if collect_live is None:
+        from codex_credits import collect as collect_credits
+        start = (date.fromisoformat(archive["daily"][-1]["date"]) + timedelta(days=1)).isoformat()
+        def read_credits(raw):
+            return collect_credits(raw, start, previous.get("creditUsage"))
+        collect_live = partial(collect_accounts, collector=partial(collect, credit_reader=read_credits))
     # An old repository variable or leftover second-account Secret cannot
     # reactivate the retired account. Only the original slot is passed onward.
     primary_env = {key: environ[key] for key in ("CODEX_AUTH_JSON", "CODEX_ACCOUNT_ID", "GH_TOKEN") if key in environ}

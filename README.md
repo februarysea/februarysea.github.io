@@ -76,12 +76,131 @@ or
 
 ## Codex token usage
 
-The homepage links to `/usage/` for Codex coverage and **OpenAI API usage by
-model**. Codex and API are separate sources; API-backed coding sessions are not
-also imported from local logs. The preserved Codex history has no model
-dimension. A read-only probe of the installed client returned `threadUsage:
-null`, so this site does not invent a Codex model breakdown from the account
-total or assign a whole conversation to its last selected model.
+The homepage shows **Codex + OpenAI API recorded token totals**, with combined
+daily activity under the simple **Token usage** heading. There is no separate
+usage detail page. **Estimated cost** values the same recorded tokens once:
+
+- For primary-only dates after the archive cutoff, usable official daily
+  analytics samples supply a credit/token rate. The estimate is
+  `Profile daily tokens / analytics sample tokens × sample credits × $0.04`.
+  `$0.04/credit` is the user-selected community reference value in
+  `src/data/codex-credit-valuation.json`, not a universal official purchase price.
+  Only recognized Codex surfaces are sampled; Work and unknown surfaces are
+  excluded. Profile and analytics counts differ, so this is explicitly daily
+  rate extrapolation, not exact matching or reconstruction of model token counts.
+- Earlier two-account history and dates without usable credit samples use the
+  token-weighted average of those **same official credit samples**:
+  `remaining Profile tokens × sum(sample credits) × $0.04 / sum(sample tokens)`.
+  This also covers undated lifetime tokens. Only samples on positive, available
+  Profile dates after the archive cutoff enter the average; future samples do
+  not change historical estimates early. Zero credits with positive usage do
+  not prove free usage and therefore use the average of valid samples.
+
+Daily estimates and historical extrapolation use the same credit valuation;
+local-log prices no longer affect the homepage cost. Historical credits remain
+inferred, not recovered. Using the primary account's sample rate for earlier
+two-account usage assumes their average cost per token is comparable. It does
+not reconstruct their historical model mix. Each recorded token is valued once;
+neither sample tokens nor sample costs are added to recorded totals.
+
+API tokens are estimated per model using uncached input, cached input and output
+rates from `src/data/token-prices.json`, checked against the linked official
+price table. The current approximation assumes Standard short-context pricing;
+speed, long-context and cache-write surcharges are not collected in these buckets.
+Unknown model prices or unpriceable Codex tokens show an unavailable estimate rather
+than a misleading partial sum. Collected billing costs are retained separately
+and are not added again to the estimate. The tooltip shows both source estimates
+and these assumptions. This is an approximate value, not subscription spending.
+Cached input
+is counted once. Each service's date buckets are preserved; a day awaiting one
+source is marked partial. Local estimates are never added to these totals.
+
+`src/data/codex-local-estimate.json` is retained for diagnosis only and is not
+imported by the homepage estimator. It is a partial local-log report from
+**ccusage 20.0.48**, including only aggregate model counts, dates,
+and API-equivalent estimated USD, never prompts, session paths, IDs, or account
+identifiers. Its retained history can span accounts and does not represent the
+complete account-wide archive. Fallback metadata/model aliases remain marked.
+It is an estimate, not subscription charges or an actual API invoice.
+
+To explicitly refresh it on the Mac, run the pinned `ccusage@20.0.48` tool:
+
+```bash
+ccusage codex daily --json --timezone Asia/Shanghai > /tmp/codex-estimate.json
+python3 scripts/import_codex_estimate.py /tmp/codex-estimate.json \
+  --output src/data/codex-local-estimate.json
+```
+
+The diagnostic local report is not available to GitHub runners and is not
+automatically refreshed. It is no longer required for cost updates. Account
+totals, official credit samples and API statistics continue their automatic
+updates; the combined estimate is recalculated at every build. API prices and
+the community credit reference value are versioned separately.
+
+### Official Codex desktop dashboard (OAuth verification)
+
+The existing ChatGPT OAuth login can read the desktop dashboard's model/speed
+breakdown; it does not require the OpenAI API Admin key. A read-only collector is
+available for local inspection:
+
+```bash
+python3 scripts/codex_dashboard.py --auth-file "$HOME/.codex/auth.json" \
+  --start-date 2026-10-05 --end-date 2026-11-04 \
+  --output /tmp/codex-dashboard.json
+```
+
+It also accepts the existing `CODEX_AUTH_JSON` environment variable, uses a fixed
+OpenAI destination, refuses redirects, never refreshes/writes credentials, and
+exports only allowlisted aggregate model/speed values. Request at most 31 days
+per read. This diagnostic collector is not wired into the Pages frontend or
+the automatic workflow.
+
+Verified on **2026-11-04**, using the routes and request formats in the installed
+official desktop client:
+
+- `GET /backend-api/wham/usage/daily-token-usage-breakdown` succeeds. For the
+  currently signed-in personal account, the response has `units: "percent"`.
+  Its model field is named `credits` even when those values are percentages;
+  the collector exports it as `usageValue` and preserves the explicit unit.
+- The workspace input/cache/output breakdown returns HTTP 400 for this account;
+  the thread USD/credit breakdown returns HTTP 403. These requests are not
+  included in the collector and no attempts are made to bypass their access rules.
+
+Percentages are not model token counts, cannot be added to the homepage total,
+and cannot be multiplied by per-token prices to produce USD. They also cannot
+reconstruct the retired account's history.
+
+Further source research and a read-only OAuth probe on **2026-11-04** found a
+different, working route: `GET /backend-api/wham/analytics/daily-workspace-usage-counts`
+with `workspace_user=true`. It returns absolute daily credits and uncached,
+cached and output token totals for the tested personal account. This does not
+contradict the failures of the two different endpoints above. However, its
+model rows have no token fields and all model-credit values were zero in the
+tested history. The response includes Work surfaces, returns only part of the
+requested lifetime history, and represents just the currently signed-in
+account. The official credits-to-USD estimate endpoint also returned HTTP 403.
+Do not substitute this partial history for the two-account lifetime total or
+label a configurable credit-to-USD reference rate as an actual bill.
+
+Following the user's acceptance of the community reference valuation on
+**2026-11-05**, `scripts/codex_credits.py` collects daily absolute samples inside
+the existing managed primary OAuth flow, after credential renewal. The samples
+are stored as optional `creditUsage` in `src/data/codex-profile.json`, starting
+the day after the two-account archive. The initial read backfills that period;
+subsequent reads refresh the last three saved days and new days. Dates replace
+previous values rather than accumulating, and older saved rows survive rolling
+retention. Only validated aggregate dates, counts and credits are published.
+
+Credit queries are optional: errors preserve old samples, still allow Profile
+tokens to update and do not block deployment. The same artifact and persistence
+job carry both kinds of statistics; no extra credential or schedule is needed.
+The frontend ignores credit dates outside Profile's available daily history.
+The earlier discrepancy between Profile and analytics is accepted as an
+estimation assumption, not declared resolved. See
+[the source investigation](docs/research/codex-cost-sources-2026-11-04.md) for
+the verified alternatives and remaining limitations. These dashboard endpoints
+are internal client APIs, so their shapes and availability can change
+independently of the documented app-server API.
 
 ### OpenAI API model statistics
 

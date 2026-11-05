@@ -73,3 +73,18 @@ test("snapshot capture dates use Shanghai time and leave later service dates out
   assert.equal(summary.daily.at(-1).totalTokens, null);
   assert.equal(summary.periodTokens, 50);
 });
+
+test("combined usage adds API input and output once and marks delayed sources", () => {
+  const { summarizeCombinedUsage } = module.exports;
+  const api = { generatedAt: "2026-10-15T12:00:00Z", startDate: "2026-10-14", throughDate: "2026-10-15",
+    daily: [{ date: "2026-10-14", models: [{inputTokens: 100, cachedInputTokens: 90, outputTokens: 10}] },
+      {date:"2026-10-15", models:[{inputTokens:50,cachedInputTokens:40,outputTokens:5}]}] };
+  const codex = snapshot([{date:"2026-10-14",totalTokens:20}]);
+  const combined = summarizeCombinedUsage(codex, api);
+  assert.equal(combined.totalTokens, 1065);
+  assert.equal(combined.recent.at(-2).totalTokens, 130);
+  assert.equal(combined.recent.at(-1).totalTokens, 55);
+  assert.equal(combined.recent.at(-1).partial, true);
+  assert.match(dayLabel(combined.recent.at(-1)), /awaiting an update/);
+  assert.equal(codex.totalTokens, 900);
+});

@@ -143,7 +143,7 @@ jobs:
           APP_PRIVATE_KEY: ${{ secrets.CODEX_APP_PRIVATE_KEY }}
         run: python3 scripts/codex_github.py auth
 
-      - name: Renew primary login and extend archived statistics
+      - name: Renew primary login and collect token and credit statistics
         id: collect
         env:
           CODEX_AUTH_JSON: ${{ secrets.CODEX_AUTH_JSON }}

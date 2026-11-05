@@ -1,9 +1,10 @@
 ---
 import {
-  codexUsage, summarizeUsage, compactTokens, exactTokens, usageDate, contributionWall, dayLabel,
+  summarizeCombinedUsage, compactTokens, exactTokens, usageDate, contributionWall, dayLabel,
 } from "../lib/token-usage";
 import RecentWork from "./RecentWork.astro";
-import { apiUsage } from "../lib/api-usage";
+import { usd } from "../lib/api-usage";
+import { usageCost } from "../lib/usage-cost";
 
 interface Props {
   variant?: "heatmap" | "bars" | "area" | "ring";
@@ -12,7 +13,11 @@ interface Props {
 }
 
 const { variant = "heatmap", id = "token-usage-card", showRecentWork = false } = Astro.props;
-const summary = summarizeUsage();
+const summary = summarizeCombinedUsage();
+const estimatedCost = usageCost.usd;
+const estimateNote = estimatedCost === null
+  ? `Full estimate unavailable: ${usageCost.api.missingModels.length ? `missing model prices for ${usageCost.api.missingModels.join(", ")}` : "missing Codex rate samples"}. No partial subtotal is shown.`
+  : `Estimated value of the same ${exactTokens(usageCost.tokens)} tokens shown here. Codex: ${usd(usageCost.codex.usd)}, using daily rates derived from official credit/token samples at the community reference of $${usageCost.codex.usdPerCredit.toFixed(2)}/credit. Earlier two-account history and dates without credits use the token-weighted average of those same samples. Historical credits are inferred, not recovered. API: ${usd(usageCost.api.usd)}, using standard input, cache-read and output prices; speed, long-context and cache-write surcharges are excluded. An approximate value, not an amount paid.`;
 const periodLabel = `Last ${summary.recent.length} days`;
 const barStep = 360 / summary.recent.length;
 const wall = contributionWall(summary.daily);
@@ -58,12 +63,16 @@ const chartLabel = variant === "heatmap"
     </div>
     <div class="token-metrics">
       <div class="token-total">
-        <p class="token-eyebrow">Codex tokens</p>
-        <p class="token-number" title={`${exactTokens(summary.totalTokens)} recorded tokens. ${codexUsage.accounting}`}>{compactTokens(summary.totalTokens)}</p>
+        <p class="token-eyebrow">Total tokens</p>
+        <p class="token-number" title={`${exactTokens(summary.totalTokens)} recorded tokens. ${summary.accounting}`}>{compactTokens(summary.totalTokens)}</p>
       </div>
       <div class="token-period" title={summary.dataThrough ? `${summary.recent[0].date} – ${summary.dataThrough}` : "Awaiting daily usage data"}>
         <p class="token-eyebrow">{periodLabel}</p>
         <p class="token-recent-number">{summary.periodTokens === null ? "—" : compactTokens(summary.periodTokens)}</p>
+      </div>
+      <div class="token-cost" title={estimateNote} tabindex="0" aria-label={`Estimated cost ${usd(estimatedCost)}. ${estimateNote}`}>
+        <p class="token-eyebrow">Estimated cost <span aria-hidden="true">*</span></p>
+        <p class="token-cost-number">{usd(estimatedCost)}</p>
       </div>
     </div>
   </header>
@@ -80,7 +89,7 @@ const chartLabel = variant === "heatmap"
           {reportedCells.map((day) => <rect
             class={`wall-cell heat-${day.level}`} data-usage-day={day.date}
             data-usage-date={`${usageDate(day.date)}, ${day.date.slice(0, 4)}`}
-            data-usage-tokens={compactTokens(day.totalTokens ?? 0)}
+            data-usage-tokens={`${compactTokens(day.totalTokens ?? 0)}${day.partial ? " (partial)" : ""}`}
             role="button" tabindex={day === reportedCells.at(-1) ? "0" : "-1"}
             aria-label={dayLabel(day)}
             x={36 + day.column * 12} y={25 + day.row * 12} width="9" height="9" rx="1.5"
@@ -139,12 +148,9 @@ const chartLabel = variant === "heatmap"
   </figure>
 
   <footer class="token-footer">
-    <span class="token-updated" title={`Usage data through ${summary.dataThrough ?? "the latest available day"}. Snapshot fetched ${codexUsage.generatedAt}.`}>
+    <span class="token-updated" title={`Usage data through ${summary.dataThrough ?? "the latest available day"}. Snapshot fetched ${summary.generatedAt}.`}>
       {summary.dataThrough ? <>As of <time datetime={summary.dataThrough}>{usageDate(summary.dataThrough)}</time></> : "Awaiting daily data"}
     </span>
-    <a class="usage-details" href="/usage/" title="Codex coverage and OpenAI API usage by model">
-      {apiUsage.totalTokens === null ? "Models & API ↗" : `API ${compactTokens(apiUsage.totalTokens)} · Models ↗`}
-    </a>
     {variant === "heatmap" && <span class="wall-legend" aria-label="Lighter teal indicates higher usage.">
       <span class="wall-scale">Less {[0, 1, 2, 3, 4].map((level) => <i class={`heat-${level}`}></i>)} More</span>
     </span>}
@@ -301,13 +307,16 @@ const chartLabel = variant === "heatmap"
   .token-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
   .token-header h2 { margin: 0; color: #f5f5f5; font: 700 20px/1.3 "JetBrains Mono", monospace; white-space: nowrap; }
   .token-range { font-family: inherit; margin: 7px 0 0; color: var(--usage-muted); font-size: 11px; line-height: 1.4; }
-  .token-metrics { display: flex; align-items: flex-end; gap: 28px; }
+  .token-metrics { display: flex; align-items: flex-end; gap: 24px; }
   .token-metrics p { margin: 0; font-family: inherit; }
   .token-eyebrow { color: var(--usage-muted); font-size: 11px; line-height: 1.5; white-space: nowrap; }
-  .token-number, .token-recent-number { padding-top: 3px; font-weight: 500; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .token-number, .token-recent-number, .token-cost-number { padding-top: 3px; font-weight: 500; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; line-height: 1.1; white-space: nowrap; }
   .token-number { font-size: 32px; }
   .token-recent-number { color: var(--usage-highlight); font-size: 24px; }
   .token-period { padding-bottom: 2px; }
+  .token-cost { padding-bottom: 2px; }
+  .token-cost-number { color: #d4dfdc; font-size: 24px; }
+  .token-cost:focus-visible { outline: 1px solid var(--usage-accent); outline-offset: 5px; border-radius: 2px; }
   .token-chart { position: relative; min-width: 0; margin: 0; }
   .token-wall-scroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--usage-level-2) #050505; padding-bottom: 3px; }
   .token-wall-scroll:focus-visible { outline: 1px solid var(--usage-accent); outline-offset: 4px; border-radius: 3px; }
@@ -360,9 +369,6 @@ const chartLabel = variant === "heatmap"
   .token-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 18px; padding-top: 10px; border-top: 1px solid #ffffff12; color: var(--usage-muted); font-size: 11px; line-height: 1.5; }
   .token-updated { white-space: nowrap; }
   .token-updated time { color: #d4dfdc; }
-  .usage-details { color: #b5fff5; text-decoration: none; }
-  .usage-details:hover { color: #fff; text-decoration: underline; }
-  .usage-details:focus-visible { outline: 1px solid var(--usage-accent); outline-offset: 3px; }
   .wall-legend, .wall-scale { display: inline-flex; align-items: center; }
   .wall-legend { gap: 12px; margin-left: auto; }
   .wall-scale { gap: 3px; }
@@ -373,15 +379,18 @@ const chartLabel = variant === "heatmap"
   .usage-flip span { font-size: 14px; line-height: 1; }
   .usage-return { flex-shrink: 0; gap: 8px; min-height: 0; margin: 0; padding: 5px 4px; font-size: 11px; line-height: 1.3; }
   .usage-return:hover { background: transparent; }
-  @container token-usage (max-width: 560px) {
+  @container token-usage (max-width: 720px) {
     .token-header { flex-wrap: wrap; gap: 18px; }
     .token-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; }
     .token-range { margin: 0; text-align: right; }
-    .token-metrics { justify-content: space-between; width: 100%; }
+    .token-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100%; }
     .wall-legend { margin-left: auto; }
     .usage-flip { margin-left: auto; }
   }
   @container token-usage (max-width: 350px) {
+    .token-number { font-size: 26px; }
+    .token-recent-number, .token-cost-number { font-size: 20px; }
+    .token-eyebrow { font-size: 10px; }
     .token-heading { display: block; }
     .token-range { margin-top: 6px; text-align: left; }
     .ring-layout { gap: 12px; }

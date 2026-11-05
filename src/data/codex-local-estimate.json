@@ -1,0 +1,905 @@
+{
+  "version": 1,
+  "source": "ccusage-local-logs",
+  "toolVersion": "20.0.48",
+  "generatedAt": "2026-11-04T06:53:59.312144+00:00",
+  "startDate": "2025-12-29",
+  "throughDate": "2026-11-03",
+  "activeDays": 154,
+  "totalTokens": 10475888906,
+  "estimatedUsd": 16719.352468,
+  "models": [
+    {
+      "model": "gpt-6-astra",
+      "inputTokens": 258929189,
+      "cachedInputTokens": 4857058432,
+      "outputTokens": 25845586,
+      "totalTokens": 5141833207,
+      "usesFallback": true
+    },
+    {
+      "model": "gpt-5.6-sol",
+      "inputTokens": 177369556,
+      "cachedInputTokens": 4062436480,
+      "outputTokens": 17161063,
+      "totalTokens": 4256967099,
+      "usesFallback": true
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "inputTokens": 16439967,
+      "cachedInputTokens": 396356480,
+      "outputTokens": 2140780,
+      "totalTokens": 414937227,
+      "usesFallback": true
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "inputTokens": 61821120,
+      "cachedInputTokens": 351792384,
+      "outputTokens": 908663,
+      "totalTokens": 414522167,
+      "usesFallback": true
+    },
+    {
+      "model": "gpt-5.5",
+      "inputTokens": 9435364,
+      "cachedInputTokens": 99444224,
+      "outputTokens": 637721,
+      "totalTokens": 109517309,
+      "usesFallback": false
+    },
+    {
+      "model": "gpt-5.4",
+      "inputTokens": 11514421,
+      "cachedInputTokens": 74157312,
+      "outputTokens": 668826,
+      "totalTokens": 86340559,
+      "usesFallback": true
+    },
+    {
+      "model": "gpt-6-sol",
+      "inputTokens": 1173826,
+      "cachedInputTokens": 28211200,
+      "outputTokens": 87695,
+      "totalTokens": 29472721,
+      "usesFallback": false
+    },
+    {
+      "model": "gpt-5.3-codex",
+      "inputTokens": 424340,
+      "cachedInputTokens": 4885888,
+      "outputTokens": 62509,
+      "totalTokens": 5372737,
+      "usesFallback": false
+    },
+    {
+      "model": "gpt-5.2-codex",
+      "inputTokens": 194339,
+      "cachedInputTokens": 5031552,
+      "outputTokens": 71985,
+      "totalTokens": 5297876,
+      "usesFallback": false
+    },
+    {
+      "model": "gpt-6-luna",
+      "inputTokens": 513613,
+      "cachedInputTokens": 4025216,
+      "outputTokens": 103205,
+      "totalTokens": 4642034,
+      "usesFallback": false
+    },
+    {
+      "model": "gpt-5",
+      "inputTokens": 979179,
+      "cachedInputTokens": 1794816,
+      "outputTokens": 66733,
+      "totalTokens": 2840728,
+      "usesFallback": true
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "inputTokens": 368787,
+      "cachedInputTokens": 1477120,
+      "outputTokens": 8426,
+      "totalTokens": 1854333,
+      "usesFallback": false
+    },
+    {
+      "model": "gpt-5.1-codex-max",
+      "inputTokens": 154249,
+      "cachedInputTokens": 993920,
+      "outputTokens": 24349,
+      "totalTokens": 1172518,
+      "usesFallback": false
+    },
+    {
+      "model": "gpt-6.1-terra",
+      "inputTokens": 165727,
+      "cachedInputTokens": 940928,
+      "outputTokens": 7704,
+      "totalTokens": 1114359,
+      "usesFallback": false
+    },
+    {
+      "model": "gpt-5.1-codex-mini",
+      "inputTokens": 1842,
+      "cachedInputTokens": 2048,
+      "outputTokens": 142,
+      "totalTokens": 4032,
+      "usesFallback": false
+    }
+  ],
+  "daily": [
+    {
+      "date": "2025-12-29",
+      "totalTokens": 59530,
+      "estimatedUsd": 0.139909
+    },
+    {
+      "date": "2026-01-22",
+      "totalTokens": 154147,
+      "estimatedUsd": 0.108945
+    },
+    {
+      "date": "2026-01-23",
+      "totalTokens": 921659,
+      "estimatedUsd": 0.29141
+    },
+    {
+      "date": "2026-02-05",
+      "totalTokens": 5339090,
+      "estimatedUsd": 2.249478
+    },
+    {
+      "date": "2026-02-07",
+      "totalTokens": 367073,
+      "estimatedUsd": 0.158766
+    },
+    {
+      "date": "2026-02-10",
+      "totalTokens": 4981468,
+      "estimatedUsd": 2.295013
+    },
+    {
+      "date": "2026-02-13",
+      "totalTokens": 24196,
+      "estimatedUsd": 0.018973
+    },
+    {
+      "date": "2026-03-10",
+      "totalTokens": 6166626,
+      "estimatedUsd": 4.259945
+    },
+    {
+      "date": "2026-03-12",
+      "totalTokens": 6724524,
+      "estimatedUsd": 4.789154
+    },
+    {
+      "date": "2026-03-13",
+      "totalTokens": 924806,
+      "estimatedUsd": 0.826942
+    },
+    {
+      "date": "2026-03-15",
+      "totalTokens": 3091666,
+      "estimatedUsd": 1.471494
+    },
+    {
+      "date": "2026-03-17",
+      "totalTokens": 1433771,
+      "estimatedUsd": 1.312696
+    },
+    {
+      "date": "2026-03-19",
+      "totalTokens": 8515531,
+      "estimatedUsd": 5.667961
+    },
+    {
+      "date": "2026-03-24",
+      "totalTokens": 31437511,
+      "estimatedUsd": 15.296648
+    },
+    {
+      "date": "2026-03-25",
+      "totalTokens": 4046692,
+      "estimatedUsd": 4.030922
+    },
+    {
+      "date": "2026-03-26",
+      "totalTokens": 355258,
+      "estimatedUsd": 0.487112
+    },
+    {
+      "date": "2026-03-30",
+      "totalTokens": 609871,
+      "estimatedUsd": 0.925547
+    },
+    {
+      "date": "2026-04-07",
+      "totalTokens": 980537,
+      "estimatedUsd": 0.599494
+    },
+    {
+      "date": "2026-04-15",
+      "totalTokens": 731380,
+      "estimatedUsd": 1.14342
+    },
+    {
+      "date": "2026-04-23",
+      "totalTokens": 3667551,
+      "estimatedUsd": 2.139199
+    },
+    {
+      "date": "2026-04-24",
+      "totalTokens": 7120123,
+      "estimatedUsd": 6.302784
+    },
+    {
+      "date": "2026-04-25",
+      "totalTokens": 170669,
+      "estimatedUsd": 0.471475
+    },
+    {
+      "date": "2026-04-28",
+      "totalTokens": 7440758,
+      "estimatedUsd": 7.418037
+    },
+    {
+      "date": "2026-05-03",
+      "totalTokens": 15607028,
+      "estimatedUsd": 11.772177
+    },
+    {
+      "date": "2026-05-04",
+      "totalTokens": 972309,
+      "estimatedUsd": 1.189665
+    },
+    {
+      "date": "2026-05-13",
+      "totalTokens": 1456552,
+      "estimatedUsd": 1.522644
+    },
+    {
+      "date": "2026-05-16",
+      "totalTokens": 2103115,
+      "estimatedUsd": 2.73298
+    },
+    {
+      "date": "2026-05-17",
+      "totalTokens": 7835847,
+      "estimatedUsd": 7.055095
+    },
+    {
+      "date": "2026-05-21",
+      "totalTokens": 733829,
+      "estimatedUsd": 1.192103
+    },
+    {
+      "date": "2026-05-26",
+      "totalTokens": 200342,
+      "estimatedUsd": 0.460507
+    },
+    {
+      "date": "2026-06-16",
+      "totalTokens": 17234,
+      "estimatedUsd": 0.081051
+    },
+    {
+      "date": "2026-06-18",
+      "totalTokens": 2588041,
+      "estimatedUsd": 2.807535
+    },
+    {
+      "date": "2026-06-20",
+      "totalTokens": 1487702,
+      "estimatedUsd": 2.589922
+    },
+    {
+      "date": "2026-06-23",
+      "totalTokens": 979322,
+      "estimatedUsd": 1.554228
+    },
+    {
+      "date": "2026-06-25",
+      "totalTokens": 1228917,
+      "estimatedUsd": 2.053984
+    },
+    {
+      "date": "2026-06-26",
+      "totalTokens": 22821171,
+      "estimatedUsd": 20.654093
+    },
+    {
+      "date": "2026-06-29",
+      "totalTokens": 1050730,
+      "estimatedUsd": 1.583964
+    },
+    {
+      "date": "2026-06-30",
+      "totalTokens": 2668131,
+      "estimatedUsd": 3.442753
+    },
+    {
+      "date": "2026-07-01",
+      "totalTokens": 6857023,
+      "estimatedUsd": 8.207956
+    },
+    {
+      "date": "2026-07-02",
+      "totalTokens": 21940750,
+      "estimatedUsd": 22.371797
+    },
+    {
+      "date": "2026-07-06",
+      "totalTokens": 5027681,
+      "estimatedUsd": 8.22252
+    },
+    {
+      "date": "2026-07-09",
+      "totalTokens": 707891,
+      "estimatedUsd": 1.051905
+    },
+    {
+      "date": "2026-07-10",
+      "totalTokens": 94618152,
+      "estimatedUsd": 110.173986
+    },
+    {
+      "date": "2026-07-11",
+      "totalTokens": 32617751,
+      "estimatedUsd": 40.887901
+    },
+    {
+      "date": "2026-07-12",
+      "totalTokens": 1011236,
+      "estimatedUsd": 2.327584
+    },
+    {
+      "date": "2026-07-13",
+      "totalTokens": 294869784,
+      "estimatedUsd": 333.998772
+    },
+    {
+      "date": "2026-07-14",
+      "totalTokens": 116102889,
+      "estimatedUsd": 146.681747
+    },
+    {
+      "date": "2026-07-15",
+      "totalTokens": 192290457,
+      "estimatedUsd": 259.783604
+    },
+    {
+      "date": "2026-07-16",
+      "totalTokens": 97547210,
+      "estimatedUsd": 131.170498
+    },
+    {
+      "date": "2026-07-17",
+      "totalTokens": 32004034,
+      "estimatedUsd": 42.560829
+    },
+    {
+      "date": "2026-07-18",
+      "totalTokens": 4276915,
+      "estimatedUsd": 8.984944
+    },
+    {
+      "date": "2026-07-19",
+      "totalTokens": 202274714,
+      "estimatedUsd": 200.208708
+    },
+    {
+      "date": "2026-07-20",
+      "totalTokens": 123278424,
+      "estimatedUsd": 137.589956
+    },
+    {
+      "date": "2026-07-21",
+      "totalTokens": 132276166,
+      "estimatedUsd": 128.393639
+    },
+    {
+      "date": "2026-07-22",
+      "totalTokens": 107529573,
+      "estimatedUsd": 101.935271
+    },
+    {
+      "date": "2026-07-23",
+      "totalTokens": 14473882,
+      "estimatedUsd": 11.82452
+    },
+    {
+      "date": "2026-07-24",
+      "totalTokens": 44758951,
+      "estimatedUsd": 49.984567
+    },
+    {
+      "date": "2026-07-25",
+      "totalTokens": 4688490,
+      "estimatedUsd": 8.233754
+    },
+    {
+      "date": "2026-07-26",
+      "totalTokens": 127575592,
+      "estimatedUsd": 99.262599
+    },
+    {
+      "date": "2026-07-27",
+      "totalTokens": 116158959,
+      "estimatedUsd": 113.860886
+    },
+    {
+      "date": "2026-07-28",
+      "totalTokens": 228838596,
+      "estimatedUsd": 260.050051
+    },
+    {
+      "date": "2026-07-29",
+      "totalTokens": 168185285,
+      "estimatedUsd": 198.456241
+    },
+    {
+      "date": "2026-07-30",
+      "totalTokens": 400613806,
+      "estimatedUsd": 333.112401
+    },
+    {
+      "date": "2026-07-31",
+      "totalTokens": 11867599,
+      "estimatedUsd": 14.142377
+    },
+    {
+      "date": "2026-08-01",
+      "totalTokens": 6828481,
+      "estimatedUsd": 9.228602
+    },
+    {
+      "date": "2026-08-02",
+      "totalTokens": 41890135,
+      "estimatedUsd": 28.913934
+    },
+    {
+      "date": "2026-08-03",
+      "totalTokens": 138494380,
+      "estimatedUsd": 128.80818
+    },
+    {
+      "date": "2026-08-04",
+      "totalTokens": 155769060,
+      "estimatedUsd": 150.392484
+    },
+    {
+      "date": "2026-08-05",
+      "totalTokens": 82466996,
+      "estimatedUsd": 89.861524
+    },
+    {
+      "date": "2026-08-06",
+      "totalTokens": 89310366,
+      "estimatedUsd": 77.224356
+    },
+    {
+      "date": "2026-08-07",
+      "totalTokens": 87848261,
+      "estimatedUsd": 54.787884
+    },
+    {
+      "date": "2026-08-08",
+      "totalTokens": 20915030,
+      "estimatedUsd": 13.433122
+    },
+    {
+      "date": "2026-08-09",
+      "totalTokens": 58463796,
+      "estimatedUsd": 54.306528
+    },
+    {
+      "date": "2026-08-10",
+      "totalTokens": 13644469,
+      "estimatedUsd": 17.227092
+    },
+    {
+      "date": "2026-08-12",
+      "totalTokens": 18792,
+      "estimatedUsd": 0.057139
+    },
+    {
+      "date": "2026-08-13",
+      "totalTokens": 5857838,
+      "estimatedUsd": 5.550639
+    },
+    {
+      "date": "2026-08-15",
+      "totalTokens": 37629213,
+      "estimatedUsd": 22.693362
+    },
+    {
+      "date": "2026-08-16",
+      "totalTokens": 85471205,
+      "estimatedUsd": 63.804453
+    },
+    {
+      "date": "2026-08-17",
+      "totalTokens": 19477891,
+      "estimatedUsd": 25.45603
+    },
+    {
+      "date": "2026-08-18",
+      "totalTokens": 31079120,
+      "estimatedUsd": 40.902108
+    },
+    {
+      "date": "2026-08-19",
+      "totalTokens": 26446159,
+      "estimatedUsd": 23.591578
+    },
+    {
+      "date": "2026-08-20",
+      "totalTokens": 18048796,
+      "estimatedUsd": 29.592213
+    },
+    {
+      "date": "2026-08-21",
+      "totalTokens": 19724496,
+      "estimatedUsd": 14.429524
+    },
+    {
+      "date": "2026-08-22",
+      "totalTokens": 6488063,
+      "estimatedUsd": 9.561603
+    },
+    {
+      "date": "2026-08-23",
+      "totalTokens": 120752,
+      "estimatedUsd": 1.014374
+    },
+    {
+      "date": "2026-08-24",
+      "totalTokens": 49365681,
+      "estimatedUsd": 60.690992
+    },
+    {
+      "date": "2026-08-25",
+      "totalTokens": 20001533,
+      "estimatedUsd": 32.603206
+    },
+    {
+      "date": "2026-08-26",
+      "totalTokens": 22190500,
+      "estimatedUsd": 29.40598
+    },
+    {
+      "date": "2026-08-27",
+      "totalTokens": 7393290,
+      "estimatedUsd": 11.67831
+    },
+    {
+      "date": "2026-08-28",
+      "totalTokens": 16095781,
+      "estimatedUsd": 17.213615
+    },
+    {
+      "date": "2026-08-29",
+      "totalTokens": 27993784,
+      "estimatedUsd": 30.448408
+    },
+    {
+      "date": "2026-08-30",
+      "totalTokens": 78410919,
+      "estimatedUsd": 91.921536
+    },
+    {
+      "date": "2026-08-31",
+      "totalTokens": 91866938,
+      "estimatedUsd": 75.708956
+    },
+    {
+      "date": "2026-09-01",
+      "totalTokens": 116519652,
+      "estimatedUsd": 85.830578
+    },
+    {
+      "date": "2026-09-02",
+      "totalTokens": 37989939,
+      "estimatedUsd": 28.219162
+    },
+    {
+      "date": "2026-09-03",
+      "totalTokens": 46011062,
+      "estimatedUsd": 42.860758
+    },
+    {
+      "date": "2026-09-04",
+      "totalTokens": 73178417,
+      "estimatedUsd": 80.949715
+    },
+    {
+      "date": "2026-09-05",
+      "totalTokens": 1700980,
+      "estimatedUsd": 2.458182
+    },
+    {
+      "date": "2026-09-07",
+      "totalTokens": 112366226,
+      "estimatedUsd": 267.242307
+    },
+    {
+      "date": "2026-09-08",
+      "totalTokens": 106727886,
+      "estimatedUsd": 152.648058
+    },
+    {
+      "date": "2026-09-09",
+      "totalTokens": 30984018,
+      "estimatedUsd": 112.630221
+    },
+    {
+      "date": "2026-09-10",
+      "totalTokens": 26235298,
+      "estimatedUsd": 94.275797
+    },
+    {
+      "date": "2026-09-11",
+      "totalTokens": 115792283,
+      "estimatedUsd": 218.800721
+    },
+    {
+      "date": "2026-09-12",
+      "totalTokens": 27973844,
+      "estimatedUsd": 83.517049
+    },
+    {
+      "date": "2026-09-13",
+      "totalTokens": 72107745,
+      "estimatedUsd": 97.424622
+    },
+    {
+      "date": "2026-09-14",
+      "totalTokens": 75319350,
+      "estimatedUsd": 119.228095
+    },
+    {
+      "date": "2026-09-15",
+      "totalTokens": 57822124,
+      "estimatedUsd": 122.817963
+    },
+    {
+      "date": "2026-09-16",
+      "totalTokens": 31753848,
+      "estimatedUsd": 59.499116
+    },
+    {
+      "date": "2026-09-17",
+      "totalTokens": 32693871,
+      "estimatedUsd": 41.808072
+    },
+    {
+      "date": "2026-09-18",
+      "totalTokens": 78997836,
+      "estimatedUsd": 137.681643
+    },
+    {
+      "date": "2026-09-19",
+      "totalTokens": 49650717,
+      "estimatedUsd": 89.121246
+    },
+    {
+      "date": "2026-09-20",
+      "totalTokens": 36788848,
+      "estimatedUsd": 56.973676
+    },
+    {
+      "date": "2026-09-21",
+      "totalTokens": 151775233,
+      "estimatedUsd": 399.663729
+    },
+    {
+      "date": "2026-09-22",
+      "totalTokens": 182938065,
+      "estimatedUsd": 404.279406
+    },
+    {
+      "date": "2026-09-23",
+      "totalTokens": 142738454,
+      "estimatedUsd": 360.647351
+    },
+    {
+      "date": "2026-09-24",
+      "totalTokens": 155759139,
+      "estimatedUsd": 407.758154
+    },
+    {
+      "date": "2026-09-25",
+      "totalTokens": 136908412,
+      "estimatedUsd": 347.176294
+    },
+    {
+      "date": "2026-09-26",
+      "totalTokens": 164531775,
+      "estimatedUsd": 475.305972
+    },
+    {
+      "date": "2026-09-27",
+      "totalTokens": 31980549,
+      "estimatedUsd": 76.71365
+    },
+    {
+      "date": "2026-09-28",
+      "totalTokens": 36015406,
+      "estimatedUsd": 99.01536
+    },
+    {
+      "date": "2026-09-29",
+      "totalTokens": 97326887,
+      "estimatedUsd": 147.584878
+    },
+    {
+      "date": "2026-09-30",
+      "totalTokens": 44361716,
+      "estimatedUsd": 46.801724
+    },
+    {
+      "date": "2026-10-02",
+      "totalTokens": 109115114,
+      "estimatedUsd": 257.642828
+    },
+    {
+      "date": "2026-10-03",
+      "totalTokens": 13055501,
+      "estimatedUsd": 13.991707
+    },
+    {
+      "date": "2026-10-04",
+      "totalTokens": 4991474,
+      "estimatedUsd": 2.094532
+    },
+    {
+      "date": "2026-10-05",
+      "totalTokens": 71685353,
+      "estimatedUsd": 100.324373
+    },
+    {
+      "date": "2026-10-06",
+      "totalTokens": 21924476,
+      "estimatedUsd": 47.808464
+    },
+    {
+      "date": "2026-10-07",
+      "totalTokens": 266723598,
+      "estimatedUsd": 713.873066
+    },
+    {
+      "date": "2026-10-08",
+      "totalTokens": 60019892,
+      "estimatedUsd": 185.335006
+    },
+    {
+      "date": "2026-10-09",
+      "totalTokens": 247683919,
+      "estimatedUsd": 463.784948
+    },
+    {
+      "date": "2026-10-11",
+      "totalTokens": 199053980,
+      "estimatedUsd": 280.152405
+    },
+    {
+      "date": "2026-10-12",
+      "totalTokens": 245604014,
+      "estimatedUsd": 186.990289
+    },
+    {
+      "date": "2026-10-13",
+      "totalTokens": 200982968,
+      "estimatedUsd": 332.995274
+    },
+    {
+      "date": "2026-10-14",
+      "totalTokens": 203815929,
+      "estimatedUsd": 294.696932
+    },
+    {
+      "date": "2026-10-15",
+      "totalTokens": 131369029,
+      "estimatedUsd": 263.360388
+    },
+    {
+      "date": "2026-10-16",
+      "totalTokens": 100295903,
+      "estimatedUsd": 155.765998
+    },
+    {
+      "date": "2026-10-17",
+      "totalTokens": 120087977,
+      "estimatedUsd": 70.340813
+    },
+    {
+      "date": "2026-10-18",
+      "totalTokens": 101253923,
+      "estimatedUsd": 183.46452
+    },
+    {
+      "date": "2026-10-19",
+      "totalTokens": 242886744,
+      "estimatedUsd": 386.495561
+    },
+    {
+      "date": "2026-10-20",
+      "totalTokens": 115118568,
+      "estimatedUsd": 188.936485
+    },
+    {
+      "date": "2026-10-21",
+      "totalTokens": 123216290,
+      "estimatedUsd": 121.718867
+    },
+    {
+      "date": "2026-10-22",
+      "totalTokens": 350845056,
+      "estimatedUsd": 787.408464
+    },
+    {
+      "date": "2026-10-23",
+      "totalTokens": 191409501,
+      "estimatedUsd": 524.080728
+    },
+    {
+      "date": "2026-10-24",
+      "totalTokens": 54406160,
+      "estimatedUsd": 109.943217
+    },
+    {
+      "date": "2026-10-25",
+      "totalTokens": 211262992,
+      "estimatedUsd": 456.108743
+    },
+    {
+      "date": "2026-10-26",
+      "totalTokens": 102565830,
+      "estimatedUsd": 306.471848
+    },
+    {
+      "date": "2026-10-27",
+      "totalTokens": 93100950,
+      "estimatedUsd": 180.915338
+    },
+    {
+      "date": "2026-10-28",
+      "totalTokens": 90351191,
+      "estimatedUsd": 238.90092
+    },
+    {
+      "date": "2026-10-29",
+      "totalTokens": 70254776,
+      "estimatedUsd": 157.377318
+    },
+    {
+      "date": "2026-10-30",
+      "totalTokens": 72320313,
+      "estimatedUsd": 204.296135
+    },
+    {
+      "date": "2026-10-31",
+      "totalTokens": 122937363,
+      "estimatedUsd": 349.306145
+    },
+    {
+      "date": "2026-11-01",
+      "totalTokens": 38490886,
+      "estimatedUsd": 57.121257
+    },
+    {
+      "date": "2026-11-02",
+      "totalTokens": 205306690,
+      "estimatedUsd": 304.28164
+    },
+    {
+      "date": "2026-11-03",
+      "totalTokens": 20084724,
+      "estimatedUsd": 27.349995
+    }
+  ]
+}

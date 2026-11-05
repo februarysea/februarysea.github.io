@@ -2,7 +2,7 @@
 import argparse
 import json
 import math
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 
@@ -28,7 +28,8 @@ def timestamp(value):
 
 def validate_snapshot(snapshot):
     required = {"version", "source", "generatedAt", "totalTokens", "daily"}
-    if not isinstance(snapshot, dict) or set(snapshot) not in (required, required | {"archivedThrough"}):
+    if (not isinstance(snapshot, dict) or not required <= snapshot.keys()
+            or snapshot.keys() - required - {"archivedThrough", "creditUsage"}):
         raise ValueError("Unexpected or missing snapshot fields.")
     if type(snapshot["version"]) is not int or snapshot["version"] != 1 or snapshot["source"] != "codex-profile-service":
         raise ValueError("Invalid snapshot version or source.")
@@ -59,6 +60,14 @@ def validate_snapshot(snapshot):
             raise ValueError("Invalid archive cutoff date.")
         if through not in {row["date"] for row in snapshot["daily"]}:
             raise ValueError("Missing archived cutoff bucket.")
+    if "creditUsage" in snapshot:
+        # Lazy import: the optional reader shares the scalar validators above.
+        from codex_credits import validate as validate_credits
+        credit_usage = validate_credits(snapshot["creditUsage"])
+        if "archivedThrough" in snapshot:
+            start = (date.fromisoformat(snapshot["archivedThrough"]) + timedelta(days=1)).isoformat()
+            if credit_usage["startDate"] != start:
+                raise ValueError("Credit samples must belong to the primary-only period.")
     return snapshot
 
 
@@ -76,6 +85,12 @@ def validate_update(previous, current):
         if ([row for row in previous["daily"] if row["date"] <= cutoff] !=
                 [row for row in current["daily"] if row["date"] <= cutoff]):
             raise ValueError("Refusing to rewrite archived account history.")
+    if "creditUsage" in previous:
+        old, new = previous["creditUsage"], current.get("creditUsage")
+        if (new is None or new["startDate"] != old["startDate"]
+                or timestamp(new["generatedAt"]) < timestamp(old["generatedAt"])
+                or not {r["date"] for r in old["daily"]} <= {r["date"] for r in new["daily"]}):
+            raise ValueError("Refusing to discard or regress saved credit history.")
     # The service may correct counts; do not invent a monotonic lifetime total.
     return current
 
@@ -89,7 +104,8 @@ def extend_archive(archive, primary, previous):
     """
     for item in (archive, primary, previous):
         validate_snapshot(item)
-    if not archive["daily"] or "archivedThrough" in archive or "archivedThrough" in primary:
+    if (not archive["daily"] or "archivedThrough" in archive or "archivedThrough" in primary
+            or "creditUsage" in archive):
         raise ValueError("Expected a raw archive and one live account snapshot.")
     cutoff = archive["daily"][-1]["date"]
     if timestamp(primary["generatedAt"]) < timestamp(archive["generatedAt"]):
@@ -109,6 +125,10 @@ def extend_archive(archive, primary, previous):
     result = {**archive, "generatedAt": primary["generatedAt"], "archivedThrough": cutoff,
               "totalTokens": token_count(archive["totalTokens"] + sum(future.values())),
               "daily": [*archive["daily"], *({"date": day, "totalTokens": value} for day, value in sorted(future.items()))]}
+    # Optional analytics outages must not block successful Profile updates.
+    credit_usage = primary.get("creditUsage", previous.get("creditUsage"))
+    if credit_usage is not None:
+        result["creditUsage"] = credit_usage
     validate_snapshot(result)
     if "archivedThrough" in previous:
         validate_update(previous, result)

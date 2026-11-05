@@ -1,4 +1,5 @@
 import snapshot from "../data/codex-profile.json";
+import apiSnapshot from "../data/openai-usage.json";
 
 const timezone = "Asia/Shanghai";
 
@@ -17,7 +18,7 @@ export const usageDate = (value: string) =>
   });
 
 type UsageSnapshot = Pick<typeof snapshot, "generatedAt" | "totalTokens" | "daily">;
-type UsageDay = { date: string; totalTokens: number | null };
+type UsageDay = { date: string; totalTokens: number | null; partial?: boolean };
 
 function shiftDate(value: string, days: number) {
   const date = new Date(`${value}T00:00:00Z`);
@@ -47,6 +48,24 @@ export function summarizeUsage(data: UsageSnapshot = snapshot) {
     daily,
     recent,
   };
+}
+
+export function summarizeCombinedUsage(codex: UsageSnapshot = snapshot, api = apiSnapshot) {
+  const records = new Map(codex.daily.map(day => [day.date, day.totalTokens]));
+  let apiTokens = 0;
+  for (const day of api.daily) {
+    const count = day.models.reduce((sum, model) => sum + model.inputTokens + model.outputTokens, 0);
+    apiTokens += count;
+    records.set(day.date, (records.get(day.date) ?? 0) + count);
+  }
+  const generatedAt = api.generatedAt && api.generatedAt > codex.generatedAt ? api.generatedAt : codex.generatedAt;
+  const summary = summarizeUsage({ generatedAt, totalTokens: codex.totalTokens + apiTokens,
+    daily: [...records].sort(([a], [b]) => a.localeCompare(b)).map(([date, totalTokens]) => ({ date, totalTokens })) });
+  const codexThrough = codex.daily.map(day => day.date).sort().at(-1) ?? "";
+  const mark = (day: UsageDay): UsageDay => ({ ...day, partial: day.totalTokens !== null &&
+    (day.date > codexThrough || Boolean(api.startDate && day.date >= api.startDate && (!api.throughDate || day.date > api.throughDate))) });
+  return { ...summary, daily: summary.daily.map(mark), recent: summary.recent.map(mark), generatedAt,
+    accounting: "Recorded Codex + OpenAI API tokens. Cache hits are counted once. Daily buckets retain each source’s reporting dates; a source may still be awaiting an update." };
 }
 
 export function contributionWall(daily: UsageDay[]) {
@@ -86,4 +105,4 @@ export function contributionWall(daily: UsageDay[]) {
 }
 
 export const dayLabel = (day: UsageDay) =>
-  `${usageDate(day.date)}, ${day.date.slice(0, 4)}: ${day.totalTokens === null ? "awaiting usage data" : `${exactTokens(day.totalTokens)} recorded tokens`}`;
+  `${usageDate(day.date)}, ${day.date.slice(0, 4)}: ${day.totalTokens === null ? "awaiting usage data" : `${exactTokens(day.totalTokens)} recorded tokens${day.partial ? "; one source is awaiting an update" : ""}`}`;

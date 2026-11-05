@@ -22,7 +22,8 @@ def publish(snapshot, token, api=request):
         previous = json.loads(base64.b64decode(previous_file["content"]))
         validate_update(previous, snapshot)
         if (previous["daily"] == snapshot["daily"] and previous["totalTokens"] == snapshot["totalTokens"]
-                and previous.get("archivedThrough") == snapshot.get("archivedThrough")):
+                and previous.get("archivedThrough") == snapshot.get("archivedThrough")
+                and previous.get("creditUsage", {}).get("daily") == snapshot.get("creditUsage", {}).get("daily")):
             return None
         try:
             result = api(ENDPOINT, token, method="PUT", payload={
