@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "source": "P7",
-  "updatedAt": "2026-11-04T21:39:25.541000+00:00",
+  "updatedAt": "2026-11-05T03:26:39.508000+00:00",
   "window": {
     "from": "2026-10-30",
     "to": "2026-11-05"
   },
   "quality": {
-    "total": 36,
-    "kept": 34,
+    "total": 37,
+    "kept": 35,
     "excluded": 2,
     "outsideRange": 0,
     "madOutliers": 2
@@ -104,16 +104,16 @@
         },
         {
           "date": "2026-11-05",
-          "kg": 6.441,
-          "samples": 1
+          "kg": 6.4945,
+          "samples": 2
         }
       ],
       "latestMeasurement": {
         "date": "2026-11-05",
-        "kg": 6.441
+        "kg": 6.548
       },
-      "visits7d": 12,
-      "medianDurationSeconds7d": 130.0
+      "visits7d": 13,
+      "medianDurationSeconds7d": 130
     },
     "doubao": {
       "assignment": "weight-estimate",
