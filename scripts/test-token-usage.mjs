@@ -89,7 +89,7 @@ test("combined usage adds API input and output once and marks delayed sources", 
   assert.equal(codex.totalTokens, 900);
 });
 
-test("a recent reported day remains provisional and a fresh source cannot hide a stale source", () => {
+test("a fresh source cannot hide a stale source", () => {
   const { summarizeCombinedUsage } = module.exports;
   const codex = snapshot([{date:"2026-11-05",totalTokens:29758305}], "2026-11-05T21:43:26Z");
   const api = {generatedAt:"2026-11-06T16:16:43Z",startDate:"2026-11-03",throughDate:"2026-11-06",
@@ -99,6 +99,4 @@ test("a recent reported day remains provisional and a fresh source cannot hide a
   assert.equal(result.sourceChecks.api, api.generatedAt);
   const day = result.daily.find(d=>d.date==="2026-11-05");
   assert.equal(day.partial, false);
-  assert.equal(day.provisional, true);
-  assert.match(dayLabel(day), /may still be revised/);
 });

@@ -21,7 +21,7 @@ export const usageCheckedTime = (value: string) =>
     month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 
 type UsageSnapshot = Pick<typeof snapshot, "generatedAt" | "totalTokens" | "daily">;
-type UsageDay = { date: string; totalTokens: number | null; partial?: boolean; provisional?: boolean };
+type UsageDay = { date: string; totalTokens: number | null; partial?: boolean };
 
 function shiftDate(value: string, days: number) {
   const date = new Date(`${value}T00:00:00Z`);
@@ -68,7 +68,6 @@ export function summarizeCombinedUsage(codex: UsageSnapshot = snapshot, api = ap
     daily: [...records].sort(([a], [b]) => a.localeCompare(b)).map(([date, totalTokens]) => ({ date, totalTokens })) });
   const codexThrough = codex.daily.map(day => day.date).sort().at(-1) ?? "";
   const mark = (day: UsageDay): UsageDay => ({ ...day,
-    provisional: day.totalTokens !== null && day.date >= shiftDate(summary.asOf, -6),
     partial: day.totalTokens !== null &&
     (day.date > codexThrough || Boolean(api.startDate && day.date >= api.startDate && (!api.throughDate || day.date > api.throughDate))) });
   return { ...summary, daily: summary.daily.map(mark), recent: summary.recent.map(mark), generatedAt,
@@ -113,4 +112,4 @@ export function contributionWall(daily: UsageDay[]) {
 }
 
 export const dayLabel = (day: UsageDay) =>
-  `${usageDate(day.date)}, ${day.date.slice(0, 4)}: ${day.totalTokens === null ? "awaiting usage data" : `${exactTokens(day.totalTokens)} recorded tokens${day.partial ? "; one source is awaiting an update" : ""}${day.provisional ? "; recent usage may still be revised" : ""}`}`;
+  `${usageDate(day.date)}, ${day.date.slice(0, 4)}: ${day.totalTokens === null ? "awaiting usage data" : `${exactTokens(day.totalTokens)} recorded tokens${day.partial ? "; one source is awaiting an update" : ""}`}`;

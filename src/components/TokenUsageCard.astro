@@ -89,7 +89,7 @@ const chartLabel = variant === "heatmap"
           {reportedCells.map((day) => <rect
             class={`wall-cell heat-${day.level}`} data-usage-day={day.date}
             data-usage-date={`${usageDate(day.date)}, ${day.date.slice(0, 4)}`}
-            data-usage-tokens={`${compactTokens(day.totalTokens ?? 0)}${day.partial ? " (partial)" : day.provisional ? " (provisional)" : ""}`}
+            data-usage-tokens={`${compactTokens(day.totalTokens ?? 0)}${day.partial ? " (partial)" : ""}`}
             role="button" tabindex={day === reportedCells.at(-1) ? "0" : "-1"}
             aria-label={dayLabel(day)}
             x={36 + day.column * 12} y={25 + day.row * 12} width="9" height="9" rx="1.5"

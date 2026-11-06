@@ -317,8 +317,8 @@ Every Profile response replaces matching primary-account dates, including late
 upward or downward revisions, without adding the same date twice or rewriting
 the frozen two-account archive. API tokens, billing costs and credit samples
 re-read the last seven saved dates and preserve older history. Counts do not
-have an upstream finalization flag. The last seven days are labelled provisional;
-older dates may also change when the source supplies a correction.
+have an upstream finalization flag; dates may change when the source supplies
+a correction.
 
 Successful rechecks persist `generatedAt` even when counts do not change. The
 homepage shows the earlier of the two configured sources' successful check times,
