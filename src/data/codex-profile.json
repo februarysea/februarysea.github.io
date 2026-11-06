@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "codex-profile-service",
-  "generatedAt": "2026-11-06T16:16:50.190357+00:00",
+  "generatedAt": "2026-11-06T16:43:16.702193+00:00",
   "totalTokens": 21254484013,
   "daily": [
     {
@@ -1006,7 +1006,7 @@
     "version": 1,
     "source": "codex-analytics-credits",
     "scope": "primary-codex-surfaces",
-    "generatedAt": "2026-11-06T16:16:50.190798+00:00",
+    "generatedAt": "2026-11-06T16:43:16.702570+00:00",
     "startDate": "2026-10-25",
     "throughDate": "2026-11-06",
     "daily": [
@@ -1096,7 +1096,7 @@
         "cachedInputTokens": 14844544,
         "outputTokens": 64165,
         "totalTokens": 16216163,
-        "credits": "1210.6266864999998"
+        "credits": "1210.6266865"
       },
       {
         "date": "2026-11-05",
@@ -1104,15 +1104,15 @@
         "cachedInputTokens": 182605952,
         "outputTokens": 1098799,
         "totalTokens": 191054315,
-        "credits": "14840.054503000003"
+        "credits": "14840.054503"
       },
       {
         "date": "2026-11-06",
-        "uncachedInputTokens": 995079,
-        "cachedInputTokens": 43748096,
-        "outputTokens": 270778,
-        "totalTokens": 45013953,
-        "credits": "3361.8893"
+        "uncachedInputTokens": 2624063,
+        "cachedInputTokens": 85235200,
+        "outputTokens": 552911,
+        "totalTokens": 88412174,
+        "credits": "6828.281647499999"
       }
     ]
   }
