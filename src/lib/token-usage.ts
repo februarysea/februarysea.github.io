@@ -16,9 +16,12 @@ export const usageDate = (value: string) =>
   new Date(`${value}T12:00:00+08:00`).toLocaleDateString("en-US", {
     timeZone: timezone, month: "short", day: "numeric",
   });
+export const usageCheckedTime = (value: string) =>
+  new Date(value).toLocaleString("en-US", { timeZone: timezone,
+    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 
 type UsageSnapshot = Pick<typeof snapshot, "generatedAt" | "totalTokens" | "daily">;
-type UsageDay = { date: string; totalTokens: number | null; partial?: boolean };
+type UsageDay = { date: string; totalTokens: number | null; partial?: boolean; provisional?: boolean };
 
 function shiftDate(value: string, days: number) {
   const date = new Date(`${value}T00:00:00Z`);
@@ -58,14 +61,19 @@ export function summarizeCombinedUsage(codex: UsageSnapshot = snapshot, api = ap
     apiTokens += count;
     records.set(day.date, (records.get(day.date) ?? 0) + count);
   }
-  const generatedAt = api.generatedAt && api.generatedAt > codex.generatedAt ? api.generatedAt : codex.generatedAt;
+  const generatedAt = api.generatedAt && Date.parse(api.generatedAt) > Date.parse(codex.generatedAt) ? api.generatedAt : codex.generatedAt;
+  const lastCheckedAt = !api.startDate ? codex.generatedAt : !api.generatedAt ? null
+    : Date.parse(api.generatedAt) < Date.parse(codex.generatedAt) ? api.generatedAt : codex.generatedAt;
   const summary = summarizeUsage({ generatedAt, totalTokens: codex.totalTokens + apiTokens,
     daily: [...records].sort(([a], [b]) => a.localeCompare(b)).map(([date, totalTokens]) => ({ date, totalTokens })) });
   const codexThrough = codex.daily.map(day => day.date).sort().at(-1) ?? "";
-  const mark = (day: UsageDay): UsageDay => ({ ...day, partial: day.totalTokens !== null &&
+  const mark = (day: UsageDay): UsageDay => ({ ...day,
+    provisional: day.totalTokens !== null && day.date >= shiftDate(summary.asOf, -6),
+    partial: day.totalTokens !== null &&
     (day.date > codexThrough || Boolean(api.startDate && day.date >= api.startDate && (!api.throughDate || day.date > api.throughDate))) });
   return { ...summary, daily: summary.daily.map(mark), recent: summary.recent.map(mark), generatedAt,
-    accounting: "Recorded Codex + OpenAI API tokens. Cache hits are counted once. Daily buckets retain each source’s reporting dates; a source may still be awaiting an update." };
+    lastCheckedAt, sourceChecks: { codex: codex.generatedAt, api: api.generatedAt },
+    accounting: "Recorded Codex + OpenAI API tokens. Cache hits are counted once. Source reporting dates are preserved, not rebucketed to Beijing time. Reported counts may be revised later; a successful check does not mean a day is complete." };
 }
 
 export function contributionWall(daily: UsageDay[]) {
@@ -105,4 +113,4 @@ export function contributionWall(daily: UsageDay[]) {
 }
 
 export const dayLabel = (day: UsageDay) =>
-  `${usageDate(day.date)}, ${day.date.slice(0, 4)}: ${day.totalTokens === null ? "awaiting usage data" : `${exactTokens(day.totalTokens)} recorded tokens${day.partial ? "; one source is awaiting an update" : ""}`}`;
+  `${usageDate(day.date)}, ${day.date.slice(0, 4)}: ${day.totalTokens === null ? "awaiting usage data" : `${exactTokens(day.totalTokens)} recorded tokens${day.partial ? "; one source is awaiting an update" : ""}${day.provisional ? "; recent usage may still be revised" : ""}`}`;

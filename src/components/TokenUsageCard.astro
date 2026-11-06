@@ -1,6 +1,6 @@
 ---
 import {
-  summarizeCombinedUsage, compactTokens, exactTokens, usageDate, contributionWall, dayLabel,
+  summarizeCombinedUsage, compactTokens, exactTokens, usageDate, usageCheckedTime, contributionWall, dayLabel,
 } from "../lib/token-usage";
 import RecentWork from "./RecentWork.astro";
 import { usd } from "../lib/api-usage";
@@ -89,7 +89,7 @@ const chartLabel = variant === "heatmap"
           {reportedCells.map((day) => <rect
             class={`wall-cell heat-${day.level}`} data-usage-day={day.date}
             data-usage-date={`${usageDate(day.date)}, ${day.date.slice(0, 4)}`}
-            data-usage-tokens={`${compactTokens(day.totalTokens ?? 0)}${day.partial ? " (partial)" : ""}`}
+            data-usage-tokens={`${compactTokens(day.totalTokens ?? 0)}${day.partial ? " (partial)" : day.provisional ? " (provisional)" : ""}`}
             role="button" tabindex={day === reportedCells.at(-1) ? "0" : "-1"}
             aria-label={dayLabel(day)}
             x={36 + day.column * 12} y={25 + day.row * 12} width="9" height="9" rx="1.5"
@@ -148,8 +148,8 @@ const chartLabel = variant === "heatmap"
   </figure>
 
   <footer class="token-footer">
-    <span class="token-updated" title={`Usage data through ${summary.dataThrough ?? "the latest available day"}. Snapshot fetched ${summary.generatedAt}.`}>
-      {summary.dataThrough ? <>As of <time datetime={summary.dataThrough}>{usageDate(summary.dataThrough)}</time></> : "Awaiting daily data"}
+    <span class="token-updated" title={`Checked times in UTC+8. Codex: ${usageCheckedTime(summary.sourceChecks.codex)}. API: ${summary.sourceChecks.api ? usageCheckedTime(summary.sourceChecks.api) : "not yet checked"}. Showing the earlier source check. Data through ${summary.dataThrough ?? "the latest available day"}, using source reporting dates. Recent usage may still be revised; older records can also be corrected.`}>
+      {summary.lastCheckedAt ? <>Checked <time datetime={summary.lastCheckedAt}>{usageCheckedTime(summary.lastCheckedAt)}</time> <span>UTC+8</span></> : "Awaiting sync"}
     </span>
     {variant === "heatmap" && <span class="wall-legend" aria-label="Lighter teal indicates higher usage.">
       <span class="wall-scale">Less {[0, 1, 2, 3, 4].map((level) => <i class={`heat-${level}`}></i>)} More</span>

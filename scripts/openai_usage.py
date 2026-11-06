@@ -18,6 +18,7 @@ from codex_github import NoRedirects
 from codex_usage import timestamp, token_count
 
 SOURCE = "openai-organization-completions"
+RECHECK_DAYS = 7
 ENDPOINT = "https://api.openai.com/v1/organization/usage/completions"
 COUNTS = ("inputTokens", "cachedInputTokens", "outputTokens", "requests")
 FIELDS = {"version", "source", "generatedAt", "startDate", "throughDate", "daily"}
@@ -134,8 +135,8 @@ def collect(previous, start_date, key, *, now=None, api=request, full=False):
         raise ValueError("OpenAI usage Admin API Key is missing.")
     refresh = start
     if previous["throughDate"] and not full:
-        # Re-read the most recent 3 saved days for delayed usage and corrections.
-        refresh = max(start, day(previous["throughDate"]) - timedelta(days=2))
+        # Re-read a week of saved days for delayed usage and corrections.
+        refresh = max(start, day(previous["throughDate"]) - timedelta(days=RECHECK_DAYS - 1))
     begin_ts = int(datetime.combine(refresh, datetime.min.time(), timezone.utc).timestamp())
     params = {"start_time": begin_ts, "end_time": min(begin_ts + 31 * 86400, end_ts), "bucket_width": "1d",
               "group_by": ["model"], "limit": 31}

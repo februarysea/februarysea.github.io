@@ -82,7 +82,7 @@ class CreditTests(unittest.TestCase):
         fetch = Mock(return_value=update)
         result = credits.collect("unused", "2026-10-25", before,
                                  now=datetime(2026, 10, 31, tzinfo=timezone.utc), fetch=fetch)
-        self.assertEqual(fetch.call_args.args[1:], ("2026-10-27", "2026-10-31"))
+        self.assertEqual(fetch.call_args.args[1:], ("2026-10-25", "2026-10-31"))
         self.assertEqual(len(result["daily"]), 6)
         self.assertEqual(result["daily"][3]["credits"], "1")
         self.assertEqual(result["daily"][:3], before["daily"][:3])
@@ -170,9 +170,9 @@ class CreditTests(unittest.TestCase):
         self.assertEqual(publisher.publish(current, "synthetic", api), "commit-sha")
         later = copy.deepcopy(current)
         later["creditUsage"]["generatedAt"] = "2026-10-31T00:00:00Z"
-        unchanged = Mock(return_value=response(current))
-        self.assertIsNone(publisher.publish(later, "synthetic", unchanged))
-        self.assertEqual(unchanged.call_count, 1)
+        rechecked = Mock(side_effect=[response(current), {"commit":{"sha":"checked-again"}}])
+        self.assertEqual(publisher.publish(later, "synthetic", rechecked), "checked-again")
+        self.assertEqual(rechecked.call_count, 2)
 
 
 if __name__ == "__main__":

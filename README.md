@@ -187,7 +187,7 @@ Following the user's acceptance of the community reference valuation on
 the existing managed primary OAuth flow, after credential renewal. The samples
 are stored as optional `creditUsage` in `src/data/codex-profile.json`, starting
 the day after the two-account archive. The initial read backfills that period;
-subsequent reads refresh the last three saved days and new days. Dates replace
+subsequent reads refresh the last seven saved days and new days. Dates replace
 previous values rather than accumulating, and older saved rows survive rolling
 retention. Only validated aggregate dates, counts and credits are published.
 
@@ -212,7 +212,7 @@ part of input. Token totals cover this endpoint only. A separate `costs` section
 organization Costs API, grouped by billing line item, with exact decimal USD
 amounts. Costs may include other API services and may lag token usage. They are
 reported usage costs, not subscription charges, payment receipts, or list-price
-estimates. Cost collection refreshes the recent three days; unavailable costs
+estimates. Cost collection refreshes the recent seven days; unavailable costs
 retain their previous coverage without blocking token updates. API dates include the current UTC day (still updating), kept separate from Codex's
 service-defined daily buckets.
 
@@ -234,7 +234,7 @@ replacement for an Admin Key.
 
 `src/data/openai-usage.json` starts unconnected (`null` dates), which the page
 renders as unavailable rather than zero. The first enabled run backfills the
-configured interval with pagination. Later runs re-read the last 3 saved days
+configured interval with pagination. Later runs re-read the last 7 saved days
 and append newer days; repeated dates replace, rather than add to, previous
 counts. Empty results in a returned bucket are zero; missing buckets, incomplete
 coverage, malformed responses, or expired credentials fail the API job and keep
@@ -312,6 +312,20 @@ Codex shares the existing daily Pages schedule at **00:00 Asia/Shanghai**
 on scheduled runs and website updates. Manual runs offer `sync_codex` and
 `dry_run`; a dry run still saves refreshed credentials but does not deploy or
 commit statistics. Existing Enode synchronization remains in the same workflow.
+
+Every Profile response replaces matching primary-account dates, including late
+upward or downward revisions, without adding the same date twice or rewriting
+the frozen two-account archive. API tokens, billing costs and credit samples
+re-read the last seven saved dates and preserve older history. Counts do not
+have an upstream finalization flag. The last seven days are labelled provisional;
+older dates may also change when the source supplies a correction.
+
+Successful rechecks persist `generatedAt` even when counts do not change. The
+homepage shows the earlier of the two configured sources' successful check times,
+with separate source times in its tooltip, so one healthy source cannot hide a
+stale one. This is a check time, not a promise that the reporting day is complete.
+Date buckets remain source-defined; they are not silently relabelled as Beijing
+calendar days. Estimated cost is recalculated from the updated recorded tokens.
 
 ### Authentication setup
 

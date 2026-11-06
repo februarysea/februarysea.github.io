@@ -20,6 +20,7 @@ ENDPOINT = "https://chatgpt.com/backend-api/wham/analytics/daily-workspace-usage
 CODEX_SURFACES = frozenset({"CODEX_CLI", "CODEX_DESKTOP_APP", "CODEX_IDE_VSCODE",
     "CODEX_WEB", "CODEX_GITHUB", "CODEX_SERVICE_EXEC"})
 COUNT_FIELDS = ("uncachedInputTokens", "cachedInputTokens", "outputTokens", "totalTokens")
+RECHECK_DAYS = 7
 
 
 def credits(value):
@@ -156,9 +157,9 @@ def collect(raw_auth, start, previous=None, *, now=None, fetch=request):
         raise ValueError("Credit start date is in the future.")
     if previous and timestamp(previous["generatedAt"]) > now:
         raise ValueError("Refusing older credit data.")
-    # Re-read three saved days to accept reporting delays, replacing rather than
+    # Re-read seven saved days to accept reporting delays, replacing rather than
     # adding repeated dates. Old history survives backend retention changes.
-    first = max(start, (date.fromisoformat(previous["throughDate"]) - timedelta(days=2)).isoformat()) if previous else start
+    first = max(start, (date.fromisoformat(previous["throughDate"]) - timedelta(days=RECHECK_DAYS - 1)).isoformat()) if previous else start
     saved = {row["date"]: row for row in previous["daily"]} if previous else {}
     current = date.fromisoformat(first)
     observed = []

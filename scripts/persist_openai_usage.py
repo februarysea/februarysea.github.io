@@ -23,7 +23,8 @@ def publish(snapshot, token, api=request):
             raise ValueError("Unexpected API snapshot response.")
         previous = json.loads(base64.b64decode(response["content"]))
         validate_update(previous, snapshot)
-        if previous.get("costs") == snapshot.get("costs") and all(previous[field] == snapshot[field] for field in ("daily", "startDate", "throughDate")):
+        # Keep the last successful check time, including a confirmed zero-change read.
+        if previous == snapshot:
             return None
         try:
             result = api(ENDPOINT, token, method="PUT", payload={"branch": "master", "sha": response["sha"],

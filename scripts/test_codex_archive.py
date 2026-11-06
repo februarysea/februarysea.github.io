@@ -84,6 +84,16 @@ class ArchiveTests(unittest.TestCase):
         self.assertEqual([r for r in current["daily"] if r["date"] <= cutoff], archive["daily"])
         self.assertEqual(current["totalTokens"], archive["totalTokens"] + sum(r["totalTokens"] for r in current["daily"] if r["date"] > cutoff))
 
+    def test_delayed_november_fifth_correction_replaces_the_old_day_exactly_once(self):
+        early = snapshot([("2026-11-05", 29758305)], 29758305, "2026-11-05T21:43:26Z")
+        previous = extend_archive(self.archive, early, self.archive)
+        revised = snapshot([("2026-11-05", 199314622)], 199314622, "2026-11-06T16:13:43Z")
+        result = extend_archive(self.archive, revised, previous)
+        self.assertEqual(result["totalTokens"] - previous["totalTokens"], 169556317)
+        self.assertEqual(result["daily"][-1]["totalTokens"], 199314622)
+        self.assertEqual(result["daily"][:2], self.archive["daily"])
+        self.assertEqual(extend_archive(self.archive, revised, result), result)
+
 
 if __name__ == "__main__":
     unittest.main()

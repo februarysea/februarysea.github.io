@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 import re
 
-from openai_usage import day, request
+from openai_usage import RECHECK_DAYS, day, request
 from codex_usage import timestamp
 
 
@@ -55,7 +55,7 @@ def collect_costs(previous, start_date, key, *, now=None, api=None):
         validate_costs(previous)
         if previous['startDate'] != start_date or timestamp(previous['generatedAt']) > now:
             raise ValueError('Cannot replace cost history.')
-    refresh = max(start, day(previous['throughDate']) - timedelta(days=2)) if previous else start
+    refresh = max(start, day(previous['throughDate']) - timedelta(days=RECHECK_DAYS - 1)) if previous else start
     stop = int(now.timestamp())
     begin = int(datetime.combine(refresh, datetime.min.time(), timezone.utc).timestamp())
     if not key or begin >= stop:

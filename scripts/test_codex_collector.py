@@ -216,10 +216,17 @@ class PublishTests(unittest.TestCase):
             publish.publish(current, "token", api)
         self.assertEqual(api.call_count, 1)
 
-    def test_unchanged_counts_do_not_create_daily_empty_commits(self):
+    def test_identical_snapshot_does_not_create_duplicate_commits(self):
         api = unittest.mock.Mock(return_value=self.response(self.previous()))
-        self.assertIsNone(publish.publish(collect.normalize_usage(usage()), "token", api))
+        self.assertIsNone(publish.publish(self.previous(), "token", api))
         self.assertEqual(api.call_count, 1)
+
+    def test_successful_recheck_persists_its_time_even_without_new_tokens(self):
+        current = self.previous()
+        current["generatedAt"] = "2026-10-15T00:00:00Z"
+        api = unittest.mock.Mock(side_effect=[self.response(self.previous()), {"commit":{"sha":"rechecked"}}])
+        self.assertEqual(publish.publish(current, "token", api), "rechecked")
+        self.assertEqual(json.loads(base64.b64decode(api.call_args.kwargs["payload"]["content"])), current)
 
     def test_concurrent_update_is_reread_before_retry(self):
         current = self.previous()

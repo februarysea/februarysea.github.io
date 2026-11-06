@@ -129,7 +129,7 @@ class CollectionTests(unittest.TestCase):
             return page(*(b for b in all_buckets if params["start_time"] <= b["start_time"] < params["end_time"]))
         current = collect(prior, "2026-09-01", "key", now=NOW, api=api)
         self.assertEqual(current, prior)
-        self.assertEqual(datetime.fromtimestamp(calls[-1]["start_time"], timezone.utc).date().isoformat(), "2026-10-31")
+        self.assertEqual(datetime.fromtimestamp(calls[-1]["start_time"], timezone.utc).date().isoformat(), "2026-10-27")
         calls.clear()
         collect(prior, "2026-09-01", "key", now=NOW, api=api, full=True)
         self.assertEqual(calls[0]["start_time"], int(start.timestamp()))
@@ -202,6 +202,19 @@ class PersistTests(unittest.TestCase):
             return {"encoding": "base64", "sha": "same",
                     "content": base64.b64encode(json.dumps(current).encode()).decode()}
         self.assertIsNone(publish(current, "token", api))
+
+    def test_successful_recheck_persists_its_time_even_without_new_tokens(self):
+        previous = sample()
+        current = {**previous, "generatedAt":"2026-11-03T01:00:00Z"}
+        writes = []
+        def api(path, token, **kwargs):
+            if not kwargs:
+                return {"encoding":"base64", "sha":"same",
+                        "content":base64.b64encode(json.dumps(previous).encode()).decode()}
+            writes.append(json.loads(base64.b64decode(kwargs["payload"]["content"])))
+            return {"commit":{"sha":"rechecked"}}
+        self.assertEqual(publish(current, "token", api), "rechecked")
+        self.assertEqual(writes, [current])
 
 
 if __name__ == "__main__":
