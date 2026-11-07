@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "timezone": "Asia/Shanghai",
-  "updatedAt": "2026-11-06T21:12:02.961000+00:00",
+  "updatedAt": "2026-11-07T19:46:19.518000+00:00",
   "coverage": {
     "from": "2026-09-05T19:26:28.072000+08:00",
-    "to": "2026-11-07T05:12:02.961000+08:00"
+    "to": "2026-11-08T03:46:19.518000+08:00"
   },
   "sessions": [
     {
@@ -5842,6 +5842,333 @@
             },
             {
               "meanVelocityMps": 0.672
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "day-2026-11-07",
+      "date": "2026-11-07",
+      "sets": [
+        {
+          "id": "set-5715051361f2ea28cab1",
+          "exercise": "Squat",
+          "weightKg": 20,
+          "repCount": 10,
+          "work": false,
+          "reps": [
+            {
+              "meanVelocityMps": 0.681
+            },
+            {
+              "meanVelocityMps": 0.663
+            },
+            {
+              "meanVelocityMps": 0.687
+            },
+            {
+              "meanVelocityMps": 0.675
+            },
+            {
+              "meanVelocityMps": 0.737
+            },
+            {
+              "meanVelocityMps": 0.809
+            },
+            {
+              "meanVelocityMps": 0.774
+            },
+            {
+              "meanVelocityMps": 0.791
+            },
+            {
+              "meanVelocityMps": 0.738
+            },
+            {
+              "meanVelocityMps": 0.769
+            }
+          ]
+        },
+        {
+          "id": "set-269eaf47c6e0bcbefcad",
+          "exercise": "Squat",
+          "weightKg": 80,
+          "repCount": 5,
+          "work": false,
+          "reps": [
+            {
+              "meanVelocityMps": 0.543
+            },
+            {
+              "meanVelocityMps": 0.593
+            },
+            {
+              "meanVelocityMps": 0.602
+            },
+            {
+              "meanVelocityMps": 0.581
+            },
+            {
+              "meanVelocityMps": 0.606
+            }
+          ]
+        },
+        {
+          "id": "set-756e8f8fd0243ec3b994",
+          "exercise": "Squat",
+          "weightKg": 50,
+          "repCount": 5,
+          "work": false,
+          "reps": [
+            {
+              "meanVelocityMps": 0.675
+            },
+            {
+              "meanVelocityMps": 0.705
+            },
+            {
+              "meanVelocityMps": 0.718
+            },
+            {
+              "meanVelocityMps": 0.688
+            },
+            {
+              "meanVelocityMps": 0.706
+            }
+          ]
+        },
+        {
+          "id": "set-c6abc92937fa7b923bef",
+          "exercise": "Squat",
+          "weightKg": 105,
+          "repCount": 5,
+          "work": true,
+          "reps": [
+            {
+              "meanVelocityMps": 0.441
+            },
+            {
+              "meanVelocityMps": 0.467
+            },
+            {
+              "meanVelocityMps": 0.481
+            },
+            {
+              "meanVelocityMps": 0.458
+            },
+            {
+              "meanVelocityMps": 0.411
+            }
+          ]
+        },
+        {
+          "id": "set-c9a1e85d1b4da5426a7b",
+          "exercise": "Squat",
+          "weightKg": 105,
+          "repCount": 5,
+          "work": true,
+          "reps": [
+            {
+              "meanVelocityMps": 0.495
+            },
+            {
+              "meanVelocityMps": 0.501
+            },
+            {
+              "meanVelocityMps": 0.472
+            },
+            {
+              "meanVelocityMps": 0.412
+            },
+            {
+              "meanVelocityMps": 0.459
+            }
+          ]
+        },
+        {
+          "id": "set-436c56adc019994d6e23",
+          "exercise": "Squat",
+          "weightKg": 105,
+          "repCount": 5,
+          "work": true,
+          "reps": [
+            {
+              "meanVelocityMps": 0.461
+            },
+            {
+              "meanVelocityMps": 0.463
+            },
+            {
+              "meanVelocityMps": 0.474
+            },
+            {
+              "meanVelocityMps": 0.458
+            },
+            {
+              "meanVelocityMps": 0.451
+            }
+          ]
+        },
+        {
+          "id": "set-9b1f81ac379c94b8c3d3",
+          "exercise": "Bench Press",
+          "weightKg": 20,
+          "repCount": 11,
+          "work": false,
+          "reps": [
+            {
+              "meanVelocityMps": 0.28
+            },
+            {
+              "meanVelocityMps": 0.762
+            },
+            {
+              "meanVelocityMps": 0.755
+            },
+            {
+              "meanVelocityMps": 0.754
+            },
+            {
+              "meanVelocityMps": 0.799
+            },
+            {
+              "meanVelocityMps": 0.822
+            },
+            {
+              "meanVelocityMps": 0.758
+            },
+            {
+              "meanVelocityMps": 0.713
+            },
+            {
+              "meanVelocityMps": 0.737
+            },
+            {
+              "meanVelocityMps": 0.715
+            },
+            {
+              "meanVelocityMps": 0.643
+            }
+          ]
+        },
+        {
+          "id": "set-e4a1337de357da4e69b0",
+          "exercise": "Bench Press",
+          "weightKg": 40,
+          "repCount": 5,
+          "work": false,
+          "reps": [
+            {
+              "meanVelocityMps": 0.601
+            },
+            {
+              "meanVelocityMps": 0.627
+            },
+            {
+              "meanVelocityMps": 0.659
+            },
+            {
+              "meanVelocityMps": 0.65
+            },
+            {
+              "meanVelocityMps": 0.583
+            }
+          ]
+        },
+        {
+          "id": "set-1a36efbdb52d2922d468",
+          "exercise": "Bench Press",
+          "weightKg": 60,
+          "repCount": 5,
+          "work": false,
+          "reps": [
+            {
+              "meanVelocityMps": 0.506
+            },
+            {
+              "meanVelocityMps": 0.53
+            },
+            {
+              "meanVelocityMps": 0.543
+            },
+            {
+              "meanVelocityMps": 0.503
+            },
+            {
+              "meanVelocityMps": 0.454
+            }
+          ]
+        },
+        {
+          "id": "set-7bc4bc30d07804148dfb",
+          "exercise": "Bench Press",
+          "weightKg": 80,
+          "repCount": 5,
+          "work": true,
+          "reps": [
+            {
+              "meanVelocityMps": 0.386
+            },
+            {
+              "meanVelocityMps": 0.381
+            },
+            {
+              "meanVelocityMps": 0.357
+            },
+            {
+              "meanVelocityMps": 0.295
+            },
+            {
+              "meanVelocityMps": 0.347
+            }
+          ]
+        },
+        {
+          "id": "set-06446ad3eaff48cbc103",
+          "exercise": "Bench Press",
+          "weightKg": 80,
+          "repCount": 5,
+          "work": true,
+          "reps": [
+            {
+              "meanVelocityMps": 0.353
+            },
+            {
+              "meanVelocityMps": 0.394
+            },
+            {
+              "meanVelocityMps": 0.347
+            },
+            {
+              "meanVelocityMps": 0.346
+            },
+            {
+              "meanVelocityMps": 0.317
+            }
+          ]
+        },
+        {
+          "id": "set-29619699ee0938477960",
+          "exercise": "Bench Press",
+          "weightKg": 80,
+          "repCount": 5,
+          "work": true,
+          "reps": [
+            {
+              "meanVelocityMps": 0.358
+            },
+            {
+              "meanVelocityMps": 0.375
+            },
+            {
+              "meanVelocityMps": 0.359
+            },
+            {
+              "meanVelocityMps": 0.361
+            },
+            {
+              "meanVelocityMps": 0.284
             }
           ]
         }
