@@ -1,8 +1,8 @@
 {
   "version": 1,
   "source": "codex-profile-service",
-  "generatedAt": "2026-11-10T21:36:29.560612+00:00",
-  "totalTokens": 21887983591,
+  "generatedAt": "2026-11-11T22:24:25.261857+00:00",
+  "totalTokens": 22025219860,
   "daily": [
     {
       "date": "2025-12-29",
@@ -1014,7 +1014,11 @@
     },
     {
       "date": "2026-11-10",
-      "totalTokens": 162307723
+      "totalTokens": 166393173
+    },
+    {
+      "date": "2026-11-11",
+      "totalTokens": 133150819
     }
   ],
   "archivedThrough": "2026-10-24",
@@ -1022,9 +1026,9 @@
     "version": 1,
     "source": "codex-analytics-credits",
     "scope": "primary-codex-surfaces",
-    "generatedAt": "2026-11-10T21:36:29.561151+00:00",
+    "generatedAt": "2026-11-11T22:24:25.262412+00:00",
     "startDate": "2026-10-25",
-    "throughDate": "2026-11-10",
+    "throughDate": "2026-11-11",
     "daily": [
       {
         "date": "2026-10-25",
@@ -1128,7 +1132,7 @@
         "cachedInputTokens": 194691712,
         "outputTokens": 1046739,
         "totalTokens": 201792168,
-        "credits": "14820.890013000002"
+        "credits": "14820.890012999995"
       },
       {
         "date": "2026-11-07",
@@ -1144,7 +1148,7 @@
         "cachedInputTokens": 196135040,
         "outputTokens": 1266694,
         "totalTokens": 205969853,
-        "credits": "15474.201734"
+        "credits": "15474.201734000006"
       },
       {
         "date": "2026-11-09",
@@ -1156,11 +1160,19 @@
       },
       {
         "date": "2026-11-10",
-        "uncachedInputTokens": 6138996,
-        "cachedInputTokens": 172766976,
-        "outputTokens": 852606,
-        "totalTokens": 179758578,
-        "credits": "11612.512887"
+        "uncachedInputTokens": 6207537,
+        "cachedInputTokens": 173199488,
+        "outputTokens": 854209,
+        "totalTokens": 180261234,
+        "credits": "11612.812405"
+      },
+      {
+        "date": "2026-11-11",
+        "uncachedInputTokens": 1938337,
+        "cachedInputTokens": 57544064,
+        "outputTokens": 316624,
+        "totalTokens": 59799025,
+        "credits": "3959.4966375000004"
       }
     ]
   }
