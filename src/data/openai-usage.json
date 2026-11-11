@@ -1,9 +1,9 @@
 {
   "version": 1,
   "source": "openai-organization-completions",
-  "generatedAt": "2026-11-10T21:36:21.197052+00:00",
+  "generatedAt": "2026-11-11T22:24:14.578822+00:00",
   "startDate": "2026-11-03",
-  "throughDate": "2026-11-10",
+  "throughDate": "2026-11-11",
   "daily": [
     {
       "date": "2026-11-03",
@@ -79,6 +79,25 @@
           "cachedInputTokens": 0,
           "outputTokens": 1533,
           "requests": 3
+        }
+      ]
+    },
+    {
+      "date": "2026-11-11",
+      "models": [
+        {
+          "model": "gpt-6-luna",
+          "inputTokens": 381,
+          "cachedInputTokens": 0,
+          "outputTokens": 27,
+          "requests": 1
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "inputTokens": 12120912,
+          "cachedInputTokens": 11403832,
+          "outputTokens": 64584,
+          "requests": 125
         }
       ]
     }
