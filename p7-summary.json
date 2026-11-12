@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "source": "P7",
-  "updatedAt": "2026-11-11T22:24:18.173000+00:00",
+  "updatedAt": "2026-11-12T21:59:30.267000+00:00",
   "window": {
-    "from": "2026-11-06",
-    "to": "2026-11-12"
+    "from": "2026-11-07",
+    "to": "2026-11-13"
   },
   "quality": {
     "total": 39,
@@ -136,14 +136,19 @@
           "date": "2026-11-11",
           "kg": 6.5695,
           "samples": 2
+        },
+        {
+          "date": "2026-11-12",
+          "kg": 6.629,
+          "samples": 3
         }
       ],
       "latestMeasurement": {
-        "date": "2026-11-11",
-        "kg": 6.534
+        "date": "2026-11-12",
+        "kg": 6.629
       },
-      "visits7d": 14,
-      "medianDurationSeconds7d": 108.5
+      "visits7d": 15,
+      "medianDurationSeconds7d": 119
     },
     "doubao": {
       "assignment": "weight-estimate",
@@ -270,16 +275,16 @@
         },
         {
           "date": "2026-11-12",
-          "kg": 5.002,
-          "samples": 2
+          "kg": 5.0005,
+          "samples": 4
         }
       ],
       "latestMeasurement": {
         "date": "2026-11-12",
-        "kg": 4.971
+        "kg": 4.921
       },
-      "visits7d": 19,
-      "medianDurationSeconds7d": 41
+      "visits7d": 18,
+      "medianDurationSeconds7d": 43.0
     }
   }
 }
