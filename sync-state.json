@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "deviceHash": "e0c1171ba6482084f284bcbf95a6374190954a7557e70797732d3a186a1498c2",
-  "updatedAt": "2026-11-12T21:59:30.267000+00:00",
+  "updatedAt": "2026-11-13T21:45:05.977000+00:00",
   "events": {
     "8e0c0bf03390ea1a7c7ce5806a78a3e61374b738e216a897658a043d90c7bb24": {
       "date": "2026-10-19",
@@ -848,6 +848,36 @@
       "kg": 6.629,
       "seconds": 155,
       "order": 6
+    },
+    "1138a9a74f678fdcb6e6c699ac99f4869349905a84dd2fc107d8b80a164861c0": {
+      "date": "2026-11-13",
+      "kg": 4.973,
+      "seconds": 37,
+      "order": 0
+    },
+    "7cf6c0c9ab1c099a2e98ebfdb0e87e21fcb3d743909ee5095b2b3792f8fdfca7": {
+      "date": "2026-11-13",
+      "kg": 5.051,
+      "seconds": 33,
+      "order": 1
+    },
+    "4a4e8f8347ecb40e70b0aa1bd5e0f9e5ef7454dabcd17a586513fac56a02a44d": {
+      "date": "2026-11-13",
+      "kg": 4.912,
+      "seconds": 67,
+      "order": 2
+    },
+    "6db0c6f1e6a1280397e683aaf11881ad40d9e95ed017f5aa9b2280301a5c9870": {
+      "date": "2026-11-13",
+      "kg": 6.624,
+      "seconds": 167,
+      "order": 3
+    },
+    "0c19bf9a920eab05b0abaf8c7c84f4996d6bac401542f41ac867dbf190e5d93e": {
+      "date": "2026-11-14",
+      "kg": 6.758,
+      "seconds": 143,
+      "order": 0
     }
   }
 }
