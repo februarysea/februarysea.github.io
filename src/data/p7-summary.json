@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
   "source": "P7",
-  "updatedAt": "2026-11-14T20:16:16.211000+00:00",
+  "updatedAt": "2026-11-15T20:41:50.864000+00:00",
   "window": {
-    "from": "2026-11-09",
-    "to": "2026-11-15"
+    "from": "2026-11-10",
+    "to": "2026-11-16"
   },
   "quality": {
-    "total": 34,
-    "kept": 30,
-    "excluded": 4,
-    "outsideRange": 3,
-    "madOutliers": 1
+    "total": 30,
+    "kept": 29,
+    "excluded": 1,
+    "outsideRange": 1,
+    "madOutliers": 0
   },
   "cats": {
     "tangyuan": {
@@ -151,14 +151,19 @@
           "date": "2026-11-14",
           "kg": 6.69,
           "samples": 2
+        },
+        {
+          "date": "2026-11-15",
+          "kg": 6.477,
+          "samples": 1
         }
       ],
       "latestMeasurement": {
-        "date": "2026-11-14",
-        "kg": 6.622
+        "date": "2026-11-15",
+        "kg": 6.477
       },
-      "visits7d": 12,
-      "medianDurationSeconds7d": 140.5
+      "visits7d": 10,
+      "medianDurationSeconds7d": 149.0
     },
     "doubao": {
       "assignment": "weight-estimate",
@@ -297,14 +302,19 @@
           "date": "2026-11-14",
           "kg": 4.9355,
           "samples": 2
+        },
+        {
+          "date": "2026-11-15",
+          "kg": 4.923,
+          "samples": 3
         }
       ],
       "latestMeasurement": {
-        "date": "2026-11-14",
-        "kg": 4.951
+        "date": "2026-11-15",
+        "kg": 4.903
       },
-      "visits7d": 18,
-      "medianDurationSeconds7d": 38.0
+      "visits7d": 19,
+      "medianDurationSeconds7d": 37
     }
   }
 }
