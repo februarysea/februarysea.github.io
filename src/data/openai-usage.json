@@ -1,9 +1,9 @@
 {
   "version": 1,
   "source": "openai-organization-completions",
-  "generatedAt": "2026-11-15T20:41:47.189522+00:00",
+  "generatedAt": "2026-11-16T23:56:01.385498+00:00",
   "startDate": "2026-11-03",
-  "throughDate": "2026-11-15",
+  "throughDate": "2026-11-16",
   "daily": [
     {
       "date": "2026-11-03",
@@ -116,6 +116,18 @@
     {
       "date": "2026-11-15",
       "models": []
+    },
+    {
+      "date": "2026-11-16",
+      "models": [
+        {
+          "model": "gpt-6.1-sol",
+          "inputTokens": 1382140,
+          "cachedInputTokens": 890504,
+          "outputTokens": 15750,
+          "requests": 27
+        }
+      ]
     }
   ]
 }
