@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "deviceHash": "e0c1171ba6482084f284bcbf95a6374190954a7557e70797732d3a186a1498c2",
-  "updatedAt": "2026-11-18T22:48:19.195000+00:00",
+  "updatedAt": "2026-11-19T22:51:34.387000+00:00",
   "events": {
     "8e0c0bf03390ea1a7c7ce5806a78a3e61374b738e216a897658a043d90c7bb24": {
       "date": "2026-10-19",
@@ -1033,6 +1033,66 @@
       "date": "2026-11-19",
       "kg": 4.99,
       "seconds": 60,
+      "order": 2
+    },
+    "47ed357b19df4655d39ac9b94dc75750dd7367d9dd39f2d0bca9c0c75355d0e7": {
+      "date": "2026-11-19",
+      "kg": 2.867,
+      "seconds": 23,
+      "order": 3
+    },
+    "c77916a7999f042b036a69c9e0edf1b30af3379f89da1c7f900fecf5fd6da8f4": {
+      "date": "2026-11-19",
+      "kg": 6.557,
+      "seconds": 153,
+      "order": 4
+    },
+    "d1c9ae3084beaf8c0f71142d10a58289b4790b4ee7bfec916dae7f20bf11f4f4": {
+      "date": "2026-11-19",
+      "kg": 4.922,
+      "seconds": 29,
+      "order": 5
+    },
+    "17a36cbe18774be108a253c5f5c60b185b45a67710a1f6c59e4497117f1a21d2": {
+      "date": "2026-11-19",
+      "kg": 3.387,
+      "seconds": 17,
+      "order": 6
+    },
+    "9b6e27c2d6709c4bbfcf5e1ab57b0b6a198124c6758307737e5ed8f08458bd62": {
+      "date": "2026-11-19",
+      "kg": 6.311,
+      "seconds": 113,
+      "order": 7
+    },
+    "2c92d6bac19c83e72bfd282b871efd252b4449beb9bd4b75f8f85e1896911eca": {
+      "date": "2026-11-19",
+      "kg": 4.99,
+      "seconds": 37,
+      "order": 8
+    },
+    "f6c85c46af519ed53a4a417dce7b75f85e2873d52d57d7cd4ce6301eab919204": {
+      "date": "2026-11-19",
+      "kg": 1.722,
+      "seconds": 68,
+      "order": 9
+    },
+    "294af3fc41a98886d27be581a515429cd84618b3f8128a22749f79a1bc35180a": {
+      "date": "2026-11-20",
+      "kg": 5.021,
+      "seconds": 37,
+      "order": 0
+    },
+    "4abc0a65e03e2a46d6be13e99746de4436e0e275f5df71d605663722904a613a": {
+      "date": "2026-11-20",
+      "kg": 4.883,
+      "seconds": 63,
+      "order": 1
+    },
+    "719309abbeace92ed1aa7a9ba86b367b0666187977d53ddef88309d532ceb774": {
+      "date": "2026-11-20",
+      "kg": 6.529,
+      "seconds": 133,
       "order": 2
     }
   }
