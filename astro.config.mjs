@@ -9,15 +9,17 @@ import { remarkReadingTime } from "./src/lib/remark-reading-time.mjs";
 
 import svelte from "@astrojs/svelte";
 
+const site = "https://jichunhou.me";
+
 // https://astro.build/config
 export default defineConfig({
-  site: "https://www.februarysea.me",
+  site,
   integrations: [
     sitemap(),
     robotsTxt({
       sitemap: [
-        "https://www.februarysea.me/sitemap-index.xml",
-        "https://www.februarysea.me/sitemap-0.xml",
+        `${site}/sitemap-index.xml`,
+        `${site}/sitemap-0.xml`,
       ],
     }),
     solidJs(),

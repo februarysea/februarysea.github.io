@@ -1,71 +1,53 @@
 ---
-import { LINKS } from "../lib/constants";
+import { getImage } from "astro:assets";
+import sharePhoto from "../assets/gallery/15-img-1618.webp";
+import { AUTHOR_NAME, LINKS } from "../lib/constants";
 
 interface Props {
   title: string;
   description: string;
   page?: "travel" | "blog";
-  slug?: string | undefined;
-  pubDate?: string;
+  pubDate?: Date;
 }
 
 const { title, description, page, pubDate } = Astro.props;
 const GA_ID = "G-W6N98PVLSC";
-const image =
-  page === "travel"
-    ? `${Astro.url.origin}/globe_preview.webp"`
-    : `${Astro.url.origin}/og-image.png`;
+const siteUrl = Astro.site!;
+const pageUrl = new URL(Astro.url.pathname, siteUrl).href;
+// Reuse the author's published gallery photo instead of the theme author's avatar.
+const shareImage = await getImage({ src: sharePhoto, width: 1200, format: "jpg" });
+const image = new URL(shareImage.src, siteUrl).href;
+const person = {
+  "@type": "Person",
+  name: AUTHOR_NAME,
+  url: siteUrl.href,
+  sameAs: [LINKS.github, LINKS.x],
+};
 
 const schema =
   page !== "blog"
     ? {
-        "@context": "http://schema.org",
-        "@type": "Person",
-        name: "Gianmarco",
-        url: Astro.url.origin,
-        sameAs: [LINKS.linkedin, LINKS.github],
-        image: `${Astro.url.origin}/og-image.png`,
-        jobTitle: "Freelance Frontend Developer",
-        worksFor: {
-          "@type": "Organization",
-          name: "Self-Employed",
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: "Italy",
-            addressCountry: "IT",
-          },
-        },
-        nationality: {
-          "@type": "Country",
-          name: "Italy",
+        "@context": "https://schema.org",
+        ...person,
+        jobTitle: "PhD Student",
+        affiliation: {
+          "@type": "CollegeOrUniversity",
+          name: "HKUST (Guangzhou)",
         },
       }
     : {
-        "@context": "http://schema.org",
+        "@context": "https://schema.org",
         "@type": "BlogPosting",
         mainEntityOfPage: {
           "@type": "WebPage",
-          "@id": Astro.url.href,
+          "@id": pageUrl,
         },
-        headline: title || title,
+        headline: title,
         description: description || title,
-        image: `${Astro.url.origin}/og-image.png`, //TODO: dynamic
-        author: {
-          "@type": "Person",
-          name: "Gianmarco",
-          url: Astro.url.origin,
-          sameAs: [LINKS.linkedin, LINKS.github],
-        },
-        publisher: {
-          "@type": "Organization",
-          name: "Gianmarco",
-          logo: {
-            "@type": "ImageObject",
-            url: `${Astro.url.origin}/og-image.png`,
-          },
-        },
-        datePublished: pubDate || new Date().toISOString(),
-        dateModified: pubDate || new Date().toISOString(),
+        image,
+        author: person,
+        publisher: person,
+        datePublished: pubDate?.toISOString(),
       };
 ---
 
@@ -82,10 +64,10 @@ const schema =
     <!-- Basic OG tags for sharing your website's content on platforms like Facebook and LinkedIn -->
     <meta content={title} property="og:title" />
     <meta content={description} property="og:description" />
-    <meta content="website" property="og:type" />
-    <meta content={Astro.url.origin} property="og:url" />
+    <meta content={page === "blog" ? "article" : "website"} property="og:type" />
+    <meta content={pageUrl} property="og:url" />
     <meta
-      content={image || `${Astro.url.origin}/og-image.png`}
+      content={image}
       property="og:image"
     />
     <!-- Basic Twitter Card tags -->
@@ -93,14 +75,14 @@ const schema =
     <meta content={title} name="twitter:title" />
     <meta content={description} name="twitter:description" />
     <meta
-      content={image || `${Astro.url.origin}/og-image.png`}
+      content={image}
       name="twitter:image"
     />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Zodiak:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link href={Astro.url.href} rel="canonical" />
+    <link href={pageUrl} rel="canonical" />
     {import.meta.env.PROD && (
       <>
         <script
