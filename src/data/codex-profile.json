@@ -1,8 +1,8 @@
 {
   "version": 1,
   "source": "codex-profile-service",
-  "generatedAt": "2026-11-19T22:51:36.507296+00:00",
-  "totalTokens": 22623860118,
+  "generatedAt": "2026-11-20T13:17:31.801662+00:00",
+  "totalTokens": 22712142222,
   "daily": [
     {
       "date": "2025-12-29",
@@ -1047,6 +1047,10 @@
     {
       "date": "2026-11-18",
       "totalTokens": 68533869
+    },
+    {
+      "date": "2026-11-19",
+      "totalTokens": 88282104
     }
   ],
   "archivedThrough": "2026-10-24",
@@ -1054,7 +1058,7 @@
     "version": 1,
     "source": "codex-analytics-credits",
     "scope": "primary-codex-surfaces",
-    "generatedAt": "2026-11-19T22:51:36.507732+00:00",
+    "generatedAt": "2026-11-20T13:17:31.802211+00:00",
     "startDate": "2026-10-25",
     "throughDate": "2026-11-19",
     "daily": [
