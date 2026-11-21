@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "source": "P7",
-  "updatedAt": "2026-11-20T22:27:55.158000+00:00",
+  "updatedAt": "2026-11-21T21:23:06.872000+00:00",
   "window": {
-    "from": "2026-11-15",
-    "to": "2026-11-21"
+    "from": "2026-11-16",
+    "to": "2026-11-22"
   },
   "quality": {
-    "total": 38,
+    "total": 40,
     "kept": 29,
-    "excluded": 9,
-    "outsideRange": 8,
+    "excluded": 11,
+    "outsideRange": 10,
     "madOutliers": 1
   },
   "cats": {
@@ -186,11 +186,16 @@
           "date": "2026-11-21",
           "kg": 6.538,
           "samples": 1
+        },
+        {
+          "date": "2026-11-22",
+          "kg": 6.561,
+          "samples": 1
         }
       ],
       "latestMeasurement": {
-        "date": "2026-11-21",
-        "kg": 6.538
+        "date": "2026-11-22",
+        "kg": 6.561
       },
       "visits7d": 10,
       "medianDurationSeconds7d": 145.0
@@ -362,11 +367,21 @@
           "date": "2026-11-20",
           "kg": 4.9525,
           "samples": 4
+        },
+        {
+          "date": "2026-11-21",
+          "kg": 5.027,
+          "samples": 2
+        },
+        {
+          "date": "2026-11-22",
+          "kg": 4.798,
+          "samples": 1
         }
       ],
       "latestMeasurement": {
-        "date": "2026-11-20",
-        "kg": 4.985
+        "date": "2026-11-22",
+        "kg": 4.798
       },
       "visits7d": 19,
       "medianDurationSeconds7d": 37
