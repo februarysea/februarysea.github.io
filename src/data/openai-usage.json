@@ -1,9 +1,9 @@
 {
   "version": 1,
   "source": "openai-organization-completions",
-  "generatedAt": "2026-11-22T21:26:00.863426+00:00",
+  "generatedAt": "2026-11-24T02:42:18.339321+00:00",
   "startDate": "2026-11-03",
-  "throughDate": "2026-11-22",
+  "throughDate": "2026-11-24",
   "daily": [
     {
       "date": "2026-11-03",
@@ -151,6 +151,14 @@
     },
     {
       "date": "2026-11-22",
+      "models": []
+    },
+    {
+      "date": "2026-11-23",
+      "models": []
+    },
+    {
+      "date": "2026-11-24",
       "models": []
     }
   ]
