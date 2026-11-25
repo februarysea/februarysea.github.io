@@ -3,7 +3,7 @@
   "accountHash": "fad74173ebd3d59ffc4adf92ea841e9f4fb132632425674831d47af231d525a5",
   "catalogHash": "4fda20c4ca4eee2b7a0189b672bc207d5db0fe9cda7bf34c030b1561e8fed25d",
   "fromMs": 1788607588072,
-  "checkedThroughMs": 1795565820663,
+  "checkedThroughMs": 1795650972388,
   "sessions": {
     "3d463ef4c9b8f929dc6e3a4de90ecca4b18647ed4a7b251774bcf34596eea6f7": {
       "date": "2026-09-15",
@@ -258,7 +258,7 @@
       "date": "2026-09-17",
       "position": 2,
       "summaryHash": "ed38bfe8eda487f8624a80da046f78465c349f8eb9c5a9f8163740b9deb1d986",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -2040,7 +2040,7 @@
       "date": "2026-10-20",
       "position": 15,
       "summaryHash": "9e05a43684d519a394c35cac0db136eaeef6c77a6abfbd73df24c5ba8c4413c5",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -2463,7 +2463,7 @@
       "date": "2026-10-22",
       "position": 17,
       "summaryHash": "689f84d3da88c701a127db5a8720a5038dfba49e3af528e1b42255deadffaf5a",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -2664,7 +2664,7 @@
       "date": "2026-10-22",
       "position": 19,
       "summaryHash": "97728298e6c6ab53bf2eed114da5ca903d3e0b1143abcb7b0d8c71ae6ab51f41",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -3207,7 +3207,7 @@
       "date": "2026-10-25",
       "position": 22,
       "summaryHash": "a2e347877afe3fcf2e2a1178e8ab2ab21f7c67cadbdc3716e4488e7f971b9d48",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -3264,7 +3264,7 @@
       "date": "2026-10-25",
       "position": 23,
       "summaryHash": "0b2e179f5bf3eec3337d35447e1e9bbd1e0fe8a3603492f61ee15caf21c7f6f4",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -3714,7 +3714,7 @@
       "date": "2026-10-26",
       "position": 25,
       "summaryHash": "c9792d4267c5ad875895043a618ff15c076805dd8849ec02b6e50f74900f4f06",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -3963,7 +3963,7 @@
       "date": "2026-10-26",
       "position": 27,
       "summaryHash": "0af6f7013977962f3b006c8d7c132eb9a988cd209acc689562cbeefeae0a1d93",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -4526,7 +4526,7 @@
       "date": "2026-10-28",
       "position": 30,
       "summaryHash": "b7ae0994d965bf5909aee8b5097ce5aa8ad7a2468ac5bfafda8acaa542c93a7b",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -4607,7 +4607,7 @@
       "date": "2026-10-28",
       "position": 31,
       "summaryHash": "cba168aa8d697e8a7d8993a5fa14630b029d832329530d3a112d7708c46aef32",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -5027,7 +5027,7 @@
       "date": "2026-11-03",
       "position": 33,
       "summaryHash": "db440fc7a44783db37a69e624660c3403acfa3298cbdc26495ef586f24a442ff",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -5252,7 +5252,7 @@
       "date": "2026-11-03",
       "position": 35,
       "summaryHash": "8c9975d9a2197ff43cf0bc539a82eb5fb7f029192379435f2194e6bd0a5eaefd",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -5783,7 +5783,7 @@
       "date": "2026-11-05",
       "position": 38,
       "summaryHash": "5e07bbaf11a00eb523d5466dd028aa59274b2381e4e12c4b97dc1b6006983980",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -5840,7 +5840,7 @@
       "date": "2026-11-05",
       "position": 39,
       "summaryHash": "75c4e8bd51888429eb9b5a09d3f96fd833db3f20fe22d620dfed991558ce6056",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -6305,7 +6305,7 @@
       "date": "2026-11-07",
       "position": 41,
       "summaryHash": "0b1025a7e65f39403efa2c284b0ada99e56b0dcbba923b415eb7bb271ff580d8",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -6788,7 +6788,7 @@
       "date": "2026-11-09",
       "position": 44,
       "summaryHash": "17e5ad14a4ff76c4be8b4e768a697bd4f11ebe1e3d12505157fbc2141ccdb247",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -6869,7 +6869,7 @@
       "date": "2026-11-09",
       "position": 45,
       "summaryHash": "5d7a47480052e08c03439b586da03a594331a8b50c671a7e57db2ce706ebbcac",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -7337,7 +7337,7 @@
       "date": "2026-11-11",
       "position": 47,
       "summaryHash": "26e2ffc68c71fe08649897981b0b82d9a64e44af35b59708b1515f8b5dfcc5b2",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -7505,7 +7505,7 @@
       "date": "2026-11-11",
       "position": 48,
       "summaryHash": "02583043f6092c8f3608ba82b9354826402fed509e964921cdbd8a23623d9306",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -8198,7 +8198,7 @@
       "date": "2026-11-16",
       "position": 52,
       "summaryHash": "1207f54f3ac12693017e5524582769643a9ac289606e0dc1c6ba35309ede8f1d",
-      "verifiedAtMs": 1795042096135,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -8702,7 +8702,7 @@
       "date": "2026-11-24",
       "position": 56,
       "summaryHash": "d92473b3cf072c82d5bd5c03892b01b9c0b70bb546f9d3d0550775d464cde5cc",
-      "verifiedAtMs": 1795565820663,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -8870,7 +8870,7 @@
       "date": "2026-11-24",
       "position": 57,
       "summaryHash": "a632f2a57ac67098db8af5c02d22f666bdfe7af646797a012ac39738e4ee87b9",
-      "verifiedAtMs": 1795565820663,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
@@ -8990,7 +8990,7 @@
       "date": "2026-11-24",
       "position": 58,
       "summaryHash": "47f2f02856ce12339bf5f5432ff465e7d29d105a6fbd99214029b3e972b9718f",
-      "verifiedAtMs": 1795565820663,
+      "verifiedAtMs": 1795650972388,
       "missingSinceMs": null,
       "sets": [
         {
