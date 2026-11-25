@@ -1,8 +1,8 @@
 {
   "version": 1,
   "source": "codex-profile-service",
-  "generatedAt": "2026-11-25T00:17:07.720360+00:00",
-  "totalTokens": 22852671260,
+  "generatedAt": "2026-11-25T23:56:18.908557+00:00",
+  "totalTokens": 22907864383,
   "daily": [
     {
       "date": "2025-12-29",
@@ -1067,6 +1067,10 @@
     {
       "date": "2026-11-23",
       "totalTokens": 27168906
+    },
+    {
+      "date": "2026-11-24",
+      "totalTokens": 55193123
     }
   ],
   "archivedThrough": "2026-10-24",
@@ -1074,9 +1078,9 @@
     "version": 1,
     "source": "codex-analytics-credits",
     "scope": "primary-codex-surfaces",
-    "generatedAt": "2026-11-25T00:17:07.720871+00:00",
+    "generatedAt": "2026-11-25T23:56:18.909161+00:00",
     "startDate": "2026-10-25",
-    "throughDate": "2026-11-23",
+    "throughDate": "2026-11-25",
     "daily": [
       {
         "date": "2026-10-25",
@@ -1268,7 +1272,7 @@
         "cachedInputTokens": 17245696,
         "outputTokens": 58741,
         "totalTokens": 17761358,
-        "credits": "70.9282405"
+        "credits": "70.92824049999999"
       },
       {
         "date": "2026-11-18",
@@ -1276,7 +1280,7 @@
         "cachedInputTokens": 77954688,
         "outputTokens": 190123,
         "totalTokens": 79638345,
-        "credits": "768.072617"
+        "credits": "768.0726169999999"
       },
       {
         "date": "2026-11-19",
@@ -1300,7 +1304,7 @@
         "cachedInputTokens": 35699840,
         "outputTokens": 146202,
         "totalTokens": 36426951,
-        "credits": "2402.5592260000003"
+        "credits": "2402.559226"
       },
       {
         "date": "2026-11-22",
@@ -1317,6 +1321,22 @@
         "outputTokens": 3221,
         "totalTokens": 766574,
         "credits": "14.518113500000002"
+      },
+      {
+        "date": "2026-11-24",
+        "uncachedInputTokens": 1590567,
+        "cachedInputTokens": 55517312,
+        "outputTokens": 383186,
+        "totalTokens": 57491065,
+        "credits": "2242.4970919999996"
+      },
+      {
+        "date": "2026-11-25",
+        "uncachedInputTokens": 3595629,
+        "cachedInputTokens": 80733184,
+        "outputTokens": 352204,
+        "totalTokens": 84681017,
+        "credits": "2698.496496"
       }
     ]
   }
